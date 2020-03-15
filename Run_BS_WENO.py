@@ -53,13 +53,13 @@ class WENONetwork(nn.Module):
     def forward(self):
         params = self.get_params()
         V, S, tt = BS_WENO(params["sigma"], params["rate"], params["E"], params["T"], params["e"], params["xl"],
-                           params["xr"], params["m"], self.omegas5, self.omegas6)
+                           params["xr"], params["m"], None)
         return V
 
     def return_S_tt(self):
         params = self.get_params()
         V, S, tt = BS_WENO(params["sigma"], params["rate"], params["E"], params["T"], params["e"], params["xl"],
-                           params["xr"], params["m"], self.omegas5, self.omegas6)
+                           params["xr"], params["m"], None)
         return S, tt
 
 
