@@ -54,7 +54,7 @@ def BS_WENO(sigma,rate,E,T,e,xl,xr,m,omegas):
     u = torch.Tensor(u)
 
     # TODO: if omegas is None, precompute omegas. else, use omegas from list
-    RHSd=WENO6(u,m,l,e,None)
+    RHSd=WENO6(u,m,l,e)
     RHSc=WENO5_minus(u,m,l,e)
 
     u1=torch.zeros((x.shape[0]))[:, None]
@@ -63,7 +63,7 @@ def BS_WENO(sigma,rate,E,T,e,xl,xr,m,omegas):
     u1[0:3,0]=torch.Tensor([a ,a ,a]);
     u1[m-2:,0]=torch.Tensor([d1[l-1],d2[l-1] ,d3[l-1]]);
     # TODO: if omegas is None, precompute omegas. else, use omegas from list
-    RHS1d=WENO6(u1,m,1,e,None)
+    RHS1d=WENO6(u1,m,1,e)
     RHS1c=WENO5_minus(u1,m,1,e)
     
     u2=torch.zeros((x.shape[0]))[:, None]
@@ -72,7 +72,7 @@ def BS_WENO(sigma,rate,E,T,e,xl,xr,m,omegas):
     u2[0:3,0]=torch.Tensor([a, a ,a]);
     u2[m-2:,0]=torch.Tensor([c1[l-1], c2[l-1] ,c3[l-1]]);
     # TODO: if omegas is None, precompute omegas. else, use omegas from list
-    RHS2d=WENO6(u2,m,1,e,None);
+    RHS2d=WENO6(u2,m,1,e);
     RHS2c=WENO5_minus(u2,m,1,e);
 
     u[3:-3,l]=((1/3)*u[3:-3,l-1]+(2/3)*u2[3:-3,0]+(2/3)*t*((sigma**2)/(2*h**2)*RHS2d+((rate-(sigma**2)/2)/h)*RHS2c))-(2/3)*t*rate*u2[3:-3,0];
