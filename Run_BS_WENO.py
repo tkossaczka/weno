@@ -14,10 +14,13 @@ class WENONetwork(nn.Module):
         super().__init__()
         params = self.get_params()
         u=self.initial_condition()
-        self.pre_omegas6=compute_omegas6(u,params['m'],1,params['e'])
-        self.pre_omegas5=compute_omegas5(u,params['m'],1,params['e'])
-        self.omegas5 = nn.Parameter(self.pre_omegas5, requires_grad=True)
-        self.omegas6 = nn.Parameter(self.pre_omegas6, requires_grad=True)
+
+        # self.omegas5 = nn.Parameter(self.pre_omegas5, requires_grad=True)
+        # self.omegas6 = nn.Parameter(self.pre_omegas6, requires_grad=True)
+        # torch.randn(2, requires_grad=True)
+        self.lag = 5
+        self.pairs= self.lag * (self.lag + 1) /2
+        self.weights = nn.Parameter(torch.zeros([self.pairs, 12]))
 
     def get_params(self):
         params = dict()
