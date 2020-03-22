@@ -18,9 +18,11 @@ class WENONetwork(nn.Module):
         # self.omegas5 = nn.Parameter(self.pre_omegas5, requires_grad=True)
         # self.omegas6 = nn.Parameter(self.pre_omegas6, requires_grad=True)
         # torch.randn(2, requires_grad=True)
-        self.lag = 5
-        self.pairs= self.lag * (self.lag + 1) /2
+        self.lag = 6
+        self.pairs= int((self.lag+1) * (self.lag + 2) /2)
         self.weights = nn.Parameter(torch.zeros([self.pairs, 12]))
+        # self.weights = nn.Parameter(torch.randn([self.pairs, 12]))
+        print("aa")
 
     def get_params(self):
         params = dict()
@@ -56,13 +58,13 @@ class WENONetwork(nn.Module):
     def forward(self):
         params = self.get_params()
         V, S, tt = BS_WENO(params["sigma"], params["rate"], params["E"], params["T"], params["e"], params["xl"],
-                           params["xr"], params["m"], None)
+                           params["xr"], params["m"], self.weights)
         return V
 
     def return_S_tt(self):
         params = self.get_params()
         V, S, tt = BS_WENO(params["sigma"], params["rate"], params["E"], params["T"], params["e"], params["xl"],
-                           params["xr"], params["m"], None)
+                           params["xr"], params["m"], self.weights)
         return S, tt
 
 

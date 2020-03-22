@@ -2,12 +2,15 @@ import numpy as np
 from WENO5_minus import WENO5_minus
 from WENO6 import WENO6
 import torch
+from helper_functions import autocor_combinations
 
-def BS_WENO(sigma,rate,E,T,e,xl,xr,m,omegas):
-    #
-    # TODO: omegas is [[omegas5_step1 ...], [omegas6_step1 ...]] or None. If list, standard weno is applied. if None, precomputed omegas are returned.
+def BS_WENO(sigma,rate,E,T,e,xl,xr,m, weights):
 
-    Smin=np.exp(xl)*E; 
+    def compute_corrections(u, weights):
+        autocors = autocor_combinations(u, lag=6, return_lags=False, return_pairs=True)
+        return autocors.matmul(weights)
+
+    Smin=np.exp(xl)*E;
     Smax=np.exp(xr)*E; 
 
     G=np.log(Smin/E);
@@ -23,7 +26,6 @@ def BS_WENO(sigma,rate,E,T,e,xl,xr,m,omegas):
     time=np.linspace(0,theta,n+1); 
 
     u=np.zeros((x.shape[0],2));
-    # TODO: use initial_condition method!
 
     for k in range(0,m+1):
         if x[k]>0:
@@ -53,27 +55,32 @@ def BS_WENO(sigma,rate,E,T,e,xl,xr,m,omegas):
     
     u = torch.Tensor(u)
 
-    # TODO: if omegas is None, precompute omegas. else, use omegas from list
-    RHSd=WENO6(u,l,e)
-    RHSc=WENO5_minus(u,l,e)
+    cor6 = compute_corrections(u[:,0], weights[:, :6])
+    cor5 = compute_corrections(u[:,0], weights[:, 6:])
+    RHSd=WENO6(u,l,e, cor6, mweno=True, mapped=False)
+    RHSc=WENO5_minus(u,l,e, cor5, mweno=True, mapped=False)
 
     u1=torch.zeros((x.shape[0]))[:, None]
     u1[3:-3,0]=u[3:-3,l-1]+t*((sigma**2)/(2*h**2)*RHSd+((rate-(sigma**2)/2)/h)*RHSc-rate*u[3:-3,l-1]);
 
     u1[0:3,0]=torch.Tensor([a ,a ,a]);
     u1[m-2:,0]=torch.Tensor([d1[l-1],d2[l-1] ,d3[l-1]]);
-    # TODO: if omegas is None, precompute omegas. else, use omegas from list
-    RHS1d=WENO6(u1,1,e)
-    RHS1c=WENO5_minus(u1,1,e)
+
+    cor6_1 = compute_corrections(u1[:,0], weights[:, :6])
+    cor5_1 = compute_corrections(u1[:,0], weights[:, 6:])
+    RHS1d=WENO6(u1,1,e, cor6_1, mweno=True, mapped=False)
+    RHS1c=WENO5_minus(u1,1,e, cor5_1, mweno=True, mapped=False)
     
     u2=torch.zeros((x.shape[0]))[:, None]
     u2[3:-3,0]=0.75*u[3:-3,l-1]+0.25*u1[3:-3,0]+0.25*t*((sigma**2)/(2*h**2)*RHS1d+((rate-(sigma**2)/2)/h)*RHS1c-rate*u1[3:-3,0]);
 
     u2[0:3,0]=torch.Tensor([a, a ,a]);
     u2[m-2:,0]=torch.Tensor([c1[l-1], c2[l-1] ,c3[l-1]]);
-    # TODO: if omegas is None, precompute omegas. else, use omegas from list
-    RHS2d=WENO6(u2,1,e);
-    RHS2c=WENO5_minus(u2,1,e);
+
+    cor6_2 = compute_corrections(u2[:,0], weights[:, :6])
+    cor5_2 = compute_corrections(u2[:,0], weights[:, 6:])
+    RHS2d=WENO6(u2,1,e, cor6_2, mweno=True, mapped=False);
+    RHS2c=WENO5_minus(u2,1,e, cor5_2, mweno=True, mapped=False);
 
     u[3:-3,l]=((1/3)*u[3:-3,l-1]+(2/3)*u2[3:-3,0]+(2/3)*t*((sigma**2)/(2*h**2)*RHS2d+((rate-(sigma**2)/2)/h)*RHS2c))-(2/3)*t*rate*u2[3:-3,0];
 
@@ -84,5 +91,4 @@ def BS_WENO(sigma,rate,E,T,e,xl,xr,m,omegas):
     for k in range(0,m+1):
         V[k,:]=E*u[k,:]
 
-    # TODO: if omegas is None, return list of precomputed omegas. else, return V, S, tt
     return V[:,1],S,tt

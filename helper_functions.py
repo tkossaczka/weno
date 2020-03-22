@@ -10,7 +10,7 @@ def autocor_combinations(u, lag, return_lags=False, return_pairs=True):
             multiplied_pairs.append(lagged_us[l] * lagged_us[k])
 
     output_list = return_lags * lagged_us + return_pairs * multiplied_pairs
-    return torch.stack(output_list, dim=0)
+    return torch.stack(output_list, dim=1)
 
 if __name__=="__main__":
     u = torch.Tensor(np.arange(10, dtype=float))

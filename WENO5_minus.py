@@ -1,5 +1,5 @@
 
-def WENO5_minus(u, l, e, mweno=True, mapped=False):
+def WENO5_minus(u, l, e, corrections, mweno=True, mapped=False):
     uu=u[:,l-1];
     uu_left = uu[:-1]
     uu_right = uu[1:]
@@ -21,6 +21,11 @@ def WENO5_minus(u, l, e, mweno=True, mapped=False):
 
     betap0, betap1, betap2 = get_betas(uu_right)
     betan0, betan1, betan2 = get_betas(uu_left)
+
+    beta_corrected_list=[]
+    for k, beta in enumerate([betap0, betap1, betap2, betan0, betan1, betan2]):
+        beta_corrected_list.append(beta + corrections[:,k])
+    [betap0, betap1, betap2, betan0, betan1, betan2] = beta_corrected_list
 
     d0=1/10;
     d1=6/10;
