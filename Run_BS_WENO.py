@@ -26,14 +26,14 @@ class WENONetwork(nn.Module):
 
     def get_params(self):
         params = dict()
-        params["sigma"] = 0.3;
-        params["rate"] = 0.2;
+        params["sigma"] = 0.3 + 0.1 * np.random.randn();
+        params["rate"] = 0.2 + max(0.1 * np.random.randn(), -0.2);
         params["E"] = 50;
         params["T"] = 1;
         params["e"] = 10 ** (-13);
         params["xl"] = -6
         params["xr"] = 1.5
-        params["m"] = 80;
+        params["m"] = 160;
         return params
 
     def initial_condition(self):
@@ -59,6 +59,7 @@ class WENONetwork(nn.Module):
         params = self.get_params()
         V, S, tt = BS_WENO(params["sigma"], params["rate"], params["E"], params["T"], params["e"], params["xl"],
                            params["xr"], params["m"], self.weights)
+        print(params["sigma"], params["rate"])
         return V
 
     def return_S_tt(self):
@@ -76,6 +77,7 @@ def monotonicity_loss(x):
     return torch.sum(torch.max(x[:-1]-x[1:], torch.Tensor([0.0])))
 
 optimizer = optim.SGD(train_model.parameters(), lr=0.0001)
+# optimizer = optim.Adam(train_model.parameters())
 
 S,tt=train_model.return_S_tt()
 plt.plot(S, V.detach().numpy())
@@ -94,3 +96,4 @@ for k in range(100):
 
 S,tt = train_model.return_S_tt()
 plt.plot(S, V_train.detach().numpy())
+w=train_model.weights.detach().numpy()
