@@ -27,7 +27,7 @@ class WENONetwork(nn.Module):
     def get_params(self):
         params = dict()
         params["sigma"] = 0.3;
-        params["rate"] = 0.1;
+        params["rate"] = 0.2;
         params["E"] = 50;
         params["T"] = 1;
         params["e"] = 10 ** (-13);
@@ -72,29 +72,25 @@ train_model=WENONetwork()
 
 V=train_model.forward()
 
-def my_loss(input):
-    loss = torch.max((input)**2)
-    return loss
+def monotonicity_loss(x):
+    return torch.sum(torch.max(x[:-1]-x[1:], torch.Tensor([0.0])))
 
-#criterion = nn.MSELoss()
-optimizer = optim.SGD(train_model.parameters(), lr=0.001)
+optimizer = optim.SGD(train_model.parameters(), lr=0.0001)
 
 S,tt=train_model.return_S_tt()
 plt.plot(S, V.detach().numpy())
 plt.show()
 V
 
-# for k in range(10):
-#     V_train = train_model.forward()
-#
-#     # Train model:
-#     optimizer.zero_grad()  # Clear gradients
-#     # loss = criterion(V_train, V_zeroflux) # Calculate loss
-#     difference=torch.min(V_train[1:-1]-V_train[0:-2],0)
-#     loss = my_loss(difference)
-#     loss.backward()  # Backward pass
-#     optimizer.step()  # Optimize weights
-#     print(k, loss, train_model.omegas5, train_model.omegas6)
-#
-# S,tt=train_model.return_S_tt()
-# plt.plot(S, V_train.detach().numpy())
+for k in range(100):
+    # Forward path
+    V_train = train_model.forward()
+    # Train model:
+    optimizer.zero_grad()  # Clear gradients
+    loss = monotonicity_loss(V_train) # Calculate loss
+    loss.backward()  # Backward pass
+    optimizer.step()  # Optimize weights
+    print(k, loss)
+
+S,tt = train_model.return_S_tt()
+plt.plot(S, V_train.detach().numpy())
