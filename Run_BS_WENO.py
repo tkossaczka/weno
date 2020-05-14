@@ -20,9 +20,9 @@ class WENONetwork(nn.Module):
         # torch.randn(2, requires_grad=True)
         self.lag = 6
         self.pairs= int((self.lag+1) * (self.lag + 2) /2)
-        self.weights = nn.Parameter(torch.zeros([self.pairs, 12]))
+        self.weights5 = nn.Parameter(torch.zeros([self.lag,6]))
+        self.weights6 = nn.Parameter(torch.zeros([self.lag+4,6]))
         # self.weights = nn.Parameter(torch.randn([self.pairs, 12]))
-        print("aa")
 
     def get_params(self):
         params = dict()
@@ -58,14 +58,14 @@ class WENONetwork(nn.Module):
     def forward(self):
         params = self.get_params()
         V, S, tt = BS_WENO(params["sigma"], params["rate"], params["E"], params["T"], params["e"], params["xl"],
-                           params["xr"], params["m"], self.weights)
+                           params["xr"], params["m"], self.weights5, self.weights6)
         print(params["sigma"], params["rate"])
         return V
 
     def return_S_tt(self):
         params = self.get_params()
         V, S, tt = BS_WENO(params["sigma"], params["rate"], params["E"], params["T"], params["e"], params["xl"],
-                           params["xr"], params["m"], self.weights)
+                           params["xr"], params["m"], self.weights5, self.weights6)
         return S, tt
 
 
@@ -84,7 +84,7 @@ plt.plot(S, V.detach().numpy())
 plt.show()
 V
 
-for k in range(100):
+for k in range(1000):
     # Forward path
     V_train = train_model.forward()
     # Train model:
@@ -92,8 +92,11 @@ for k in range(100):
     loss = monotonicity_loss(V_train) # Calculate loss
     loss.backward()  # Backward pass
     optimizer.step()  # Optimize weights
+    w5 = train_model.weights5.detach().numpy()
+    w6 = train_model.weights6.detach().numpy()
     print(k, loss)
 
 S,tt = train_model.return_S_tt()
 plt.plot(S, V_train.detach().numpy())
-w=train_model.weights.detach().numpy()
+w5=train_model.weights5.detach().numpy()
+w6=train_model.weights6.detach().numpy()

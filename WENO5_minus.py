@@ -24,7 +24,7 @@ def WENO5_minus(u, l, e, corrections, mweno=True, mapped=False):
 
     beta_corrected_list=[]
     for k, beta in enumerate([betap0, betap1, betap2, betan0, betan1, betan2]):
-        beta_corrected_list.append(beta + corrections[:,k])
+        beta_corrected_list.append(beta + corrections[k])
     [betap0, betap1, betap2, betan0, betan1, betan2] = beta_corrected_list
 
     d0=1/10;

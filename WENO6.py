@@ -22,9 +22,11 @@ def WENO6(u,l,e, corrections, mweno=True, mapped=False):
     betap0, betap1, betap2 = get_betas(uu_right)
     betan0, betan1, betan2 = get_betas(uu_left)
 
+
+
     beta_corrected_list=[]
     for k, beta in enumerate([betap0, betap1, betap2, betan0, betan1, betan2]):
-        beta_corrected_list.append(beta + corrections[:,k])
+        beta_corrected_list.append(beta + corrections[k])
     [betap0, betap1, betap2, betan0, betan1, betan2] = beta_corrected_list
 
     gamap0 = 1 / 21;
