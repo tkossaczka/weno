@@ -58,17 +58,27 @@ class WENONetwork(nn.Module):
     def forward(self):
         params = self.get_params()
         V, S, tt = self.BS_WENO(params["sigma"], params["rate"], params["E"], params["T"], params["e"], params["xl"],
-                           params["xr"], params["m"])
+                           params["xr"], params["m"], trainable=True)
         print(params["sigma"], params["rate"])
         return V
+
+    def compare_wenos(self):
+        params = self.get_params()
+        V_trained, S, tt = self.BS_WENO(params["sigma"], params["rate"], params["E"], params["T"], params["e"], params["xl"],
+                           params["xr"], params["m"], trainable=True)
+        params = self.get_params()
+        V_classic, S, tt = self.BS_WENO(params["sigma"], params["rate"], params["E"], params["T"], params["e"], params["xl"],
+                           params["xr"], params["m"], trainable=False)
+
+        plt.plot(S, V_classic.detach().numpy(), S, V_trained.detach().numpy())
 
     def return_S_tt(self):
         params = self.get_params()
         V, S, tt = self.BS_WENO(params["sigma"], params["rate"], params["E"], params["T"], params["e"], params["xl"],
-                           params["xr"], params["m"])
+                           params["xr"], params["m"], trainable=True)
         return S, tt
 
-    def WENO5_minus(self, u, l, e, mweno=True, mapped=False):
+    def WENO5_minus(self, u, l, e, mweno=True, mapped=False, trainable=True):
         uu = u[:, l - 1];
         uu_left = uu[:-1]
         uu_right = uu[1:]
@@ -93,18 +103,19 @@ class WENONetwork(nn.Module):
         betap0, betap1, betap2 = get_betas(uu_right)
         betan0, betan1, betan2 = get_betas(uu_left)
 
-        beta_multiplicators_left = self.inner_nn_weno5(uu_left[None, None, :])[0,:,:]
-        beta_multiplicators_right = self.inner_nn_weno5(uu_right[None,None,:])[0,:,:]
-        # beta_multiplicators = torch.cat([beta_multiplicators_right, beta_multiplicators_left], 0)
+        if trainable:
+            beta_multiplicators_left = self.inner_nn_weno5(uu_left[None, None, :])[0,:,:]
+            beta_multiplicators_right = self.inner_nn_weno5(uu_right[None,None,:])[0,:,:]
+            # beta_multiplicators = torch.cat([beta_multiplicators_right, beta_multiplicators_left], 0)
 
-        betap_corrected_list = []
-        betan_corrected_list = []
-        for k, beta in enumerate([betap0, betap1, betap2]):
-            betap_corrected_list.append(beta * beta_multiplicators_right[k, 3:-2])
-        for k, beta in enumerate([betan0, betan1, betan2]):
-            betan_corrected_list.append(beta * beta_multiplicators_left[k, 2:-3])
-        [betap0, betap1, betap2] = betap_corrected_list
-        [betan0, betan1, betan2] = betan_corrected_list
+            betap_corrected_list = []
+            betan_corrected_list = []
+            for k, beta in enumerate([betap0, betap1, betap2]):
+                betap_corrected_list.append(beta * beta_multiplicators_right[k, 3:-2])
+            for k, beta in enumerate([betan0, betan1, betan2]):
+                betan_corrected_list.append(beta * beta_multiplicators_left[k, 2:-3])
+            [betap0, betap1, betap2] = betap_corrected_list
+            [betan0, betan1, betan2] = betan_corrected_list
 
         d0 = 1 / 10;
         d1 = 6 / 10;
@@ -147,7 +158,7 @@ class WENONetwork(nn.Module):
 
         return RHS
 
-    def WENO6(self, u, l, e, mweno=True, mapped=False):
+    def WENO6(self, u, l, e, mweno=True, mapped=False, trainable=True):
         uu = u[:, l - 1]
         uu_left = uu[:-1]
         uu_right = uu[1:]
@@ -173,18 +184,19 @@ class WENONetwork(nn.Module):
         betap0, betap1, betap2 = get_betas(uu_right)
         betan0, betan1, betan2 = get_betas(uu_left)
 
-        beta_multiplicators_left = self.inner_nn_weno6(uu_left[None, None, :])[0,:,:]
-        beta_multiplicators_right = self.inner_nn_weno6(uu_right[None,None,:])[0,:,:]
-        # beta_multiplicators = torch.cat([beta_multiplicators_right, beta_multiplicators_left], 0)
+        if trainable:
+            beta_multiplicators_left = self.inner_nn_weno6(uu_left[None, None, :])[0,:,:]
+            beta_multiplicators_right = self.inner_nn_weno6(uu_right[None,None,:])[0,:,:]
+            # beta_multiplicators = torch.cat([beta_multiplicators_right, beta_multiplicators_left], 0)
 
-        betap_corrected_list = []
-        betan_corrected_list = []
-        for k, beta in enumerate([betap0, betap1, betap2]):
-            betap_corrected_list.append(beta * beta_multiplicators_right[k, 3:-2])
-        for k, beta in enumerate([betan0, betan1, betan2]):
-            betan_corrected_list.append(beta * beta_multiplicators_left[k, 2:-3])
-        [betap0, betap1, betap2] = betap_corrected_list
-        [betan0, betan1, betan2] = betan_corrected_list
+            betap_corrected_list = []
+            betan_corrected_list = []
+            for k, beta in enumerate([betap0, betap1, betap2]):
+                betap_corrected_list.append(beta * beta_multiplicators_right[k, 3:-2])
+            for k, beta in enumerate([betan0, betan1, betan2]):
+                betan_corrected_list.append(beta * beta_multiplicators_left[k, 2:-3])
+            [betap0, betap1, betap2] = betap_corrected_list
+            [betan0, betan1, betan2] = betan_corrected_list
 
         gamap0 = 1 / 21;
         gamap1 = 19 / 21;
@@ -249,7 +261,7 @@ class WENONetwork(nn.Module):
 
         return RHS
 
-    def BS_WENO(self, sigma, rate, E, T, e, xl, xr, m):
+    def BS_WENO(self, sigma, rate, E, T, e, xl, xr, m, trainable=True):
 
         Smin = np.exp(xl) * E
         Smax = np.exp(xr) * E
@@ -299,8 +311,8 @@ class WENONetwork(nn.Module):
 
         u = torch.Tensor(u)
 
-        RHSd = self.WENO6(u, l, e, mweno=True, mapped=False)
-        RHSc = self.WENO5_minus(u, l, e, mweno=True, mapped=False)
+        RHSd = self.WENO6(u, l, e, mweno=True, mapped=False, trainable=trainable)
+        RHSc = self.WENO5_minus(u, l, e, mweno=True, mapped=False, trainable=trainable)
 
         u1 = torch.zeros((x.shape[0]))[:, None]
         u1[3:-3, 0] = u[3:-3, l - 1] + t * (
@@ -310,8 +322,8 @@ class WENONetwork(nn.Module):
         u1[0:3, 0] = torch.Tensor([a, a, a])
         u1[m - 2:, 0] = torch.Tensor([d1[l - 1], d2[l - 1], d3[l - 1]])
 
-        RHS1d = self.WENO6(u1, 1, e, mweno=True, mapped=False)
-        RHS1c = self.WENO5_minus(u1, 1, e, mweno=True, mapped=False)
+        RHS1d = self.WENO6(u1, 1, e, mweno=True, mapped=False, trainable=trainable)
+        RHS1c = self.WENO5_minus(u1, 1, e, mweno=True, mapped=False, trainable=trainable)
 
         u2 = torch.zeros((x.shape[0]))[:, None]
         u2[3:-3, 0] = 0.75 * u[3:-3, l - 1] + 0.25 * u1[3:-3, 0] + 0.25 * t * (
@@ -320,8 +332,8 @@ class WENONetwork(nn.Module):
         u2[0:3, 0] = torch.Tensor([a, a, a])
         u2[m - 2:, 0] = torch.Tensor([c1[l - 1], c2[l - 1], c3[l - 1]])
 
-        RHS2d = self.WENO6(u2, 1, e, mweno=True, mapped=False);
-        RHS2c = self.WENO5_minus(u2, 1, e, mweno=True, mapped=False);
+        RHS2d = self.WENO6(u2, 1, e, mweno=True, mapped=False, trainable=trainable);
+        RHS2c = self.WENO5_minus(u2, 1, e, mweno=True, mapped=False, trainable=trainable);
 
         u[3:-3, l] = ((1 / 3) * u[3:-3, l - 1] + (2 / 3) * u2[3:-3, 0] + (2 / 3) * t * (
                     (sigma ** 2) / (2 * h ** 2) * RHS2d + ((rate - (sigma ** 2) / 2) / h) * RHS2c)) - (
@@ -351,7 +363,7 @@ plt.plot(S, V.detach().numpy())
 plt.show()
 V
 
-for k in range(1000):
+for k in range(100):
     # Forward path
     V_train = train_model.forward()
     # Train model:
