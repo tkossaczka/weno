@@ -1,16 +1,9 @@
-from Run_BS_WENO import WENONetwork
-from BS_WENO import BS_WENO
-import numpy as np
-import matplotlib.pyplot as plt
+#from define_BS_WENO import WENONetwork
 import torch
 
-train_model=WENONetwork()
-params = train_model.get_params()
-V, S, tt = BS_WENO(params["sigma"], params["rate"], params["E"], params["T"], params["e"], params["xl"],params["xr"], params["m"], train_model.weights5, train_model.weights6)
-plt.plot(S, V.detach().numpy())
+train_model = torch.load("model")
 
-V, S, tt = BS_WENO(params["sigma"], params["rate"], params["E"], params["T"], params["e"], params["xl"], params["xr"], params["m"], torch.zeros([6,6]), torch.zeros([6+4,6]))
-plt.plot(S, V.detach().numpy())
-
-
-
+params={'sigma': 0.3, 'rate': 0.1, 'E': 50, 'T': 1, 'e': 1e-13, 'xl': -6, 'xr': 1.5, 'm': 160}
+train_model.compare_wenos(params=params)
+err_t, order_t = train_model.order_compute(params=params, mm=20, trainable=True)
+err_n, order_n = train_model.order_compute(params=params, mm=20, trainable=False)

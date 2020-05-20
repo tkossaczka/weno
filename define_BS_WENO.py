@@ -4,9 +4,9 @@ from mpl_toolkits.mplot3d import Axes3D
 from matplotlib import cm
 import torch
 from torch import nn, optim # Sets of preset layers and optimizers
+from scipy.stats import norm
 import torch.nn.functional as F # Sets of functions such as ReLU
 from torchvision import datasets, transforms # Popular datasets, architectures and common
-
 
 class WENONetwork(nn.Module):
     def __init__(self):
@@ -15,15 +15,15 @@ class WENONetwork(nn.Module):
         #u_init=self.initial_condition()
 
         self.inner_nn_weno5 = nn.Sequential(
-            nn.Conv1d(1, 4, kernel_size=3, stride=1, padding=1),
+            nn.Conv1d(1, 6, kernel_size=5, stride=1, padding=2),
             nn.ReLU(),
-            nn.Conv1d(4, 3, kernel_size=3, stride=1, padding=1),
+            nn.Conv1d(6, 3, kernel_size=5, stride=1, padding=2),
             nn.Sigmoid())
 
         self.inner_nn_weno6 = nn.Sequential(
-            nn.Conv1d(1, 4, kernel_size=3, stride=1, padding=1),
+            nn.Conv1d(1, 6, kernel_size=5, stride=1, padding=2),
             nn.ReLU(),
-            nn.Conv1d(4, 3, kernel_size=3, stride=1, padding=1),
+            nn.Conv1d(6, 3, kernel_size=5, stride=1, padding=2),
             nn.Sigmoid())
 
     def get_params(self):
@@ -93,7 +93,7 @@ class WENONetwork(nn.Module):
 
     def forward(self):
         params = self.get_params()
-        V, S, tt = self.BS_WENO(params["sigma"], params["rate"], params["E"], params["T"], params["e"], params["xl"],
+        V, S, tt,_ = self.BS_WENO(params["sigma"], params["rate"], params["E"], params["T"], params["e"], params["xl"],
                            params["xr"], params["m"], trainable=True)
         print(params["sigma"], params["rate"])
         return V
@@ -101,10 +101,9 @@ class WENONetwork(nn.Module):
     def compare_wenos(self, params=None):
         if params is None:
             params = self.get_params()
-        V_trained, S, tt = self.BS_WENO(params["sigma"], params["rate"], params["E"], params["T"], params["e"], params["xl"],
+        V_trained, S, tt,_ = self.BS_WENO(params["sigma"], params["rate"], params["E"], params["T"], params["e"], params["xl"],
                            params["xr"], params["m"], trainable=True)
-        params = self.get_params()
-        V_classic, S, tt = self.BS_WENO(params["sigma"], params["rate"], params["E"], params["T"], params["e"], params["xl"],
+        V_classic, S, tt,_ = self.BS_WENO(params["sigma"], params["rate"], params["E"], params["T"], params["e"], params["xl"],
                            params["xr"], params["m"], trainable=False)
 
         plt.plot(S, V_classic.detach().numpy()[:,1], S, V_trained.detach().numpy()[:,1])
@@ -112,7 +111,7 @@ class WENONetwork(nn.Module):
     def full_WENO(self, trainable=True, params=None, plot=True):
         if params is None:
             params = self.get_params()
-        V_trained, S, tt = self.BS_WENO(params["sigma"], params["rate"], params["E"], params["T"], params["e"],
+        V_trained, S, tt,_ = self.BS_WENO(params["sigma"], params["rate"], params["E"], params["T"], params["e"],
                                         params["xl"],params["xr"], params["m"], trainable=trainable, max_steps=None)
         V = V_trained.detach().numpy()
         if plot:
@@ -125,7 +124,7 @@ class WENONetwork(nn.Module):
 
     def return_S_tt(self):
         params = self.get_params()
-        V, S, tt = self.BS_WENO(params["sigma"], params["rate"], params["E"], params["T"], params["e"], params["xl"],
+        V, S, tt,_ = self.BS_WENO(params["sigma"], params["rate"], params["E"], params["T"], params["e"], params["xl"],
                            params["xr"], params["m"], trainable=True)
         return S, tt
 
@@ -312,7 +311,7 @@ class WENONetwork(nn.Module):
 
         return RHS
 
-    def BS_WENO(self, sigma, rate, E, T, e, xl, xr, m, trainable, max_steps=1):
+    def BS_WENO(self, sigma, rate, E, T, e, xl, xr, m, trainable, max_steps=1,comp_order=False):
 
         Smin = np.exp(xl) * E
         Smax = np.exp(xr) * E
@@ -401,36 +400,67 @@ class WENONetwork(nn.Module):
         for k in range(0, m + 1):
             V[k, :] = E * u[k, :]
 
-        return V, S, tt
+        if comp_order:
+            Digital = np.zeros((m+1, n+1))
+            for k in range(0, n+1):
+                for j in range(0, m+1):
+                    Digital[j, k] = np.exp(-rate * (T - tt[k])) * norm.cdf((np.log(S[j] / E) + (rate - (sigma**2) / 2) * (T - tt[k])) / (sigma * np.sqrt(T - tt[k])))
+            uDigital = Digital[:, n]/E
+            u_last = u[:, n ].detach().numpy()
+            xerr = np.absolute([uDigital - u_last])
+            xmaxerr = np.max([xerr])
+        else:
+            xmaxerr=0
+
+        return V, S, tt, xmaxerr
+
+    def order_compute(self, params, mm, trainable=True):
+        order_numb=5
+        vecerr = np.zeros((order_numb))[:, None]
+        order = np.zeros((order_numb-1))[:, None]
+        _,_,_,xmaxerr = self.BS_WENO(params["sigma"], params["rate"], params["E"], params["T"], params["e"],
+                                        params["xl"], params["xr"], mm, trainable=trainable, max_steps=None, comp_order=True)
+        vecerr[0] = xmaxerr
+        for i in range(1,order_numb):
+            mm=mm*2
+            _,_,_, xmaxerr = self.BS_WENO(params["sigma"], params["rate"], params["E"], params["T"], params["e"],
+                                                 params["xl"], params["xr"], mm, trainable=trainable, max_steps=None,  comp_order=True)
+            vecerr[i] = xmaxerr
+            order[i - 1] = np.log(vecerr[i - 1] / vecerr[i]) / np.log(2)
+            print(mm)
+
+        return vecerr, order
 
 
-train_model=WENONetwork()
 
-V=train_model.forward()
-
-def monotonicity_loss(x):
-    return torch.sum(torch.max(x[:-1]-x[1:], torch.Tensor([0.0])))
-
-#optimizer = optim.SGD(train_model.parameters(), lr=0.001)
-optimizer = optim.Adam(train_model.parameters())
-
-S,tt=train_model.return_S_tt()
-
-V
-
-for k in range(15):
-    # Forward path
-    V_train = train_model.forward()
-    # Train model:
-    optimizer.zero_grad()  # Clear gradients
-    loss = monotonicity_loss(V_train[:,1]) # Calculate loss
-    loss.backward()  # Backward pass
-    optimizer.step()  # Optimize weights
-    print(k, loss)
-
-S,tt = train_model.return_S_tt()
-#plt.plot(S, V_train.detach().numpy())
-print("number of parameters:", sum(p.numel() for p in train_model.parameters()))
-train_model.compare_wenos()
-#g=train_model.parameters()
-#g.__next__()
+# train_model=WENONetwork()
+#
+# V=train_model.forward()
+#
+# def monotonicity_loss(x):
+#     return torch.sum(torch.max(x[:-1]-x[1:], torch.Tensor([0.0])))
+#
+# #optimizer = optim.SGD(train_model.parameters(), lr=0.001)
+# optimizer = optim.Adam(train_model.parameters())
+#
+# S,tt=train_model.return_S_tt()
+#
+# V
+#
+# for k in range(1500):
+#     # Forward path
+#     V_train = train_model.forward()
+#     # Train model:
+#     optimizer.zero_grad()  # Clear gradients
+#     loss = monotonicity_loss(V_train[:,1]) # Calculate loss
+#     loss.backward()  # Backward pass
+#     optimizer.step()  # Optimize weights
+#     print(k, loss)
+#
+# S,tt = train_model.return_S_tt()
+# #plt.plot(S, V_train.detach().numpy())
+# print("number of parameters:", sum(p.numel() for p in train_model.parameters()))
+# train_model.compare_wenos()
+# #_,_,_,params = train_model.full_WENO()
+# #g=train_model.parameters()
+# #g.__next__()
