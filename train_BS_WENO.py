@@ -24,8 +24,6 @@ for k in range(1500):
 S,tt = train_model.return_S_tt()
 #plt.plot(S, V_train.detach().numpy())
 print("number of parameters:", sum(p.numel() for p in train_model.parameters()))
-train_model.compare_wenos()
-#_,_,_,params = train_model.full_WENO()
 #g=train_model.parameters()
 #g.__next__()
 
