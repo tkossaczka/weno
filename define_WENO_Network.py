@@ -7,12 +7,11 @@ from torch import nn, optim # Sets of preset layers and optimizers
 from scipy.stats import norm
 import torch.nn.functional as F # Sets of functions such as ReLU
 from torchvision import datasets, transforms # Popular datasets, architectures and common
+from define_time_loop import WENO_loop
 
 class WENONetwork(nn.Module):
     def __init__(self):
         super().__init__()
-        #params = self.get_params()
-        #u_init=self.initial_condition()
 
         self.inner_nn_weno5 = nn.Sequential(
             nn.Conv1d(1, 6, kernel_size=5, stride=1, padding=2),
@@ -25,108 +24,6 @@ class WENONetwork(nn.Module):
             nn.ReLU(),
             nn.Conv1d(6, 3, kernel_size=5, stride=1, padding=2),
             nn.Sigmoid())
-
-    def get_params(self):
-        params = dict()
-        params["sigma"] = 0.31 + max(0.1 * np.random.randn(), -0.3)
-        params["rate"] = 0.21 + max(0.1 * np.random.randn(), -0.2)
-        params["E"] = 50
-        params["T"] = 1
-        params["e"] = 10 ** (-13)
-        params["xl"] = -6
-        params["xr"] = 1.5
-        params["m"] = 160
-        return params
-
-    def initial_condition(self):
-        params = self.get_params()
-        sigma = params['sigma']
-        rate = params['rate']
-        E = params['E']
-        T = params['T']
-        e = params['e']
-        xl = params['xl']
-        xr = params['xr']
-        m = params['m']
-        Smin = np.exp(xl) * E
-        Smax = np.exp(xr) * E
-        G = np.log(Smin / E)
-        L = np.log(Smax / E)
-        theta = T
-        h = (-G + L) / m
-        n = np.ceil((theta * sigma ** 2) / (0.8 * (h ** 2)))
-        n = int(n)
-        t = theta / n
-        x = np.linspace(G, L, m + 1)
-        time = np.linspace(0, theta, n + 1)
-        u = torch.zeros((x.shape[0],time.shape[0]))
-        for k in range(0, m+1):
-            if x[k] > 0:
-                u[k, 0] = 1/E
-            else:
-                u[k, 0] = 0
-
-        u_init = u[:,0]
-
-        for j in range(0, n+1):
-            u[0, j] = 0
-            u[1, j] = 0
-            u[2, j] = 0
-            u[m, j] = np.exp(-rate * time[j]) / E
-            u[m - 1, j] = np.exp(-rate * time[j]) / E
-            u[m - 2, j] = np.exp(-rate * time[j]) / E
-
-        d1 = np.exp(-rate * time) / E - t * rate * np.exp(-rate * time) / E
-        d2 = np.exp(-rate * time) / E - t * rate * np.exp(-rate * time) / E
-        d3 = np.exp(-rate * time) / E - t * rate * np.exp(-rate * time) / E
-
-        c1 = np.exp(-rate * time) / E - 0.5 * t * rate * np.exp(-rate * time) / E + 0.25 * (t ** 2) * (
-                rate ** 2) * np.exp(-rate * time) / E
-        c2 = np.exp(-rate * time) / E - 0.5 * t * rate * np.exp(-rate * time) / E + 0.25 * (t ** 2) * (
-                rate ** 2) * np.exp(-rate * time) / E
-        c3 = np.exp(-rate * time) / E - 0.5 * t * rate * np.exp(-rate * time) / E + 0.25 * (t ** 2) * (
-                rate ** 2) * np.exp(-rate * time) / E
-
-        boundary = [d1, d2, d3, c1, c2, c3]
-
-        return params, u, boundary, h, t, x, time, n
-
-    def forward(self):
-        params = self.get_params()
-        V, S, tt,_ = self.BS_WENO(params["sigma"], params["rate"], params["E"], params["T"], params["e"], params["xl"],
-                           params["xr"], params["m"], trainable=True)
-        print(params["sigma"], params["rate"])
-        return V
-
-    def compare_wenos(self, params=None):
-        if params is None:
-            params = self.get_params()
-        V_trained, S, tt,_ = self.BS_WENO(params["sigma"], params["rate"], params["E"], params["T"], params["e"], params["xl"],
-                           params["xr"], params["m"], trainable=True)
-        V_classic, S, tt,_ = self.BS_WENO(params["sigma"], params["rate"], params["E"], params["T"], params["e"], params["xl"],
-                           params["xr"], params["m"], trainable=False)
-
-        plt.plot(S, V_classic.detach().numpy()[:,1], S, V_trained.detach().numpy()[:,1])
-
-    def full_WENO(self, trainable=True, params=None, plot=True):
-        if params is None:
-            params = self.get_params()
-        V_trained, S, tt,_ = self.BS_WENO(params["sigma"], params["rate"], params["E"], params["T"], params["e"],
-                                        params["xl"],params["xr"], params["m"], trainable=trainable, max_steps=None)
-        V = V_trained.detach().numpy()
-        if plot:
-            X, Y = np.meshgrid(S, tt, indexing="ij")
-            fig = plt.figure()
-            ax = fig.gca(projection='3d')
-            ax.plot_surface(X, Y, V, cmap=cm.viridis)
-
-        return V, S, tt, params
-
-    def return_S_tt(self):
-        params = self.get_params()
-        V, S, tt,_ = self.BS_WENO(params["sigma"], params["rate"], params["E"], params["T"], params["e"], params["xl"],
-                           params["xr"], params["m"], trainable=True)
-        return S, tt
 
     def WENO5_minus(self, u, l, e, mweno=True, mapped=False, trainable=True):
         uu = u[:, l - 1]
@@ -311,59 +208,24 @@ class WENONetwork(nn.Module):
 
         return RHS
 
-    def BS_WENO(self, sigma, rate, E, T, e, xl, xr, m, trainable, max_steps=1,comp_order=False):
-
-        Smin = np.exp(xl) * E
-        Smax = np.exp(xr) * E
-
-        G = np.log(Smin / E)
-        L = np.log(Smax / E)
-        theta = T
-
-        h = (-G + L) / m
-        n = np.ceil((theta * sigma ** 2) / (0.8 * (h ** 2)))
-        n = int(n)
-        t = theta / n
-
-        x = np.linspace(G, L, m + 1)
-        time = np.linspace(0, theta, n + 1)
-
-        if max_steps is None:
-            max_steps = n
-
-        steps = min(max_steps, n)+1
-
-        u = np.zeros((x.shape[0],steps))
-
-        for k in range(0, m + 1):
-            if x[k] > 0:
-                u[k, 0] = 1 / E
-            else:
-                u[k, 0] = 0
-
-        for j in range(0, steps):
-            u[0, j] = 0
-            u[1, j] = 0
-            u[2, j] = 0
-            u[m, j] = np.exp(-rate * time[j]) / E
-            u[m - 1, j] = np.exp(-rate * time[j]) / E
-            u[m - 2, j] = np.exp(-rate * time[j]) / E
-
-        a = 0
-
-        d1 = np.exp(-rate * time) / E - t * rate * np.exp(-rate * time) / E
-        d2 = np.exp(-rate * time) / E - t * rate * np.exp(-rate * time) / E
-        d3 = np.exp(-rate * time) / E - t * rate * np.exp(-rate * time) / E
-
-        c1 = np.exp(-rate * time) / E - 0.5 * t * rate * np.exp(-rate * time) / E + 0.25 * (t ** 2) * (
-                    rate ** 2) * np.exp(-rate * time) / E
-        c2 = np.exp(-rate * time) / E - 0.5 * t * rate * np.exp(-rate * time) / E + 0.25 * (t ** 2) * (
-                    rate ** 2) * np.exp(-rate * time) / E
-        c3 = np.exp(-rate * time) / E - 0.5 * t * rate * np.exp(-rate * time) / E + 0.25 * (t ** 2) * (
-                    rate ** 2) * np.exp(-rate * time) / E
+    def run_weno(self, problem, trainable):
+        m = problem.space_steps
+        e = problem.params['e']
+        n, t, h = problem.time_steps, problem.t, problem.h
+        x, time = problem.x, problem.time
+        term_2 = problem.der_2(x, time)
+        term_1 = problem.der_1(x, time)
+        term_0 = problem.der_0(x, time)
+        term_const = problem.der_const(x, time)
+        u_bc_l, u_bc_r, u1_bc_l, u1_bc_r, u2_bc_l, u2_bc_r = problem.boundary_condition
 
 
-        for l in range(1, steps):
+        u = torch.zeros((m+1, n+1))
+        u[:,0] = problem.initial_condition
+        u[0:3,:] = u_bc_l
+        u[m-2:,:] = u_bc_r
+
+        for l in range(1, n+1):
             u = torch.Tensor(u)
 
             RHSd = self.WENO6(u, l, e, mweno=True, mapped=False, trainable=trainable)
@@ -371,50 +233,57 @@ class WENONetwork(nn.Module):
 
             u1 = torch.zeros((x.shape[0]))[:, None]
             u1[3:-3, 0] = u[3:-3, l - 1] + t * (
-                        (sigma ** 2) / (2 * h ** 2) * RHSd + ((rate - (sigma ** 2) / 2) / h) * RHSc - rate * u[3:-3,
-                                                                                                             l - 1])
+                        (term_2 / h ** 2) * RHSd + (term_1 / h) * RHSc + term_0 * u[3:-3, l - 1])
 
-            u1[0:3, 0] = torch.Tensor([a, a, a])
-            u1[m - 2:, 0] = torch.Tensor([d1[l - 1], d2[l - 1], d3[l - 1]])
+            u1[0:3, 0] = u1_bc_l[:,l - 1]
+            u1[m - 2:, 0] = u1_bc_r[:,l - 1]
 
             RHS1d = self.WENO6(u1, 1, e, mweno=True, mapped=False, trainable=trainable)
             RHS1c = self.WENO5_minus(u1, 1, e, mweno=True, mapped=False, trainable=trainable)
 
             u2 = torch.zeros((x.shape[0]))[:, None]
             u2[3:-3, 0] = 0.75 * u[3:-3, l - 1] + 0.25 * u1[3:-3, 0] + 0.25 * t * (
-                        (sigma ** 2) / (2 * h ** 2) * RHS1d + ((rate - (sigma ** 2) / 2) / h) * RHS1c - rate * u1[3:-3, 0])
+                    (term_2 / h ** 2) * RHS1d + (term_1 / h) * RHS1c + term_0 * u1[3:-3, 0])
 
-            u2[0:3, 0] = torch.Tensor([a, a, a])
-            u2[m - 2:, 0] = torch.Tensor([c1[l - 1], c2[l - 1], c3[l - 1]])
+            u2[0:3, 0] = u2_bc_l[:,l - 1]
+            u2[m - 2:, 0] = u2_bc_r[:,l - 1]
 
             RHS2d = self.WENO6(u2, 1, e, mweno=True, mapped=False, trainable=trainable)
             RHS2c = self.WENO5_minus(u2, 1, e, mweno=True, mapped=False, trainable=trainable)
 
-            u[3:-3, l] = ((1 / 3) * u[3:-3, l - 1] + (2 / 3) * u2[3:-3, 0] + (2 / 3) * t * (
-                        (sigma ** 2) / (2 * h ** 2) * RHS2d + ((rate - (sigma ** 2) / 2) / h) * RHS2c)) - (
-                                     2 / 3) * t * rate * u2[3:-3, 0]
+            u[3:-3, l] = (1 / 3) * u[3:-3, l - 1] + (2 / 3) * u2[3:-3, 0] + (2 / 3) * t * (
+                    (term_2 / h ** 2) * RHS2d + (term_1 / h) * RHS2c + term_0 * u2[3:-3, 0])
 
-        tt = T - time
-        S = E * np.exp(x)
-        V = torch.zeros((m + 1, steps))
-        for k in range(0, m + 1):
-            V[k, :] = E * u[k, :]
+        return u
 
-        if comp_order:
-            Digital = np.zeros((m+1, n+1))
-            for k in range(0, n+1):
-                for j in range(0, m+1):
-                    Digital[j, k] = np.exp(-rate * (T - tt[k])) * norm.cdf((np.log(S[j] / E) + (rate - (sigma**2) / 2) * (T - tt[k])) / (sigma * np.sqrt(T - tt[k])))
-            uDigital = Digital[:, n]/E
-            u_last = u[:, n ].detach().numpy()
-            xerr = np.absolute([uDigital - u_last])
-            xmaxerr = np.max([xerr])
-        else:
-            xmaxerr=0
+    def forward(self, problem):
+        u = self.run_weno(problem, trainable=True)
+        V,_,_ = problem.transformation(u)
+        return V
 
-        return V, S, tt, xmaxerr
+    def full_WENO(self, problem, trainable=True, params=None, plot=True):
+        if params is None:
+            params = problem.get_params()
+        u = self.run_weno(problem, trainable=trainable)
+        V, S, tt = problem.transformation(u)
+        V = V.detach().numpy()
+        if plot:
+            X, Y = np.meshgrid(S, tt, indexing="ij")
+            fig = plt.figure()
+            ax = fig.gca(projection='3d')
+            ax.plot_surface(X, Y, V, cmap=cm.viridis)
+        return V, S, tt, params
 
-    def order_compute(self, params, mm, trainable=True):
+    def compare_wenos(self, problem, params=None):
+        if params is None:
+            params = problem.get_params()
+        u_trained = self.run_weno(problem, trainable=True)
+        V_trained, S, tt = problem.transformation(u_trained)
+        u_classic = self.run_weno(problem, trainable=False)
+        V_classic, S, tt = problem.transformation(u_classic)
+        plt.plot(S, V_classic.detach().numpy()[:,1], S, V_trained.detach().numpy()[:,1])
+
+    def order_comput_old(self, params, mm, trainable=True):
         order_numb=5
         vecerr = np.zeros((order_numb))[:, None]
         order = np.zeros((order_numb-1))[:, None]
@@ -430,3 +299,24 @@ class WENONetwork(nn.Module):
             print(mm)
 
         return vecerr, order
+
+    def order_compute(self, problem, mm, trainable=True):
+        exact=problem.exact()
+        order_numb=5
+        vecerr = np.zeros((order_numb))[:, None]
+        order = np.zeros((order_numb - 1))[:, None]
+        u = self.run_weno(problem, trainable=trainable)
+        u_last = u[:,-1]
+        xmaxerr = problem.err(exact, u_last)
+        vecerr[0] = xmaxerr
+        for i in range(1, order_numb):
+            mm = mm * 2
+            problem.space_steps = mm
+            u = self.run_weno(problem, trainable=trainable)
+            u_last = u[:, -1]
+            xmaxerr = problem.err(exact, u_last)
+            vecerr[i] = xmaxerr
+            order[i - 1] = np.log(vecerr[i - 1] / vecerr[i]) / np.log(2)
+            print(mm)
+        return vecerr, order
+

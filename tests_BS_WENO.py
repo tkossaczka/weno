@@ -2,6 +2,7 @@
 import torch
 train_model = torch.load("model")
 
+
 # COMPARE WENOS
 train_model.compare_wenos()
 
