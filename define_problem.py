@@ -12,19 +12,16 @@ class Digital_option():
 
         self.params = params
         if params is None:
-            self.params=self.get_params()
-        self.space_steps=space_steps
+            self.init_params()
+        self.space_steps = space_steps
         self.time_steps = time_steps
-        n, self.t, self.h = self.__compute_n_t_h()
+        n, self.t, self.h, self.x, self.time = self.__compute_n_t_h_x_time()
         if time_steps is None:
-            self.time_steps, = n
-        x, time = self.__compute_x_time()
-        self.x = x
-        self.time = time
+            self.time_steps = n
         self.initial_condition = self.__compute_initial_condition()
         self.boundary_condition = self.__compute_boundary_condition()
 
-    def get_params(self):
+    def init_params(self):
         params = dict()
         params["sigma"] = 0.31 + max(0.1 * np.random.randn(), -0.3)
         params["rate"] = 0.21 + max(0.1 * np.random.randn(), -0.2)
@@ -33,9 +30,12 @@ class Digital_option():
         params["e"] = 10 ** (-13)
         params["xl"] = -6
         params["xr"] = 1.5
-        return params
+        self.params = params
 
-    def __compute_n_t_h(self):
+    def get_params(self):
+        return self.params
+
+    def __compute_n_t_h_x_time(self):
         sigma = self.params["sigma"]
         E = self.params["E"]
         T = self.params["T"]
@@ -51,27 +51,14 @@ class Digital_option():
         n = np.ceil((theta * sigma ** 2) / (0.8 * (h ** 2)))
         n = int(n)
         t = T / n
-        return n, t, h
-
-    def __compute_x_time(self):
-        n = self.time_steps
-        m = self.space_steps
-        T = self.params["T"]
-        xl = self.params["xl"]
-        xr = self.params["xr"]
-        E = self.params["E"]
-        Smin = np.exp(xl) * E
-        Smax = np.exp(xr) * E
-        G = np.log(Smin / E)
-        L = np.log(Smax / E)
         x = np.linspace(G, L, m + 1)
         time = np.linspace(0, T, n + 1)
-        return x, time
+        return n, t, h, x, time
 
     def __compute_initial_condition(self):
         m = self.space_steps
         E = self.params["E"]
-        x,_ = self.__compute_x_time()
+        x = self.x
         u_init = torch.zeros(m+1)
         for k in range(0, m + 1):
             if x[k] > 0:
@@ -85,7 +72,9 @@ class Digital_option():
         E = self.params["E"]
         time = self.time
         time = torch.Tensor(time)
-        n,t = self.time_steps, self.t
+        n = self.time_steps
+        t = self.t
+        time = time[0:n+1]
 
         u_bc_l = torch.zeros((3, n+1))
         u_bc_r = torch.zeros((3, n+1))
@@ -128,13 +117,13 @@ class Digital_option():
     # TODO: vies co...
 
     def exact(self):
-        m=self.space_steps
-        n,_, _ = self.__compute_n_t_h()
+        m = self.space_steps
+        n,_, _,_,_ = self.__compute_n_t_h_x_time()
         sigma = self.params["sigma"]
         rate = self.params["rate"]
         T = self.params["T"]
         E = self.params["E"]
-        x, time = self.__compute_x_time()
+        x, time = self.x, self.time
         tt = T - time
         S = E * np.exp(x)
         Digital = np.zeros((m + 1, n + 1))

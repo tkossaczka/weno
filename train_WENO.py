@@ -1,7 +1,7 @@
 from define_WENO_Network import WENONetwork
 import torch
 from torch import optim
-from define_classes import Digital_option
+from define_problem import Digital_option
 
 #train_model=WENONetwork()
 #V=train_model.forward()
@@ -16,7 +16,7 @@ def monotonicity_loss(x):
 #optimizer = optim.SGD(train_model.parameters(), lr=0.001)
 optimizer = optim.Adam(train_model.parameters())
 
-for k in range(500):
+for k in range(1000):
     # Forward path
     my_problem = Digital_option(space_steps=160, time_steps=1, params=None)
     V_train = train_model.forward(my_problem)

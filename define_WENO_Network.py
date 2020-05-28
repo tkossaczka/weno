@@ -219,7 +219,6 @@ class WENONetwork(nn.Module):
         term_const = problem.der_const(x, time)
         u_bc_l, u_bc_r, u1_bc_l, u1_bc_r, u2_bc_l, u2_bc_r = problem.boundary_condition
 
-
         u = torch.zeros((m+1, n+1))
         u[:,0] = problem.initial_condition
         u[0:3,:] = u_bc_l
@@ -232,8 +231,7 @@ class WENONetwork(nn.Module):
             RHSc = self.WENO5_minus(u, l, e, mweno=True, mapped=False, trainable=trainable)
 
             u1 = torch.zeros((x.shape[0]))[:, None]
-            u1[3:-3, 0] = u[3:-3, l - 1] + t * (
-                        (term_2 / h ** 2) * RHSd + (term_1 / h) * RHSc + term_0 * u[3:-3, l - 1])
+            u1[3:-3, 0] = u[3:-3, l - 1] + t * ((term_2 / h ** 2) * RHSd + (term_1 / h) * RHSc + term_0 * u[3:-3, l - 1])
 
             u1[0:3, 0] = u1_bc_l[:,l - 1]
             u1[m - 2:, 0] = u1_bc_r[:,l - 1]
@@ -242,8 +240,7 @@ class WENONetwork(nn.Module):
             RHS1c = self.WENO5_minus(u1, 1, e, mweno=True, mapped=False, trainable=trainable)
 
             u2 = torch.zeros((x.shape[0]))[:, None]
-            u2[3:-3, 0] = 0.75 * u[3:-3, l - 1] + 0.25 * u1[3:-3, 0] + 0.25 * t * (
-                    (term_2 / h ** 2) * RHS1d + (term_1 / h) * RHS1c + term_0 * u1[3:-3, 0])
+            u2[3:-3, 0] = 0.75*u[3:-3,l-1] + 0.25*u1[3:-3,0] + 0.25*t*((term_2/h ** 2)*RHS1d + (term_1/h)*RHS1c + term_0*u1[3:-3, 0])
 
             u2[0:3, 0] = u2_bc_l[:,l - 1]
             u2[m - 2:, 0] = u2_bc_r[:,l - 1]
@@ -262,8 +259,6 @@ class WENONetwork(nn.Module):
         return V
 
     def full_WENO(self, problem, trainable=True, params=None, plot=True):
-        if params is None:
-            params = problem.get_params()
         u = self.run_weno(problem, trainable=trainable)
         V, S, tt = problem.transformation(u)
         V = V.detach().numpy()
@@ -272,11 +267,9 @@ class WENONetwork(nn.Module):
             fig = plt.figure()
             ax = fig.gca(projection='3d')
             ax.plot_surface(X, Y, V, cmap=cm.viridis)
-        return V, S, tt, params
+        return V, S, tt
 
     def compare_wenos(self, problem, params=None):
-        if params is None:
-            params = problem.get_params()
         u_trained = self.run_weno(problem, trainable=True)
         V_trained, S, tt = problem.transformation(u_trained)
         u_classic = self.run_weno(problem, trainable=False)
@@ -317,6 +310,6 @@ class WENONetwork(nn.Module):
             xmaxerr = problem.err(exact, u_last)
             vecerr[i] = xmaxerr
             order[i - 1] = np.log(vecerr[i - 1] / vecerr[i]) / np.log(2)
-            print(mm)
+            print(problem.space_steps)
         return vecerr, order
 
