@@ -135,7 +135,8 @@ class Digital_option():
         return u_Digital
 
     def err(self, u_last):
-        u_Digital = self.exact(comp_order=True)
+        u_Digital = self.exact()
+        u_last = u_last.detach().numpy()
         xerr = np.absolute([u_Digital - u_last])
         xmaxerr = np.max([xerr])
         return xmaxerr
@@ -152,17 +153,5 @@ class Digital_option():
             V[k, :] = E * u[k, :]
         return V, S, tt
 
-
-    # def plotting(self):
-    #     m = self.space_steps
-    #     n, _ = self.compute_number_of_timesteps()
-    #     T = self.params["T"]
-    #     E = self.params["E"]
-    #     x, time = self.compute_x_t()
-    #     tt = T - time
-    #     S = E * np.exp(x)
-    #     V = torch.zeros((m + 1, steps))
-    #     for k in range(0, m + 1):
-    #         V[k, :] = E * u[k, :]
 
 

@@ -7,23 +7,28 @@ from torch import nn, optim # Sets of preset layers and optimizers
 from scipy.stats import norm
 import torch.nn.functional as F # Sets of functions such as ReLU
 from torchvision import datasets, transforms # Popular datasets, architectures and common
-from define_time_loop import WENO_loop
 
 class WENONetwork(nn.Module):
     def __init__(self):
         super().__init__()
+        self.inner_nn_weno5 = self.get_inner_nn_weno5()
+        self.inner_nn_weno6 = self.get_inner_nn_weno6()
 
-        self.inner_nn_weno5 = nn.Sequential(
+    def get_inner_nn_weno5(self):
+        net = nn.Sequential(
             nn.Conv1d(1, 6, kernel_size=5, stride=1, padding=2),
             nn.ReLU(),
             nn.Conv1d(6, 3, kernel_size=5, stride=1, padding=2),
             nn.Sigmoid())
+        return net
 
-        self.inner_nn_weno6 = nn.Sequential(
+    def get_inner_nn_weno6(self):
+        net = nn.Sequential(
             nn.Conv1d(1, 6, kernel_size=5, stride=1, padding=2),
             nn.ReLU(),
             nn.Conv1d(6, 3, kernel_size=5, stride=1, padding=2),
             nn.Sigmoid())
+        return net
 
     def WENO5_minus(self, u, l, e, mweno=True, mapped=False, trainable=True):
         uu = u[:, l - 1]
@@ -258,7 +263,7 @@ class WENONetwork(nn.Module):
         V,_,_ = problem.transformation(u)
         return V
 
-    def full_WENO(self, problem, trainable=True, params=None, plot=True):
+    def full_WENO(self, problem, trainable=True, plot=True):
         u = self.run_weno(problem, trainable=trainable)
         V, S, tt = problem.transformation(u)
         V = V.detach().numpy()
@@ -269,7 +274,7 @@ class WENONetwork(nn.Module):
             ax.plot_surface(X, Y, V, cmap=cm.viridis)
         return V, S, tt
 
-    def compare_wenos(self, problem, params=None):
+    def compare_wenos(self, problem):
         u_trained = self.run_weno(problem, trainable=True)
         V_trained, S, tt = problem.transformation(u_trained)
         u_classic = self.run_weno(problem, trainable=False)
@@ -293,23 +298,24 @@ class WENONetwork(nn.Module):
 
         return vecerr, order
 
-    def order_compute(self, problem, mm, trainable=True):
-        exact=problem.exact()
+    def order_compute(self, initial_space_steps, params, problem_class, trainable=True):
+        problem = problem_class(space_steps=initial_space_steps, time_steps=None, params=params)
         order_numb=5
         vecerr = np.zeros((order_numb))[:, None]
         order = np.zeros((order_numb - 1))[:, None]
         u = self.run_weno(problem, trainable=trainable)
         u_last = u[:,-1]
-        xmaxerr = problem.err(exact, u_last)
+        xmaxerr = problem.err(u_last)
         vecerr[0] = xmaxerr
         for i in range(1, order_numb):
-            mm = mm * 2
-            problem.space_steps = mm
+            problem = problem_class(space_steps=problem.space_steps * 2, time_steps=None, params=params)
             u = self.run_weno(problem, trainable=trainable)
             u_last = u[:, -1]
-            xmaxerr = problem.err(exact, u_last)
+            xmaxerr = problem.err(u_last)
             vecerr[i] = xmaxerr
             order[i - 1] = np.log(vecerr[i - 1] / vecerr[i]) / np.log(2)
             print(problem.space_steps)
         return vecerr, order
+
+
 

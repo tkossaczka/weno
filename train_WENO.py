@@ -7,7 +7,6 @@ from define_problem import Digital_option
 #V=train_model.forward()
 
 # TRAIN NETWORK
-#my_problem = Digital_option(space_steps=160, time_steps=1, params=None)
 train_model = WENONetwork()
 
 def monotonicity_loss(x):
@@ -16,7 +15,7 @@ def monotonicity_loss(x):
 #optimizer = optim.SGD(train_model.parameters(), lr=0.001)
 optimizer = optim.Adam(train_model.parameters())
 
-for k in range(1000):
+for k in range(1500):
     # Forward path
     my_problem = Digital_option(space_steps=160, time_steps=1, params=None)
     V_train = train_model.forward(my_problem)
@@ -27,10 +26,9 @@ for k in range(1000):
     optimizer.step()  # Optimize weights
     print(k, loss)
 
-#S,tt = train_model.return_S_tt()
 #plt.plot(S, V_train.detach().numpy())
 print("number of parameters:", sum(p.numel() for p in train_model.parameters()))
-#g=train_model.parameters()
-#g.__next__()
+# g=train_model.parameters()
+# g.__next__()
 
 #torch.save(train_model, "model")
