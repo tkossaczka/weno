@@ -2,7 +2,6 @@ import numpy as np
 import torch
 from scipy.stats import norm
 
-
 class Digital_option():
     def __init__(self, space_steps, time_steps=None, params=None):
         """

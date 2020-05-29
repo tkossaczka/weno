@@ -63,9 +63,9 @@ class WENONetwork(nn.Module):
             betap_corrected_list = []
             betan_corrected_list = []
             for k, beta in enumerate([betap0, betap1, betap2]):
-                betap_corrected_list.append(beta * beta_multiplicators_right[k, 3:-2])
+                betap_corrected_list.append(beta * (beta_multiplicators_right[k, 3:-2]))
             for k, beta in enumerate([betan0, betan1, betan2]):
-                betan_corrected_list.append(beta * beta_multiplicators_left[k, 2:-3])
+                betan_corrected_list.append(beta * (beta_multiplicators_left[k, 2:-3]))
             [betap0, betap1, betap2] = betap_corrected_list
             [betan0, betan1, betan2] = betan_corrected_list
 
@@ -144,9 +144,9 @@ class WENONetwork(nn.Module):
             betap_corrected_list = []
             betan_corrected_list = []
             for k, beta in enumerate([betap0, betap1, betap2]):
-                betap_corrected_list.append(beta * beta_multiplicators_right[k, 3:-2])
+                betap_corrected_list.append(beta * (beta_multiplicators_right[k, 3:-2]))
             for k, beta in enumerate([betan0, betan1, betan2]):
-                betan_corrected_list.append(beta * beta_multiplicators_left[k, 2:-3])
+                betan_corrected_list.append(beta * (beta_multiplicators_left[k, 2:-3]))
             [betap0, betap1, betap2] = betap_corrected_list
             [betan0, betan1, betan2] = betan_corrected_list
 
@@ -281,32 +281,16 @@ class WENONetwork(nn.Module):
         V_classic, S, tt = problem.transformation(u_classic)
         plt.plot(S, V_classic.detach().numpy()[:,1], S, V_trained.detach().numpy()[:,1])
 
-    def order_comput_old(self, params, mm, trainable=True):
-        order_numb=5
-        vecerr = np.zeros((order_numb))[:, None]
-        order = np.zeros((order_numb-1))[:, None]
-        _,_,_,xmaxerr = self.BS_WENO(params["sigma"], params["rate"], params["E"], params["T"], params["e"],
-                                        params["xl"], params["xr"], mm, trainable=trainable, max_steps=None, comp_order=True)
-        vecerr[0] = xmaxerr
-        for i in range(1,order_numb):
-            mm=mm*2
-            _,_,_, xmaxerr = self.BS_WENO(params["sigma"], params["rate"], params["E"], params["T"], params["e"],
-                                                 params["xl"], params["xr"], mm, trainable=trainable, max_steps=None,  comp_order=True)
-            vecerr[i] = xmaxerr
-            order[i - 1] = np.log(vecerr[i - 1] / vecerr[i]) / np.log(2)
-            print(mm)
-
-        return vecerr, order
-
     def order_compute(self, initial_space_steps, params, problem_class, trainable=True):
         problem = problem_class(space_steps=initial_space_steps, time_steps=None, params=params)
-        order_numb=5
+        order_numb=3
         vecerr = np.zeros((order_numb))[:, None]
         order = np.zeros((order_numb - 1))[:, None]
         u = self.run_weno(problem, trainable=trainable)
         u_last = u[:,-1]
         xmaxerr = problem.err(u_last)
         vecerr[0] = xmaxerr
+        print(problem.space_steps)
         for i in range(1, order_numb):
             problem = problem_class(space_steps=problem.space_steps * 2, time_steps=None, params=params)
             u = self.run_weno(problem, trainable=trainable)

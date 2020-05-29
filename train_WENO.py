@@ -1,10 +1,13 @@
 from define_WENO_Network import WENONetwork
 import torch
 from torch import optim
-from define_problem import Digital_option
+from define_problem_Digital import Digital_option
+from define_problem_heat_eq import heat_equation
 
 #train_model=WENONetwork()
 #V=train_model.forward()
+
+torch.set_default_dtype(torch.float64)
 
 # TRAIN NETWORK
 train_model = WENONetwork()
@@ -15,9 +18,10 @@ def monotonicity_loss(x):
 #optimizer = optim.SGD(train_model.parameters(), lr=0.001)
 optimizer = optim.Adam(train_model.parameters())
 
-for k in range(1500):
+for k in range(1000):
     # Forward path
     my_problem = Digital_option(space_steps=160, time_steps=1, params=None)
+    #my_problem = heat_equation(space_steps=160, time_steps=1, params=None)
     V_train = train_model.forward(my_problem)
     # Train model:
     optimizer.zero_grad()  # Clear gradients
