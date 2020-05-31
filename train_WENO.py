@@ -5,7 +5,7 @@ from define_problem_Digital import Digital_option
 from define_problem_heat_eq import heat_equation
 from define_problem_Call import Call_option
 
-#torch.set_default_dtype(torch.float64)
+torch.set_default_dtype(torch.float64)
 
 # TRAIN NETWORK
 train_model = WENONetwork()
@@ -18,7 +18,8 @@ optimizer = optim.Adam(train_model.parameters())
 
 for k in range(1000):
     # Forward path
-    my_problem = Digital_option(space_steps=160, time_steps=1, params=None)
+    my_problem = Digital_option(space_steps=160, time_steps=1,
+                                params={'sigma': 0.3, 'rate': 0.1, 'E': 50, 'T': 1, 'e': 1e-13, 'xl': -6, 'xr': 1.5})
     #my_problem = heat_equation(space_steps=160, time_steps=1, params=None)
     V_train = train_model.forward(my_problem)
     # Train model:
