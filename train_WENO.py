@@ -3,11 +3,9 @@ import torch
 from torch import optim
 from define_problem_Digital import Digital_option
 from define_problem_heat_eq import heat_equation
+from define_problem_Call import Call_option
 
-#train_model=WENONetwork()
-#V=train_model.forward()
-
-torch.set_default_dtype(torch.float64)
+#torch.set_default_dtype(torch.float64)
 
 # TRAIN NETWORK
 train_model = WENONetwork()
@@ -35,4 +33,4 @@ print("number of parameters:", sum(p.numel() for p in train_model.parameters()))
 # g=train_model.parameters()
 # g.__next__()
 
-#torch.save(train_model, "model")
+torch.save(train_model, "model")

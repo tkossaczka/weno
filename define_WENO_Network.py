@@ -283,7 +283,7 @@ class WENONetwork(nn.Module):
 
     def order_compute(self, initial_space_steps, params, problem_class, trainable=True):
         problem = problem_class(space_steps=initial_space_steps, time_steps=None, params=params)
-        order_numb=3
+        order_numb=4
         vecerr = np.zeros((order_numb))[:, None]
         order = np.zeros((order_numb - 1))[:, None]
         u = self.run_weno(problem, trainable=trainable)
