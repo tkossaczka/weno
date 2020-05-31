@@ -16,17 +16,25 @@ class WENONetwork(nn.Module):
 
     def get_inner_nn_weno5(self):
         net = nn.Sequential(
-            nn.Conv1d(1, 6, kernel_size=5, stride=1, padding=2),
+            nn.Conv1d(1, 20, kernel_size=5, stride=1, padding=2),
             nn.ELU(),
-            nn.Conv1d(6, 1, kernel_size=5, stride=1, padding=2),
+            nn.Conv1d(20, 40, kernel_size=5, stride=1, padding=2),
+            nn.ELU(),
+            nn.Conv1d(40, 20, kernel_size=5, stride=1, padding=2),
+            nn.ELU(),
+            nn.Conv1d(20, 1, kernel_size=5, stride=1, padding=2),
             nn.Sigmoid())
         return net
 
     def get_inner_nn_weno6(self):
         net = nn.Sequential(
-            nn.Conv1d(1, 6, kernel_size=5, stride=1, padding=2),
+            nn.Conv1d(1, 20, kernel_size=5, stride=1, padding=2),
             nn.ELU(),
-            nn.Conv1d(6, 1, kernel_size=5, stride=1, padding=2),
+            nn.Conv1d(20, 40, kernel_size=5, stride=1, padding=2),
+            nn.ELU(),
+            nn.Conv1d(40, 20, kernel_size=5, stride=1, padding=2),
+            nn.ELU(),
+            nn.Conv1d(20, 1, kernel_size=5, stride=1, padding=2),
             nn.Sigmoid())
         return net
 
@@ -34,15 +42,6 @@ class WENONetwork(nn.Module):
         uu = u[:, l - 1]
         uu_left = uu[:-1]
         uu_right = uu[1:]
-        uu_left_shifted=[]
-        uu_left_shifted.append(torch.cat([torch.Tensor([0]), uu_left[:-1]], 0))
-        uu_left_shifted.append(uu_left)
-        uu_left_shifted.append(uu_right)
-
-        uu_right_shifted=[]
-        uu_right_shifted.append(uu_left)
-        uu_right_shifted.append(uu_right)
-        uu_right_shifted.append(torch.cat([uu_left[1:], torch.Tensor([0])], 0))
 
         def get_fluxes(uu):
             flux0 = (11 * uu[3:-2] - 7 * uu[4:-1] + 2 * uu[5:]) / 6
@@ -65,20 +64,19 @@ class WENONetwork(nn.Module):
         betan0, betan1, betan2 = get_betas(uu_left)
 
         if trainable:
-            beta_multiplicators_left = []
-            beta_multiplicators_right =[]
-            for k, uu_input in enumerate(uu_left_shifted):
-                beta_multiplicators_left.append(self.inner_nn_weno5(uu_input[None, None, :])[0,:,:])
-            for k, uu_input in enumerate(uu_right_shifted):
-                beta_multiplicators_right.append(self.inner_nn_weno5(uu_input[None, None, :])[0,:,:])
-            # beta_multiplicators = torch.cat([beta_multiplicators_right, beta_multiplicators_left], 0)
+            dif = self.__get_average_diff(uu)
+            beta_multiplicators = self.inner_nn_weno5(dif[None, None, :])[0, 0, :]
+            # beta_multiplicators_left = beta_multiplicators[:-1]
+            # beta_multiplicators_right = beta_multiplicators[1:]
 
             betap_corrected_list = []
             betan_corrected_list = []
             for k, beta in enumerate([betap0, betap1, betap2]):
-                betap_corrected_list.append(beta * (beta_multiplicators_right[k][0, 3:-2]))
+                shift = k -1
+                betap_corrected_list.append(beta * (beta_multiplicators[3+shift:-3+shift]))
             for k, beta in enumerate([betan0, betan1, betan2]):
-                betan_corrected_list.append(beta * (beta_multiplicators_left[k][0, 2:-3]))
+                shift = k - 1
+                betan_corrected_list.append(beta * (beta_multiplicators[3+shift:-3+shift]))
             [betap0, betap1, betap2] = betap_corrected_list
             [betan0, betan1, betan2] = betan_corrected_list
 
@@ -127,15 +125,6 @@ class WENONetwork(nn.Module):
         uu = u[:, l - 1]
         uu_left = uu[:-1]
         uu_right = uu[1:]
-        uu_left_shifted = []
-        uu_left_shifted.append(torch.cat([torch.Tensor([0]), uu_left[:-1]], 0))
-        uu_left_shifted.append(uu_left)
-        uu_left_shifted.append(uu_right)
-
-        uu_right_shifted = []
-        uu_right_shifted.append(uu_left)
-        uu_right_shifted.append(uu_right)
-        uu_right_shifted.append(torch.cat([uu_left[1:], torch.Tensor([0])], 0))
 
         def get_fluxes(uu):
             flux0 = (uu[0:-5] - 3 * uu[1:-4] - 9 * uu[2:-3] + 11 * uu[3:-2]) / 12
@@ -159,20 +148,19 @@ class WENONetwork(nn.Module):
         betan0, betan1, betan2 = get_betas(uu_left)
 
         if trainable:
-            beta_multiplicators_left = []
-            beta_multiplicators_right = []
-            for k, uu_input in enumerate(uu_left_shifted):
-                beta_multiplicators_left.append(self.inner_nn_weno5(uu_input[None, None, :])[0, :, :])
-            for k, uu_input in enumerate(uu_right_shifted):
-                beta_multiplicators_right.append(self.inner_nn_weno5(uu_input[None, None, :])[0, :, :])
-            # beta_multiplicators = torch.cat([beta_multiplicators_right, beta_multiplicators_left], 0)
+            dif = self.__get_average_diff(uu)
+            beta_multiplicators = self.inner_nn_weno6(dif[None, None, :])[0, 0, :]
+            # beta_multiplicators_left = beta_multiplicators[:-1]
+            # beta_multiplicators_right = beta_multiplicators[1:]
 
             betap_corrected_list = []
             betan_corrected_list = []
             for k, beta in enumerate([betap0, betap1, betap2]):
-                betap_corrected_list.append(beta * (beta_multiplicators_right[k][0, 3:-2]))
+                shift = k -1
+                betap_corrected_list.append(beta * (beta_multiplicators[3+shift:-3+shift]))
             for k, beta in enumerate([betan0, betan1, betan2]):
-                betan_corrected_list.append(beta * (beta_multiplicators_left[k][0, 2:-3]))
+                shift = k - 1
+                betan_corrected_list.append(beta * (beta_multiplicators[3+shift:-3+shift]))
             [betap0, betap1, betap2] = betap_corrected_list
             [betan0, betan1, betan2] = betan_corrected_list
 
@@ -238,6 +226,15 @@ class WENONetwork(nn.Module):
         RHS = (fluxp - fluxn)
 
         return RHS
+
+    def __get_average_diff(self, uu):
+        dif = uu[1:] - uu[:-1]
+        dif_left = torch.zeros_like(uu)
+        dif_right = torch.zeros_like(uu)
+        dif_left[:-1] = dif
+        dif_right[1:] = dif
+        dif_final = 0.5 * dif_left + 0.5 * dif_right
+        return dif_final
 
     def run_weno(self, problem, trainable):
         m = problem.space_steps
@@ -309,7 +306,7 @@ class WENONetwork(nn.Module):
 
     def order_compute(self, initial_space_steps, params, problem_class, trainable=True):
         problem = problem_class(space_steps=initial_space_steps, time_steps=None, params=params)
-        order_numb=3
+        order_numb=4
         vecerr = np.zeros((order_numb))[:, None]
         order = np.zeros((order_numb - 1))[:, None]
         u = self.run_weno(problem, trainable=trainable)

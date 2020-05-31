@@ -4,6 +4,8 @@ from define_WENO_Network import WENONetwork
 from define_problem_heat_eq import heat_equation
 from define_problem_Call import Call_option
 
+torch.set_default_dtype(torch.float64)
+
 train_model = torch.load('model')
 
 params=None

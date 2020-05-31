@@ -1,0 +1,4 @@
+import matplotlib.pyplot as plt
+u_=uu.detach().numpy()
+m_=beta_multiplicators.detach().numpy()
+plt.plot(np.array([u_,m_]).T)
