@@ -236,7 +236,7 @@ class WENONetwork(nn.Module):
         dif_final = 0.5 * dif_left + 0.5 * dif_right
         return dif_final
 
-    def run_weno(self, problem, trainable):
+    def run_weno(self, problem, trainable, vectorized):
         m = problem.space_steps
         e = problem.params['e']
         n, t, h = problem.time_steps, problem.t, problem.h
@@ -247,19 +247,25 @@ class WENONetwork(nn.Module):
         term_const = problem.der_const(x, time)
         u_bc_l, u_bc_r, u1_bc_l, u1_bc_r, u2_bc_l, u2_bc_r = problem.boundary_condition
 
-        u = torch.zeros((m+1, n+1))
+        if vectorized:
+            u = torch.zeros(m+1,1)
+        else:
+            u = torch.zeros((m+1, n+1))
+
         u[:,0] = problem.initial_condition
-        u[0:3,:] = u_bc_l
-        u[m-2:,:] = u_bc_r
 
         for l in range(1, n+1):
             u = torch.Tensor(u)
+            if vectorized:
+                ll=1
+            else:
+                ll=l
 
-            RHSd = self.WENO6(u, l, e, mweno=True, mapped=False, trainable=trainable)
-            RHSc = self.WENO5_minus(u, l, e, mweno=True, mapped=False, trainable=trainable)
+            RHSd = self.WENO6(u, ll, e, mweno=True, mapped=False, trainable=trainable)
+            RHSc = self.WENO5_minus(u, ll, e, mweno=True, mapped=False, trainable=trainable)
 
             u1 = torch.zeros((x.shape[0]))[:, None]
-            u1[3:-3, 0] = u[3:-3, l - 1] + t * ((term_2 / h ** 2) * RHSd + (term_1 / h) * RHSc + term_0 * u[3:-3, l - 1])
+            u1[3:-3, 0] = u[3:-3, ll - 1] + t * ((term_2 / h ** 2) * RHSd + (term_1 / h) * RHSc + term_0 * u[3:-3, ll - 1])
 
             u1[0:3, 0] = u1_bc_l[:,l - 1]
             u1[m - 2:, 0] = u1_bc_r[:,l - 1]
@@ -268,7 +274,7 @@ class WENONetwork(nn.Module):
             RHS1c = self.WENO5_minus(u1, 1, e, mweno=True, mapped=False, trainable=trainable)
 
             u2 = torch.zeros((x.shape[0]))[:, None]
-            u2[3:-3, 0] = 0.75*u[3:-3,l-1] + 0.25*u1[3:-3,0] + 0.25*t*((term_2/h ** 2)*RHS1d + (term_1/h)*RHS1c + term_0*u1[3:-3, 0])
+            u2[3:-3, 0] = 0.75*u[3:-3,ll-1] + 0.25*u1[3:-3,0] + 0.25*t*((term_2/h ** 2)*RHS1d + (term_1/h)*RHS1c + term_0*u1[3:-3, 0])
 
             u2[0:3, 0] = u2_bc_l[:,l - 1]
             u2[m - 2:, 0] = u2_bc_r[:,l - 1]
@@ -276,18 +282,26 @@ class WENONetwork(nn.Module):
             RHS2d = self.WENO6(u2, 1, e, mweno=True, mapped=False, trainable=trainable)
             RHS2c = self.WENO5_minus(u2, 1, e, mweno=True, mapped=False, trainable=trainable)
 
-            u[3:-3, l] = (1 / 3) * u[3:-3, l - 1] + (2 / 3) * u2[3:-3, 0] + (2 / 3) * t * (
-                    (term_2 / h ** 2) * RHS2d + (term_1 / h) * RHS2c + term_0 * u2[3:-3, 0])
+            if vectorized:
+                u[3:-3, 0] = (1 / 3) * u[3:-3, ll - 1] + (2 / 3) * u2[3:-3, 0] + (2 / 3) * t * (
+                        (term_2 / h ** 2) * RHS2d + (term_1 / h) * RHS2c + term_0 * u2[3:-3, 0])
+                u[0:3, 0] = u_bc_l[:, l]
+                u[m - 2:, 0] = u_bc_r[:, l]
+            else:
+                u[3:-3, l] = (1 / 3) * u[3:-3, ll - 1] + (2 / 3) * u2[3:-3, 0] + (2 / 3) * t * (
+                        (term_2 / h ** 2) * RHS2d + (term_1 / h) * RHS2c + term_0 * u2[3:-3, 0])
+                u[0:3, l] = u_bc_l[:, l]
+                u[m - 2:, l] = u_bc_r[:, l]
 
         return u
 
     def forward(self, problem):
-        u = self.run_weno(problem, trainable=True)
+        u = self.run_weno(problem, trainable=True, vectorized=True)
         V,_,_ = problem.transformation(u)
         return V
 
-    def full_WENO(self, problem, trainable=True, plot=True):
-        u = self.run_weno(problem, trainable=trainable)
+    def full_WENO(self, problem, trainable=True, plot=True, vectorized=False):
+        u = self.run_weno(problem, trainable=trainable, vectorized=vectorized)
         V, S, tt = problem.transformation(u)
         V = V.detach().numpy()
         if plot:
@@ -298,25 +312,24 @@ class WENONetwork(nn.Module):
         return V, S, tt
 
     def compare_wenos(self, problem):
-        u_trained = self.run_weno(problem, trainable=True)
+        u_trained = self.run_weno(problem, trainable=True, vectorized=False)
         V_trained, S, tt = problem.transformation(u_trained)
-        u_classic = self.run_weno(problem, trainable=False)
+        u_classic = self.run_weno(problem, trainable=False, vectorized=False)
         V_classic, S, tt = problem.transformation(u_classic)
         plt.plot(S, V_classic.detach().numpy()[:,1], S, V_trained.detach().numpy()[:,1])
 
-    def order_compute(self, initial_space_steps, params, problem_class, trainable=True):
+    def order_compute(self, iterations, initial_space_steps, params, problem_class, trainable=True):
         problem = problem_class(space_steps=initial_space_steps, time_steps=None, params=params)
-        order_numb=4
-        vecerr = np.zeros((order_numb))[:, None]
-        order = np.zeros((order_numb - 1))[:, None]
-        u = self.run_weno(problem, trainable=trainable)
+        vecerr = np.zeros((iterations))[:, None]
+        order = np.zeros((iterations - 1))[:, None]
+        u = self.run_weno(problem, trainable=trainable, vectorized=True)
         u_last = u[:,-1]
         xmaxerr = problem.err(u_last)
         vecerr[0] = xmaxerr
         print(problem.space_steps)
-        for i in range(1, order_numb):
+        for i in range(1, iterations):
             problem = problem_class(space_steps=problem.space_steps * 2, time_steps=None, params=params)
-            u = self.run_weno(problem, trainable=trainable)
+            u = self.run_weno(problem, trainable=trainable, vectorized=True)
             u_last = u[:, -1]
             xmaxerr = problem.err(u_last)
             vecerr[i] = xmaxerr
