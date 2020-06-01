@@ -1,4 +1,8 @@
 import matplotlib.pyplot as plt
 u_=uu.detach().numpy()
+d_=dif.detach().numpy()
 m_=beta_multiplicators.detach().numpy()
-plt.plot(np.array([u_,m_]).T)
+plt.plot(np.array([d_,m_]).T)
+
+import matplotlib.pyplot as plt
+plt.plot(xerr)

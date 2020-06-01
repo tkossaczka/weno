@@ -13,6 +13,7 @@ class WENONetwork(nn.Module):
         super().__init__()
         self.inner_nn_weno5 = self.get_inner_nn_weno5()
         self.inner_nn_weno6 = self.get_inner_nn_weno6()
+        self.weno5_mult_bias, self.weno6_mult_bias = self.get_multiplicator_biases()
 
     def get_inner_nn_weno5(self):
         net = nn.Sequential(
@@ -20,9 +21,13 @@ class WENONetwork(nn.Module):
             nn.ELU(),
             nn.Conv1d(20, 40, kernel_size=5, stride=1, padding=2),
             nn.ELU(),
-            nn.Conv1d(40, 20, kernel_size=5, stride=1, padding=2),
+            nn.Conv1d(40, 80, kernel_size=1, stride=1, padding=0),
             nn.ELU(),
-            nn.Conv1d(20, 1, kernel_size=5, stride=1, padding=2),
+            nn.Conv1d(80, 40, kernel_size=1, stride=1, padding=0),
+            nn.ELU(),
+            nn.Conv1d(40, 20, kernel_size=3, stride=1, padding=1),
+            nn.ELU(),
+            nn.Conv1d(20, 1, kernel_size=1, stride=1, padding=0),
             nn.Sigmoid())
         return net
 
@@ -32,11 +37,19 @@ class WENONetwork(nn.Module):
             nn.ELU(),
             nn.Conv1d(20, 40, kernel_size=5, stride=1, padding=2),
             nn.ELU(),
-            nn.Conv1d(40, 20, kernel_size=5, stride=1, padding=2),
+            nn.Conv1d(40, 80, kernel_size=1, stride=1, padding=0),
             nn.ELU(),
-            nn.Conv1d(20, 1, kernel_size=5, stride=1, padding=2),
+            nn.Conv1d(80, 40, kernel_size=1, stride=1, padding=0),
+            nn.ELU(),
+            nn.Conv1d(40, 20, kernel_size=3, stride=1, padding=1),
+            nn.ELU(),
+            nn.Conv1d(20, 1, kernel_size=1, stride=1, padding=0),
             nn.Sigmoid())
         return net
+
+    def get_multiplicator_biases(self):
+        # first for weno 5, second for weno 6
+        return 0.1, 0.1
 
     def WENO5_minus(self, u, l, e, mweno=True, mapped=False, trainable=True):
         uu = u[:, l - 1]
@@ -65,7 +78,7 @@ class WENONetwork(nn.Module):
 
         if trainable:
             dif = self.__get_average_diff(uu)
-            beta_multiplicators = self.inner_nn_weno5(dif[None, None, :])[0, 0, :]
+            beta_multiplicators = self.inner_nn_weno5(dif[None, None, :])[0, 0, :] + self.weno5_mult_bias
             # beta_multiplicators_left = beta_multiplicators[:-1]
             # beta_multiplicators_right = beta_multiplicators[1:]
 
@@ -149,7 +162,7 @@ class WENONetwork(nn.Module):
 
         if trainable:
             dif = self.__get_average_diff(uu)
-            beta_multiplicators = self.inner_nn_weno6(dif[None, None, :])[0, 0, :]
+            beta_multiplicators = self.inner_nn_weno6(dif[None, None, :])[0, 0, :] + self.weno6_mult_bias
             # beta_multiplicators_left = beta_multiplicators[:-1]
             # beta_multiplicators_right = beta_multiplicators[1:]
 
@@ -232,7 +245,9 @@ class WENONetwork(nn.Module):
         dif_left = torch.zeros_like(uu)
         dif_right = torch.zeros_like(uu)
         dif_left[:-1] = dif
+        dif_left[-1] = dif[-1]
         dif_right[1:] = dif
+        dif_right[0] = dif[0]
         dif_final = 0.5 * dif_left + 0.5 * dif_right
         return dif_final
 
