@@ -3,18 +3,22 @@ from define_problem_Digital import Digital_option
 from define_WENO_Network import WENONetwork
 from define_problem_heat_eq import heat_equation
 from define_problem_Call import Call_option
+from define_problem_transport_eq import transport_equation
 
 train_model = WENONetwork()
 train_model = torch.load('model')
 
+torch.set_default_dtype(torch.float64)
+
 params=None
 problem = heat_equation
+problem = transport_equation
 problem= Digital_option
 problem= Call_option
 
 # FULL WENO
 my_problem = problem(space_steps=160, time_steps=None, params = params)
-V, S, tt = train_model.full_WENO(my_problem, trainable=True, plot=True)
+V, S, tt = train_model.full_WENO(my_problem, trainable=True, plot=True, vectorized=False)
 my_problem.get_params()
 
 # COMPARE WENOS

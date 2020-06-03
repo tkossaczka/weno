@@ -16,7 +16,7 @@ def monotonicity_loss(x):
 #optimizer = optim.SGD(train_model.parameters(), lr=0.001)
 optimizer = optim.Adam(train_model.parameters())
 
-for k in range(400):
+for k in range(500):
     # Forward path
     params = None
     # params = {'sigma': 0.3, 'rate': 0.1, 'E': 50, 'T': 1, 'e': 1e-13, 'xl': -6, 'xr': 1.5}

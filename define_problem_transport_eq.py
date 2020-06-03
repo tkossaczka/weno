@@ -2,8 +2,8 @@ import numpy as np
 import torch
 from scipy.stats import norm
 
-class heat_equation():
-    def __init__(self, space_steps, time_steps=None, params=None, w5_minus=None):
+class transport_equation():
+    def __init__(self, space_steps, time_steps=None, params=None, w5_minus=False):
         """
         Atributes needed to be initialized to make WENO network functional
         space_steps, time_steps, initial_condition, boundary_condition, x, time, h, n
@@ -25,7 +25,7 @@ class heat_equation():
         params = dict()
         params["T"] = 1
         params["e"] = 10 ** (-13)
-        params["L"] = np.pi
+        params["L"] = 1
         self.params = params
 
     def get_params(self):
@@ -36,7 +36,7 @@ class heat_equation():
         L= self.params["L"]
         m = self.space_steps
         h = 2 * L / m
-        n = np.ceil(T / (0.4 * (h ** 2)))
+        n = np.ceil(T / (0.4 * h**(5/3)))
         n = int(n)
         t = T / n
         x = np.linspace(-L, L, m + 1)
@@ -48,7 +48,7 @@ class heat_equation():
         x = self.x
         u_init = torch.zeros(m+1)
         for k in range(0, m + 1):
-            u_init[k] = np.sin(x[k])
+            u_init[k] = np.sin(np.pi*x[k])
         return u_init
 
     def __compute_boundary_condition(self):
@@ -63,32 +63,32 @@ class heat_equation():
         u_bc_l = torch.zeros((3, n+1))
         u_bc_r = torch.zeros((3, n + 1))
         for k in range(0,3):
-            u_bc_l[k,:] = np.exp(-time)*np.sin(x[k])
+            u_bc_l[k,:] = np.sin(np.pi*(x[k]-time))
         for k in range(m-2,m+1):
-            u_bc_r[k-(m-2),:] = np.exp(-time)*np.sin(x[k])
+            u_bc_r[k-(m-2),:] = np.sin(np.pi*(x[k]-time))
 
         u1_bc_l = torch.zeros((3, n+1))
         u1_bc_r = torch.zeros((3, n+1))
         for k in range(0,3):
-            u1_bc_l[k,:] = np.exp(-time)* np.sin(x[k]) - t* np.exp(-time)* np.sin(x[k])
+            u1_bc_l[k,:] = np.sin(np.pi*(x[k]-time)) - t* np.pi*(np.cos(np.pi*(x[k]-time)))
         for k in range(m-2,m+1):
-            u1_bc_r[k-(m-2),:] = np.exp(-time)* np.sin(x[k]) - t* np.exp(-time)* np.sin(x[k])
+            u1_bc_r[k-(m-2),:] = np.sin(np.pi*(x[k]-time)) - t* np.pi*(np.cos(np.pi*(x[k]-time)))
 
         u2_bc_l = torch.zeros((3, n+1))
         u2_bc_r = torch.zeros((3, n+1))
         for k in range(0,3):
-            u2_bc_l[k, :] = np.exp(-time)*np.sin(x[k])-0.5*t*np.exp(-time)*np.sin(x[k])+0.25*(t**2)*np.exp(-time)*np.sin(x[k])
+            u2_bc_l[k, :] = np.sin(np.pi*(x[k]-time)) - 0.5* t* np.pi*(np.cos(np.pi*(x[k]-time)))  - 0.25* np.pi**2 * t**2 *(np.sin(np.pi*(x[k]-time)))
         for k in range(m-2,m+1):
-            u2_bc_r[k-(m-2), :] = np.exp(-time)*np.sin(x[k])-0.5*t*np.exp(-time)*np.sin(x[k])+0.25*(t**2)*np.exp(-time)*np.sin(x[k])
+            u2_bc_r[k-(m-2), :] = np.sin(np.pi*(x[k]-time)) - 0.5* t* np.pi*(np.cos(np.pi*(x[k]-time))) - 0.25* np.pi**2 * t**2 *(np.sin(np.pi*(x[k]-time)))
 
         return u_bc_l, u_bc_r, u1_bc_l, u1_bc_r, u2_bc_l, u2_bc_r
 
     def der_2(self, x, t):
-        term_2 = 1
+        term_2 = 0
         return term_2
 
     def der_1(self, x, t):
-        term_1 = 0
+        term_1 = -1
         return term_1
 
     def der_0(self, x, t):
@@ -108,7 +108,7 @@ class heat_equation():
         uex = np.zeros((m + 1, n + 1))
         for k in range(0, n + 1):
             for j in range(0, m + 1):
-                uex[j, k] = np.exp(-time[k]) * np.sin(x[j])
+                uex[j, k] = np.sin(np.pi*(x[j]-time[k]))
         u_ex = uex[:, n]
         return u_ex
 
@@ -124,6 +124,3 @@ class heat_equation():
         t = self.time
         x = self.x
         return u, x, t
-
-
-

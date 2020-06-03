@@ -51,26 +51,38 @@ class WENONetwork(nn.Module):
         # first for weno 5, second for weno 6
         return 0.1, 0.1
 
-    def WENO5_minus(self, u, l, e, mweno=True, mapped=False, trainable=True):
+    def WENO5(self, u, l, e, w5_minus, mweno=True, mapped=False, trainable=True):
         uu = u[:, l - 1]
         uu_left = uu[:-1]
         uu_right = uu[1:]
 
         def get_fluxes(uu):
-            flux0 = (11 * uu[3:-2] - 7 * uu[4:-1] + 2 * uu[5:]) / 6
-            flux1 = (2 * uu[2:-3] + 5 * uu[3:-2] - uu[4:-1]) / 6
-            flux2 = (-uu[1:-4] + 5 * uu[2:-3] + 2 * uu[3:-2]) / 6
+            if w5_minus is True:
+                flux0 = (11 * uu[3:-2] - 7 * uu[4:-1] + 2 * uu[5:]) / 6
+                flux1 = (2 * uu[2:-3] + 5 * uu[3:-2] - uu[4:-1]) / 6
+                flux2 = (-uu[1:-4] + 5 * uu[2:-3] + 2 * uu[3:-2]) / 6
+            else:
+                flux0 = (2 * uu[0:-5] - 7 * uu[1:-4] + 11 * uu[2:-3]) / 6
+                flux1 = (- uu[1:-4] + 5 * uu[2:-3] + 2* uu[3:-2]) / 6
+                flux2 = (2*uu[2:-3] + 5 * uu[3:-2] - uu[4:-1]) / 6
             return flux0, flux1, flux2
 
         fluxp0, fluxp1, fluxp2 = get_fluxes(uu_right)
         fluxn0, fluxn1, fluxn2 = get_fluxes(uu_left)
 
         def get_betas(uu):
-            beta0 = 13 / 12 * (uu[3:-2] - 2 * uu[4:-1] + uu[5:]) ** 2 + 1 / 4 * (
-                        3 * uu[3:-2] - 4 * uu[4:-1] + uu[5:]) ** 2
-            beta1 = 13 / 12 * (uu[2:-3] - 2 * uu[3:-2] + uu[4:-1]) ** 2 + 1 / 4 * (uu[2:-3] - uu[4:-1]) ** 2
-            beta2 = 13 / 12 * (uu[1:-4] - 2 * uu[2:-3] + uu[3:-2]) ** 2 + 1 / 4 * (
-                        uu[1:-4] - 4 * uu[2:-3] + 3 * uu[3:-2]) ** 2
+            if w5_minus is True:
+                beta0 = 13 / 12 * (uu[3:-2] - 2 * uu[4:-1] + uu[5:]) ** 2 + 1 / 4 * (
+                            3 * uu[3:-2] - 4 * uu[4:-1] + uu[5:]) ** 2
+                beta1 = 13 / 12 * (uu[2:-3] - 2 * uu[3:-2] + uu[4:-1]) ** 2 + 1 / 4 * (uu[2:-3] - uu[4:-1]) ** 2
+                beta2 = 13 / 12 * (uu[1:-4] - 2 * uu[2:-3] + uu[3:-2]) ** 2 + 1 / 4 * (
+                            uu[1:-4] - 4 * uu[2:-3] + 3 * uu[3:-2]) ** 2
+            else:
+                beta0 = 13 / 12 * (uu[0:-5] - 2 * uu[1:-4] + uu[2:-3]) ** 2 + 1 / 4 * (
+                        uu[0:-5] - 4 * uu[1:-4] + 3*uu[2:-3]) ** 2
+                beta1 = 13 / 12 * (uu[1:-4] - 2 * uu[2:-3] + uu[3:-2]) ** 2 + 1 / 4 * (uu[1:-4] - uu[3:-2]) ** 2
+                beta2 = 13 / 12 * (uu[2:-3] - 2 * uu[3:-2] + uu[4:-1]) ** 2 + 1 / 4 * (
+                        3*uu[2:-3] - 4 * uu[3:-2] + uu[4:-1]) ** 2
             return beta0, beta1, beta2
 
         betap0, betap1, betap2 = get_betas(uu_right)
@@ -261,6 +273,7 @@ class WENONetwork(nn.Module):
         term_0 = problem.der_0(x, time)
         term_const = problem.der_const(x, time)
         u_bc_l, u_bc_r, u1_bc_l, u1_bc_r, u2_bc_l, u2_bc_r = problem.boundary_condition
+        w5_minus = problem.w5_minus
 
         if vectorized:
             u = torch.zeros(m+1,1)
@@ -277,7 +290,7 @@ class WENONetwork(nn.Module):
                 ll=l
 
             RHSd = self.WENO6(u, ll, e, mweno=True, mapped=False, trainable=trainable)
-            RHSc = self.WENO5_minus(u, ll, e, mweno=True, mapped=False, trainable=trainable)
+            RHSc = self.WENO5(u, ll, e, w5_minus=w5_minus, mweno=True, mapped=False, trainable=trainable)
 
             u1 = torch.zeros((x.shape[0]))[:, None]
             u1[3:-3, 0] = u[3:-3, ll - 1] + t * ((term_2 / h ** 2) * RHSd + (term_1 / h) * RHSc + term_0 * u[3:-3, ll - 1])
@@ -286,7 +299,7 @@ class WENONetwork(nn.Module):
             u1[m - 2:, 0] = u1_bc_r[:,l - 1]
 
             RHS1d = self.WENO6(u1, 1, e, mweno=True, mapped=False, trainable=trainable)
-            RHS1c = self.WENO5_minus(u1, 1, e, mweno=True, mapped=False, trainable=trainable)
+            RHS1c = self.WENO5(u1, 1, e, w5_minus=w5_minus, mweno=True, mapped=False, trainable=trainable)
 
             u2 = torch.zeros((x.shape[0]))[:, None]
             u2[3:-3, 0] = 0.75*u[3:-3,ll-1] + 0.25*u1[3:-3,0] + 0.25*t*((term_2/h ** 2)*RHS1d + (term_1/h)*RHS1c + term_0*u1[3:-3, 0])
@@ -295,7 +308,7 @@ class WENONetwork(nn.Module):
             u2[m - 2:, 0] = u2_bc_r[:,l - 1]
 
             RHS2d = self.WENO6(u2, 1, e, mweno=True, mapped=False, trainable=trainable)
-            RHS2c = self.WENO5_minus(u2, 1, e, mweno=True, mapped=False, trainable=trainable)
+            RHS2c = self.WENO5(u2, 1, e, w5_minus=w5_minus, mweno=True, mapped=False, trainable=trainable)
 
             if vectorized:
                 u[3:-3, 0] = (1 / 3) * u[3:-3, ll - 1] + (2 / 3) * u2[3:-3, 0] + (2 / 3) * t * (
