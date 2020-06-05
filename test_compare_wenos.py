@@ -9,6 +9,7 @@ torch.set_default_dtype(torch.float64)
 train_model = torch.load('model')
 
 params=None
+#problem = Call_option
 problem= Digital_option
 my_problem = problem(space_steps=160, time_steps=1, params = params)
 train_model.compare_wenos(my_problem)

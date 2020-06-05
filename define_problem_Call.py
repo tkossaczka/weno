@@ -3,7 +3,7 @@ import torch
 from scipy.stats import norm
 
 class Call_option():
-    def __init__(self, space_steps, time_steps=None, params=None):
+    def __init__(self, space_steps, time_steps=None, params=None, w5_minus=True):
         """
         Atributes needed to be initialized to make WENO network functional
         space_steps, time_steps, initial_condition, boundary_condition, x, time, h, n
@@ -19,6 +19,7 @@ class Call_option():
             self.time_steps = n
         self.initial_condition = self.__compute_initial_condition()
         self.boundary_condition = self.__compute_boundary_condition()
+        self.w5_minus = w5_minus
 
     def init_params(self):
         params = dict()
