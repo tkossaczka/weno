@@ -99,7 +99,8 @@ class transport_equation():
         term_const=0
         return term_const
 
-    # TODO: vies co...
+    def funct(self, u):
+        return u
 
     def exact(self):
         m = self.space_steps

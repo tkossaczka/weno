@@ -51,8 +51,7 @@ class WENONetwork(nn.Module):
         # first for weno 5, second for weno 6
         return 0.1, 0.1
 
-    def WENO5(self, u, l, e, w5_minus, mweno=True, mapped=False, trainable=True):
-        uu = u[:, l - 1]
+    def WENO5(self, uu, e, w5_minus, mweno=True, mapped=False, trainable=True):
         uu_left = uu[:-1]
         uu_right = uu[1:]
 
@@ -146,8 +145,7 @@ class WENONetwork(nn.Module):
 
         return RHS
 
-    def WENO6(self, u, l, e, mweno=True, mapped=False, trainable=True):
-        uu = u[:, l - 1]
+    def WENO6(self, uu, e, mweno=True, mapped=False, trainable=True):
         uu_left = uu[:-1]
         uu_right = uu[1:]
 
@@ -289,35 +287,38 @@ class WENONetwork(nn.Module):
             else:
                 ll=l
 
-            RHSd = self.WENO6(u, ll, e, mweno=True, mapped=False, trainable=trainable)
-            RHSc = self.WENO5(u, ll, e, w5_minus=w5_minus, mweno=True, mapped=False, trainable=trainable)
+            uu = problem.funct(u[:, ll - 1])
+            RHSd = self.WENO6(uu, e, mweno=True, mapped=False, trainable=trainable)
+            RHSc = self.WENO5(uu, e, w5_minus=w5_minus, mweno=True, mapped=False, trainable=trainable)
 
-            u1 = torch.zeros((x.shape[0]))[:, None]
-            u1[3:-3, 0] = u[3:-3, ll - 1] + t * ((term_2 / h ** 2) * RHSd + (term_1 / h) * RHSc + term_0 * u[3:-3, ll - 1])
+            u1 = torch.zeros(x.shape[0])
+            u1[3:-3] = u[3:-3, ll - 1] + t * ((term_2 / h ** 2) * RHSd + (term_1 / h) * RHSc + term_0 * u[3:-3, ll - 1])
 
-            u1[0:3, 0] = u1_bc_l[:,l - 1]
-            u1[m - 2:, 0] = u1_bc_r[:,l - 1]
+            u1[0:3] = u1_bc_l[:,l - 1]
+            u1[m - 2:] = u1_bc_r[:,l - 1]
 
-            RHS1d = self.WENO6(u1, 1, e, mweno=True, mapped=False, trainable=trainable)
-            RHS1c = self.WENO5(u1, 1, e, w5_minus=w5_minus, mweno=True, mapped=False, trainable=trainable)
+            uu1 = problem.funct(u1)
+            RHS1d = self.WENO6(uu1, e, mweno=True, mapped=False, trainable=trainable)
+            RHS1c = self.WENO5(uu1, e, w5_minus=w5_minus, mweno=True, mapped=False, trainable=trainable)
 
-            u2 = torch.zeros((x.shape[0]))[:, None]
-            u2[3:-3, 0] = 0.75*u[3:-3,ll-1] + 0.25*u1[3:-3,0] + 0.25*t*((term_2/h ** 2)*RHS1d + (term_1/h)*RHS1c + term_0*u1[3:-3, 0])
+            u2 = torch.zeros(x.shape[0])
+            u2[3:-3] = 0.75*u[3:-3,ll-1]+0.25*u1[3:-3]+0.25*t*((term_2/h ** 2)*RHS1d+(term_1/h)*RHS1c+term_0*u1[3:-3])
 
-            u2[0:3, 0] = u2_bc_l[:,l - 1]
-            u2[m - 2:, 0] = u2_bc_r[:,l - 1]
+            u2[0:3] = u2_bc_l[:,l - 1]
+            u2[m - 2:] = u2_bc_r[:,l - 1]
 
-            RHS2d = self.WENO6(u2, 1, e, mweno=True, mapped=False, trainable=trainable)
-            RHS2c = self.WENO5(u2, 1, e, w5_minus=w5_minus, mweno=True, mapped=False, trainable=trainable)
+            uu2 = problem.funct(u2)
+            RHS2d = self.WENO6(uu2, e, mweno=True, mapped=False, trainable=trainable)
+            RHS2c = self.WENO5(uu2, e, w5_minus=w5_minus, mweno=True, mapped=False, trainable=trainable)
 
             if vectorized:
-                u[3:-3, 0] = (1 / 3) * u[3:-3, ll - 1] + (2 / 3) * u2[3:-3, 0] + (2 / 3) * t * (
-                        (term_2 / h ** 2) * RHS2d + (term_1 / h) * RHS2c + term_0 * u2[3:-3, 0])
+                u[3:-3, 0] = (1 / 3) * u[3:-3, ll - 1] + (2 / 3) * u2[3:-3] + (2 / 3) * t * (
+                        (term_2 / h ** 2) * RHS2d + (term_1 / h) * RHS2c + term_0 * u2[3:-3])
                 u[0:3, 0] = u_bc_l[:, l]
                 u[m - 2:, 0] = u_bc_r[:, l]
             else:
-                u[3:-3, l] = (1 / 3) * u[3:-3, ll - 1] + (2 / 3) * u2[3:-3, 0] + (2 / 3) * t * (
-                        (term_2 / h ** 2) * RHS2d + (term_1 / h) * RHS2c + term_0 * u2[3:-3, 0])
+                u[3:-3, l] = (1 / 3) * u[3:-3, ll - 1] + (2 / 3) * u2[3:-3] + (2 / 3) * t * (
+                        (term_2 / h ** 2) * RHS2d + (term_1 / h) * RHS2c + term_0 * u2[3:-3])
                 u[0:3, l] = u_bc_l[:, l]
                 u[m - 2:, l] = u_bc_r[:, l]
 
