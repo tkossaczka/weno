@@ -150,6 +150,7 @@ class Digital_option():
         tt = T - self.time
         S = E * np.exp(self.x)
         V = torch.zeros((m + 1, n+1))
+        #V = np.zeros((m + 1, n+1))
         for k in range(0, m + 1):
             V[k, :] = E * u[k, :]
         return V, S, tt
