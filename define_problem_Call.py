@@ -17,8 +17,8 @@ class Call_option():
         n, self.t, self.h, self.x, self.time = self.__compute_n_t_h_x_time()
         if time_steps is None:
             self.time_steps = n
-        self.initial_condition = self.__compute_initial_condition()
-        self.boundary_condition = self.__compute_boundary_condition()
+        self.initial_condition = self.compute_initial_condition()
+        self.boundary_condition = self.compute_boundary_condition()
         self.w5_minus = w5_minus
 
     def init_params(self):
@@ -50,12 +50,12 @@ class Call_option():
         h = (-G + L) / m
         n = np.ceil((theta * sigma ** 2) / (0.8 * (h ** 2)))
         n = int(n)
-        t = T / n
+        t = theta / n
         x = np.linspace(G, L, m + 1)
-        time = np.linspace(0, T, n + 1)
+        time = np.linspace(0, theta, n + 1)
         return n, t, h, x, time
 
-    def __compute_initial_condition(self):
+    def compute_initial_condition(self):
         x = self.x
         m = self.space_steps
         u_init = np.maximum(np.exp(x)-1,np.zeros(m+1))
@@ -63,9 +63,8 @@ class Call_option():
         return u_init
 
 
-    def __compute_boundary_condition(self):
+    def compute_boundary_condition(self):
         rate = self.params["rate"]
-        E = self.params["E"]
         time = self.time
         x = self.x
         time = torch.Tensor(time)
@@ -93,23 +92,23 @@ class Call_option():
 
         return u_bc_l, u_bc_r, u1_bc_l, u1_bc_r, u2_bc_l, u2_bc_r
 
-    def der_2(self, x, t):
+    def der_2(self):
         sigma = self.params["sigma"]
         term_2 = 0.5*sigma**2
         return term_2
 
-    def der_1(self, x, t):
+    def der_1(self):
         sigma = self.params["sigma"]
         rate = self.params["rate"]
         term_1 = rate - 0.5*sigma**2
         return term_1
 
-    def der_0(self, x, t):
+    def der_0(self):
         rate = self.params["rate"]
         term_0 = -rate
         return term_0
 
-    def der_const(self,x,t):
+    def der_const(self):
         term_const=0
         return term_const
 

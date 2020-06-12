@@ -266,10 +266,10 @@ class WENONetwork(nn.Module):
         e = problem.params['e']
         n, t, h = problem.time_steps, problem.t, problem.h
         x, time = problem.x, problem.time
-        term_2 = problem.der_2(x, time)
-        term_1 = problem.der_1(x, time)
-        term_0 = problem.der_0(x, time)
-        term_const = problem.der_const(x, time)
+        term_2 = problem.der_2()
+        term_1 = problem.der_1()
+        term_0 = problem.der_0()
+        term_const = problem.der_const()
         u_bc_l, u_bc_r, u1_bc_l, u1_bc_r, u2_bc_l, u2_bc_r = problem.boundary_condition
         w5_minus = problem.w5_minus
 
@@ -288,39 +288,64 @@ class WENONetwork(nn.Module):
                 ll=l
 
             uu = problem.funct(u[:, ll - 1])
-            RHSd = self.WENO6(uu, e, mweno=True, mapped=False, trainable=trainable)
-            RHSc = self.WENO5(uu, e, w5_minus=w5_minus, mweno=True, mapped=False, trainable=trainable)
-
             u1 = torch.zeros(x.shape[0])
-            u1[3:-3] = u[3:-3, ll - 1] + t * ((term_2 / h ** 2) * RHSd + (term_1 / h) * RHSc + term_0 * u[3:-3, ll - 1])
+            RHSd = self.WENO6(uu, e, mweno=True, mapped=False, trainable=trainable)
+            if w5_minus=='both':
+                RHSc_p = self.WENO5(uu, e, w5_minus=False, mweno=True, mapped=False, trainable=trainable)
+                RHSc_n= self.WENO5(uu, e, w5_minus=True, mweno=True, mapped=False, trainable=trainable)
+                u1[3:-3] = u[3:-3, ll - 1] + t * ((term_2[3:-3] / h ** 2) * RHSd + ((term_1>=0)[3:-3])*(term_1[3:-3] / h) * RHSc_n
+                                                  + ((term_1<0)[3:-3])*(term_1[3:-3] / h) * RHSc_p + term_0 * u[3:-3, ll - 1])
+            else:
+                RHSc = self.WENO5(uu, e, w5_minus=w5_minus, mweno=True, mapped=False, trainable=trainable)
+                u1[3:-3] = u[3:-3, ll - 1] + t * ((term_2 / h ** 2) * RHSd + (term_1 / h) * RHSc + term_0 * u[3:-3, ll - 1])
 
             u1[0:3] = u1_bc_l[:,l - 1]
             u1[m - 2:] = u1_bc_r[:,l - 1]
 
             uu1 = problem.funct(u1)
-            RHS1d = self.WENO6(uu1, e, mweno=True, mapped=False, trainable=trainable)
-            RHS1c = self.WENO5(uu1, e, w5_minus=w5_minus, mweno=True, mapped=False, trainable=trainable)
-
             u2 = torch.zeros(x.shape[0])
-            u2[3:-3] = 0.75*u[3:-3,ll-1]+0.25*u1[3:-3]+0.25*t*((term_2/h ** 2)*RHS1d+(term_1/h)*RHS1c+term_0*u1[3:-3])
+            RHS1d = self.WENO6(uu1, e, mweno=True, mapped=False, trainable=trainable)
+            if w5_minus=='both':
+                RHS1c_p = self.WENO5(uu1, e, w5_minus=False, mweno=True, mapped=False, trainable=trainable)
+                RHS1c_n = self.WENO5(uu1, e, w5_minus=True, mweno=True, mapped=False, trainable=trainable)
+                u2[3:-3] = 0.75*u[3:-3,ll-1]+0.25*u1[3:-3]+0.25*t*((term_2[3:-3]/h ** 2)*RHS1d+ (term_1>=0)[3:-3]*(term_1[3:-3] / h)*RHS1c_n
+                                                                   + (term_1<0)[3:-3]*(term_1[3:-3] / h) * RHS1c_p +term_0*u1[3:-3])
+            else:
+                RHS1c = self.WENO5(uu1, e, w5_minus=w5_minus, mweno=True, mapped=False, trainable=trainable)
+                u2[3:-3] = 0.75*u[3:-3,ll-1]+0.25*u1[3:-3]+0.25*t*((term_2/h ** 2)*RHS1d+(term_1/h)*RHS1c+term_0*u1[3:-3])
 
             u2[0:3] = u2_bc_l[:,l - 1]
             u2[m - 2:] = u2_bc_r[:,l - 1]
 
             uu2 = problem.funct(u2)
             RHS2d = self.WENO6(uu2, e, mweno=True, mapped=False, trainable=trainable)
-            RHS2c = self.WENO5(uu2, e, w5_minus=w5_minus, mweno=True, mapped=False, trainable=trainable)
-
-            if vectorized:
-                u[3:-3, 0] = (1 / 3) * u[3:-3, ll - 1] + (2 / 3) * u2[3:-3] + (2 / 3) * t * (
-                        (term_2 / h ** 2) * RHS2d + (term_1 / h) * RHS2c + term_0 * u2[3:-3])
-                u[0:3, 0] = u_bc_l[:, l]
-                u[m - 2:, 0] = u_bc_r[:, l]
+            if w5_minus=='both':
+                RHS2c_p = self.WENO5(uu2, e, w5_minus=False, mweno=True, mapped=False, trainable=trainable)
+                RHS2c_n = self.WENO5(uu2, e, w5_minus=True, mweno=True, mapped=False, trainable=trainable)
+                if vectorized:
+                    u[3:-3, 0] = (1 / 3) * u[3:-3, ll - 1] + (2 / 3) * u2[3:-3] + (2 / 3) * t * (
+                            (term_2[3:-3] / h ** 2) * RHS2d + (term_1>=0)[3:-3]*(term_1[3:-3] / h) * RHS2c_n
+                            + (term_1<0)[3:-3]*(term_1[3:-3] / h) * RHS2c_p + term_0 * u2[3:-3])
+                    u[0:3, 0] = u_bc_l[:, l]
+                    u[m - 2:, 0] = u_bc_r[:, l]
+                else:
+                    u[3:-3, l] = (1 / 3) * u[3:-3, ll - 1] + (2 / 3) * u2[3:-3] + (2 / 3) * t * (
+                            (term_2[3:-3] / h ** 2) * RHS2d + (term_1>=0)[3:-3]*(term_1[3:-3] / h) * RHS2c_n
+                            + (term_1<0)[3:-3]*(term_1[3:-3] / h) * RHS2c_p + term_0 * u2[3:-3])
+                    u[0:3, l] = u_bc_l[:, l]
+                    u[m - 2:, l] = u_bc_r[:, l]
             else:
-                u[3:-3, l] = (1 / 3) * u[3:-3, ll - 1] + (2 / 3) * u2[3:-3] + (2 / 3) * t * (
-                        (term_2 / h ** 2) * RHS2d + (term_1 / h) * RHS2c + term_0 * u2[3:-3])
-                u[0:3, l] = u_bc_l[:, l]
-                u[m - 2:, l] = u_bc_r[:, l]
+                RHS2c = self.WENO5(uu2, e, w5_minus=w5_minus, mweno=True, mapped=False, trainable=trainable)
+                if vectorized:
+                    u[3:-3, 0] = (1 / 3) * u[3:-3, ll - 1] + (2 / 3) * u2[3:-3] + (2 / 3) * t * (
+                            (term_2 / h ** 2) * RHS2d + (term_1 / h) * RHS2c + term_0 * u2[3:-3])
+                    u[0:3, 0] = u_bc_l[:, l]
+                    u[m - 2:, 0] = u_bc_r[:, l]
+                else:
+                    u[3:-3, l] = (1 / 3) * u[3:-3, ll - 1] + (2 / 3) * u2[3:-3] + (2 / 3) * t * (
+                            (term_2 / h ** 2) * RHS2d + (term_1 / h) * RHS2c + term_0 * u2[3:-3])
+                    u[0:3, l] = u_bc_l[:, l]
+                    u[m - 2:, l] = u_bc_r[:, l]
 
         return u
 
@@ -347,7 +372,7 @@ class WENONetwork(nn.Module):
         V_classic, S, tt = problem.transformation(u_classic)
         plt.plot(S, V_classic.detach().numpy()[:,1], S, V_trained.detach().numpy()[:,1])
 
-    def order_compute(self, iterations, initial_space_steps, params, problem_class, trainable=True):
+    def order_compute(self, iterations, initial_space_steps, params, problem_class, trainable):
         problem = problem_class(space_steps=initial_space_steps, time_steps=None, params=params)
         vecerr = np.zeros((iterations))[:, None]
         order = np.zeros((iterations - 1))[:, None]

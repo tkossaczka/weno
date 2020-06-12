@@ -83,19 +83,19 @@ class transport_equation():
 
         return u_bc_l, u_bc_r, u1_bc_l, u1_bc_r, u2_bc_l, u2_bc_r
 
-    def der_2(self, x, t):
+    def der_2(self):
         term_2 = 0
         return term_2
 
-    def der_1(self, x, t):
+    def der_1(self):
         term_1 = -1
         return term_1
 
-    def der_0(self, x, t):
+    def der_0(self):
         term_0 = 0
         return term_0
 
-    def der_const(self,x,t):
+    def der_const(self):
         term_const=0
         return term_const
 
