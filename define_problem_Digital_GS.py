@@ -74,7 +74,7 @@ class Digital_option_GS(Digital_option):
         sigma = self.params["sigma"]
         rate = self.params["rate"]
         _,_,_,_,_,xx,xxx = self.__compute_n_t_h_x_time()
-        term_1 = (rate - 0.5*sigma**2)/xx -  (0.5*sigma**2)*(xxx/xx**3)
+        term_1 = (rate - 0.5*sigma**2)/xx - (0.5*sigma**2)*(xxx/xx**3)
         term_1 = torch.Tensor(term_1)
         return term_1
 

@@ -1,9 +1,8 @@
 import numpy as np
 import torch
-from scipy.stats import norm
 
-class heat_equation():
-    def __init__(self, space_steps, time_steps=None, params=None, w5_minus=None):
+class Buckley_Leverett():
+    def __init__(self, space_steps, time_steps=None, params=None, w5_minus='Lax-Friedrichs'):
         """
         Atributes needed to be initialized to make WENO network functional
         space_steps, time_steps, initial_condition, boundary_condition, x, time, h, n
@@ -23,9 +22,10 @@ class heat_equation():
 
     def init_params(self):
         params = dict()
-        params["T"] = 1
+        params["T"] = 0.2
         params["e"] = 10 ** (-13)
-        params["L"] = np.pi
+        params["L"] = 2
+        params["R"] = 2
         self.params = params
 
     def get_params(self):
@@ -34,61 +34,62 @@ class heat_equation():
     def __compute_n_t_h_x_time(self):
         T = self.params["T"]
         L= self.params["L"]
+        R= self.params["R"]
         m = self.space_steps
-        h = 2 * L / m
-        n = np.ceil(T / (0.4 * (h ** 2)))
+        h = (L+R) / m
+        #n = np.ceil(0.02*T/(h**2))
+        n = np.ceil(0.5*T / (h ** 2))
+        #n=1000
         n = int(n)
         t = T / n
-        x = np.linspace(-L, L, m + 1)
+        x = np.linspace(-L, R, m + 1)
         time = np.linspace(0, T, n + 1)
         return n, t, h, x, time
 
     def __compute_initial_condition(self):
         m = self.space_steps
         x = self.x
-        u_init = torch.zeros(m+1)
+        u_init = np.zeros(m+1)
+        # for k in range(0, m + 1):
+        #     if x[k] > -0.5 and x[k]<0:
+        #         u_init[k] = 1
+        #     else:
+        #         u_init[k] = 0
         for k in range(0, m + 1):
-            u_init[k] = np.sin(x[k])
+            if x[k] > -1/np.sqrt(2)-0.4 and x[k] < -1/np.sqrt(2)+0.4:
+                u_init[k] = 1
+            elif x[k] > 1/np.sqrt(2)-0.4 and x[k] < 1/np.sqrt(2)+0.4:
+                u_init[k] = -1
+            else:
+                u_init[k] = 0
+        # for k in range(0, m + 1):
+        #     if x[k] >= 0 and x[k] < 1-1/np.sqrt(2):
+        #         u_init[k] = 0
+        #     else:
+        #         u_init[k] = 1
+        u_init = torch.Tensor(u_init)
         return u_init
 
     def __compute_boundary_condition(self):
-        time = self.time
-        time = torch.Tensor(time)
         n = self.time_steps
-        m = self.space_steps
-        t = self.t
-        x = self.x
-        time = time[0:n+1]
 
         u_bc_l = torch.zeros((3, n+1))
         u_bc_r = torch.zeros((3, n + 1))
-        for k in range(0,3):
-            u_bc_l[k,:] = np.exp(-time)*np.sin(x[k])
-        for k in range(m-2,m+1):
-            u_bc_r[k-(m-2),:] = np.exp(-time)*np.sin(x[k])
 
         u1_bc_l = torch.zeros((3, n+1))
         u1_bc_r = torch.zeros((3, n+1))
-        for k in range(0,3):
-            u1_bc_l[k,:] = np.exp(-time)* np.sin(x[k]) - t* np.exp(-time)* np.sin(x[k])
-        for k in range(m-2,m+1):
-            u1_bc_r[k-(m-2),:] = np.exp(-time)* np.sin(x[k]) - t* np.exp(-time)* np.sin(x[k])
 
         u2_bc_l = torch.zeros((3, n+1))
         u2_bc_r = torch.zeros((3, n+1))
-        for k in range(0,3):
-            u2_bc_l[k, :] = np.exp(-time)*np.sin(x[k])-0.5*t*np.exp(-time)*np.sin(x[k])+0.25*(t**2)*np.exp(-time)*np.sin(x[k])
-        for k in range(m-2,m+1):
-            u2_bc_r[k-(m-2), :] = np.exp(-time)*np.sin(x[k])-0.5*t*np.exp(-time)*np.sin(x[k])+0.25*(t**2)*np.exp(-time)*np.sin(x[k])
 
         return u_bc_l, u_bc_r, u1_bc_l, u1_bc_r, u2_bc_l, u2_bc_r
 
     def der_2(self):
-        term_2 = 1
+        term_2 = 0.01
         return term_2
 
     def der_1(self):
-        term_1 = 0
+        term_1 = 1
         return term_1
 
     def der_0(self):
@@ -99,26 +100,34 @@ class heat_equation():
         term_const=0
         return term_const
 
+    def funct_diffusion(self,u):
+        #m = self.space_steps
+        #u_diff = torch.zeros(m+1)
+        #u_diff =  (2*u**2 - (4/3)*u**3) *((u >= 0.) & (u<=1.))
+        u_diff = (u) * ((torch.abs(u) > 0.25))
+        # for k in range(0, m + 1):
+        #     if u[k] < -0.25 or u[k]>0.25:
+        #         u_diff[k] = u[k]
+        #     else:
+        #         u_diff[k] = 0
+        return u_diff
+
     def funct_convection(self, u):
-        return u
+        #u_conv = (4*u**2)/(4*u**2+(1-u)**2)
+        #u_conv = (u**2)*(1-5*(1-u)**2)/(u**2+(1-u)**2)
+        #u_conv = (u ** 2)  / (u ** 2 + (1 - u) ** 2)
+        u_conv = u**2
+        return u_conv
 
-    def funct_diffusion(self, u):
-        return u
-
-    def funct_derivative(self, u):
-        u_der = u ** 0
+    def funct_derivative(self,u):
+        #u_der =  8*u*(1-u)/(5*u**2-2*u+1)**2
+        #u_der = 2 * u * (1 - u) / (2 * u ** 2 - 2 * u + 1) ** 2
+        u_der = 2*u
         return u_der
 
     def exact(self):
-        m = self.space_steps
-        n,_, _,_,_ = self.__compute_n_t_h_x_time()
-        x, time = self.x, self.time
-        uex = np.zeros((m + 1, n + 1))
-        for k in range(0, n + 1):
-            for j in range(0, m + 1):
-                uex[j, k] = np.exp(-time[k]) * np.sin(x[j])
-        u_ex = uex[:, n]
-        return u_ex
+
+        return
 
     def err(self, u_last):
         u_ex = self.exact()

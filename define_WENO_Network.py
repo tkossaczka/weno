@@ -287,41 +287,56 @@ class WENONetwork(nn.Module):
             else:
                 ll=l
 
-            uu = problem.funct(u[:, ll - 1])
+            uu_conv = problem.funct_convection(u[:, ll - 1])
+            uu_diff = problem.funct_diffusion(u[:, ll - 1])
             u1 = torch.zeros(x.shape[0])
-            RHSd = self.WENO6(uu, e, mweno=True, mapped=False, trainable=trainable)
+            RHSd = self.WENO6(uu_diff, e, mweno=True, mapped=False, trainable=trainable)
             if w5_minus=='both':
-                RHSc_p = self.WENO5(uu, e, w5_minus=False, mweno=True, mapped=False, trainable=trainable)
-                RHSc_n= self.WENO5(uu, e, w5_minus=True, mweno=True, mapped=False, trainable=trainable)
+                RHSc_p = self.WENO5(uu_conv, e, w5_minus=False, mweno=True, mapped=False, trainable=trainable)
+                RHSc_n= self.WENO5(uu_conv, e, w5_minus=True, mweno=True, mapped=False, trainable=trainable)
                 u1[3:-3] = u[3:-3, ll - 1] + t * ((term_2[3:-3] / h ** 2) * RHSd + ((term_1>=0)[3:-3])*(term_1[3:-3] / h) * RHSc_n
                                                   + ((term_1<0)[3:-3])*(term_1[3:-3] / h) * RHSc_p + term_0 * u[3:-3, ll - 1])
+            elif w5_minus=='Lax-Friedrichs':
+                max_der = torch.max(torch.abs(problem.funct_derivative(u)))
+                RHSc_p = self.WENO5(0.5*(uu_conv+max_der*u[:, ll - 1]), e, w5_minus=False, mweno=True, mapped=False, trainable=trainable)
+                RHSc_n = self.WENO5(0.5*(uu_conv-max_der*u[:, ll - 1]), e, w5_minus=True, mweno=True, mapped=False, trainable=trainable)
+                RHSc = RHSc_p + RHSc_n
+                u1[3:-3] = u[3:-3, ll - 1] + t * ((term_2 / h ** 2) * RHSd - (term_1 / h) * RHSc + term_0 * u[3:-3, ll - 1])
             else:
-                RHSc = self.WENO5(uu, e, w5_minus=w5_minus, mweno=True, mapped=False, trainable=trainable)
-                u1[3:-3] = u[3:-3, ll - 1] + t * ((term_2 / h ** 2) * RHSd + (term_1 / h) * RHSc + term_0 * u[3:-3, ll - 1])
+                RHSc = self.WENO5(uu_conv, e, w5_minus=w5_minus, mweno=True, mapped=False, trainable=trainable)
+                u1[3:-3] = u[3:-3, ll - 1] + t * ((term_2 / h ** 2) * RHSd - (term_1 / h) * RHSc + term_0 * u[3:-3, ll - 1])
 
             u1[0:3] = u1_bc_l[:,l - 1]
             u1[m - 2:] = u1_bc_r[:,l - 1]
 
-            uu1 = problem.funct(u1)
+            uu1_conv = problem.funct_convection(u1)
+            uu1_diff = problem.funct_diffusion(u1)
             u2 = torch.zeros(x.shape[0])
-            RHS1d = self.WENO6(uu1, e, mweno=True, mapped=False, trainable=trainable)
+            RHS1d = self.WENO6(uu1_diff, e, mweno=True, mapped=False, trainable=trainable)
             if w5_minus=='both':
-                RHS1c_p = self.WENO5(uu1, e, w5_minus=False, mweno=True, mapped=False, trainable=trainable)
-                RHS1c_n = self.WENO5(uu1, e, w5_minus=True, mweno=True, mapped=False, trainable=trainable)
+                RHS1c_p = self.WENO5(uu1_conv, e, w5_minus=False, mweno=True, mapped=False, trainable=trainable)
+                RHS1c_n = self.WENO5(uu1_conv, e, w5_minus=True, mweno=True, mapped=False, trainable=trainable)
                 u2[3:-3] = 0.75*u[3:-3,ll-1]+0.25*u1[3:-3]+0.25*t*((term_2[3:-3]/h ** 2)*RHS1d+ (term_1>=0)[3:-3]*(term_1[3:-3] / h)*RHS1c_n
                                                                    + (term_1<0)[3:-3]*(term_1[3:-3] / h) * RHS1c_p +term_0*u1[3:-3])
+            elif w5_minus=='Lax-Friedrichs':
+                max_der = torch.max(torch.abs(problem.funct_derivative(u1)))
+                RHS1c_p = self.WENO5(0.5*(uu1_conv+max_der*u1), e, w5_minus=False, mweno=True, mapped=False, trainable=trainable)
+                RHS1c_n = self.WENO5(0.5*(uu1_conv-max_der*u1), e, w5_minus=True, mweno=True, mapped=False, trainable=trainable)
+                RHS1c = RHS1c_p + RHS1c_n
+                u2[3:-3] = 0.75*u[3:-3,ll-1]+0.25*u1[3:-3]+0.25*t*((term_2/h ** 2)*RHS1d-(term_1/h)*RHS1c+term_0*u1[3:-3])
             else:
-                RHS1c = self.WENO5(uu1, e, w5_minus=w5_minus, mweno=True, mapped=False, trainable=trainable)
-                u2[3:-3] = 0.75*u[3:-3,ll-1]+0.25*u1[3:-3]+0.25*t*((term_2/h ** 2)*RHS1d+(term_1/h)*RHS1c+term_0*u1[3:-3])
+                RHS1c = self.WENO5(uu1_conv, e, w5_minus=w5_minus, mweno=True, mapped=False, trainable=trainable)
+                u2[3:-3] = 0.75*u[3:-3,ll-1]+0.25*u1[3:-3]+0.25*t*((term_2/h ** 2)*RHS1d-(term_1/h)*RHS1c+term_0*u1[3:-3])
 
             u2[0:3] = u2_bc_l[:,l - 1]
             u2[m - 2:] = u2_bc_r[:,l - 1]
 
-            uu2 = problem.funct(u2)
-            RHS2d = self.WENO6(uu2, e, mweno=True, mapped=False, trainable=trainable)
+            uu2_conv = problem.funct_convection(u2)
+            uu2_diff = problem.funct_diffusion(u2)
+            RHS2d = self.WENO6(uu2_diff, e, mweno=True, mapped=False, trainable=trainable)
             if w5_minus=='both':
-                RHS2c_p = self.WENO5(uu2, e, w5_minus=False, mweno=True, mapped=False, trainable=trainable)
-                RHS2c_n = self.WENO5(uu2, e, w5_minus=True, mweno=True, mapped=False, trainable=trainable)
+                RHS2c_p = self.WENO5(uu2_conv, e, w5_minus=False, mweno=True, mapped=False, trainable=trainable)
+                RHS2c_n = self.WENO5(uu2_conv, e, w5_minus=True, mweno=True, mapped=False, trainable=trainable)
                 if vectorized:
                     u[3:-3, 0] = (1 / 3) * u[3:-3, ll - 1] + (2 / 3) * u2[3:-3] + (2 / 3) * t * (
                             (term_2[3:-3] / h ** 2) * RHS2d + (term_1>=0)[3:-3]*(term_1[3:-3] / h) * RHS2c_n
@@ -332,21 +347,37 @@ class WENONetwork(nn.Module):
                     u[3:-3, l] = (1 / 3) * u[3:-3, ll - 1] + (2 / 3) * u2[3:-3] + (2 / 3) * t * (
                             (term_2[3:-3] / h ** 2) * RHS2d + (term_1>=0)[3:-3]*(term_1[3:-3] / h) * RHS2c_n
                             + (term_1<0)[3:-3]*(term_1[3:-3] / h) * RHS2c_p + term_0 * u2[3:-3])
+                    u[0:3, l] = u_bc_l[:, l]
+                    u[m - 2:, l] = u_bc_r[:, l]
+            elif w5_minus == 'Lax-Friedrichs':
+                max_der = torch.max(torch.abs(problem.funct_derivative(u2)))
+                RHS2c_p = self.WENO5(0.5 * (uu2_conv + max_der * u2), e, w5_minus=False, mweno=True, mapped=False,
+                                     trainable=trainable)
+                RHS2c_n = self.WENO5(0.5 * (uu2_conv - max_der * u2), e, w5_minus=True, mweno=True, mapped=False,
+                                     trainable=trainable)
+                RHS2c = RHS2c_p + RHS2c_n
+                if vectorized:
+                    u[3:-3, 0] = (1 / 3) * u[3:-3, ll - 1] + (2 / 3) * u2[3:-3] + (2 / 3) * t * (
+                            (term_2 / h ** 2) * RHS2d - (term_1 / h) * RHS2c + term_0 * u2[3:-3])
+                    u[0:3, 0] = u_bc_l[:, l]
+                    u[m - 2:, 0] = u_bc_r[:, l]
+                else:
+                    u[3:-3, l] = (1 / 3) * u[3:-3, ll - 1] + (2 / 3) * u2[3:-3] + (2 / 3) * t * (
+                            (term_2 / h ** 2) * RHS2d - (term_1 / h) * RHS2c + term_0 * u2[3:-3])
                     u[0:3, l] = u_bc_l[:, l]
                     u[m - 2:, l] = u_bc_r[:, l]
             else:
-                RHS2c = self.WENO5(uu2, e, w5_minus=w5_minus, mweno=True, mapped=False, trainable=trainable)
+                RHS2c = self.WENO5(uu2_conv, e, w5_minus=w5_minus, mweno=True, mapped=False, trainable=trainable)
                 if vectorized:
                     u[3:-3, 0] = (1 / 3) * u[3:-3, ll - 1] + (2 / 3) * u2[3:-3] + (2 / 3) * t * (
-                            (term_2 / h ** 2) * RHS2d + (term_1 / h) * RHS2c + term_0 * u2[3:-3])
+                            (term_2 / h ** 2) * RHS2d - (term_1 / h) * RHS2c + term_0 * u2[3:-3])
                     u[0:3, 0] = u_bc_l[:, l]
                     u[m - 2:, 0] = u_bc_r[:, l]
                 else:
                     u[3:-3, l] = (1 / 3) * u[3:-3, ll - 1] + (2 / 3) * u2[3:-3] + (2 / 3) * t * (
-                            (term_2 / h ** 2) * RHS2d + (term_1 / h) * RHS2c + term_0 * u2[3:-3])
+                            (term_2 / h ** 2) * RHS2d - (term_1 / h) * RHS2c + term_0 * u2[3:-3])
                     u[0:3, l] = u_bc_l[:, l]
                     u[m - 2:, l] = u_bc_r[:, l]
-
         return u
 
     def forward(self, problem):
@@ -370,7 +401,7 @@ class WENONetwork(nn.Module):
         V_trained, S, tt = problem.transformation(u_trained)
         u_classic = self.run_weno(problem, trainable=False, vectorized=False)
         V_classic, S, tt = problem.transformation(u_classic)
-        plt.plot(S, V_classic.detach().numpy()[:,1], S, V_trained.detach().numpy()[:,1])
+        plt.plot(S, V_classic.detach().numpy()[:,100], S, V_trained.detach().numpy()[:,100])
 
     def order_compute(self, iterations, initial_space_steps, params, problem_class, trainable):
         problem = problem_class(space_steps=initial_space_steps, time_steps=None, params=params)

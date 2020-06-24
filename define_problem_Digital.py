@@ -3,7 +3,7 @@ import torch
 from scipy.stats import norm
 
 class Digital_option():
-    def __init__(self, space_steps, time_steps=None, params=None, w5_minus=True):
+    def __init__(self, space_steps, time_steps=None, params=None, w5_minus='Lax-Friedrichs'):
         """
         Atributes needed to be initialized to make WENO network functional
         space_steps, time_steps, initial_condition, boundary_condition, x, time, h, n
@@ -114,8 +114,16 @@ class Digital_option():
         term_const=0
         return term_const
 
-    def funct(self, u):
+    def funct_convection(self, u):
+        u = -u
         return u
+
+    def funct_diffusion(self, u):
+        return u
+
+    def funct_derivative(self, u):
+        u_der = u ** 0
+        return u_der
 
     def exact(self):
         m = self.space_steps
