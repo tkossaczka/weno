@@ -11,7 +11,7 @@ from define_problem_Buckley_Leverett import Buckley_Leverett
 
 with torch.no_grad():
     train_model = torch.load('model')
-    problem = transport_equation
+    #problem = transport_equation
     #problem = heat_equation
     #problem = Call_option
     #problem = Digital_option

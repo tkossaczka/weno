@@ -22,10 +22,11 @@ class PME():
 
     def init_params(self):
         params = dict()
-        params["T"] = 2
+        params["T"] = 3
         params["e"] = 10 ** (-13)
         params["L"] = 6
-        params["power"] = 5
+        params["power"] = 4
+        params["d"] = 1
         self.params = params
 
     def get_params(self):
@@ -36,7 +37,7 @@ class PME():
         L= self.params["L"]
         m = self.space_steps
         h = 2 * L / m
-        n = np.ceil(11.5*(T-1)/(h**2))
+        n = np.ceil(10*(T-1)/(h**2)) #11.5 pre m=2,4; 20 pre m=6
         n = int(n)
         t = (T-1) / n
         x = np.linspace(-L, L, m + 1)
@@ -45,12 +46,16 @@ class PME():
 
     def __compute_initial_condition(self):
         mm = self.params["power"]
+        d = self.params["d"]
         m = self.space_steps
         x = self.x
-        kk = 1/(mm+1)
+        alpha = d / ((mm-1)*d+2)
+        kk = (alpha*(mm-1))/(2*mm*d)
+        #kk = 1/(mm+1)
         u_init = np.zeros(m+1)
         for k in range(0, m + 1):
-            u_init[k] = (np.maximum(1-(kk*(mm-1))/(2*mm)*np.abs(x[k])**2,0))**(1/(mm-1))
+            u_init[k] = (np.maximum(1 - kk*np.abs(x[k])**2, 0)) ** (1 / (mm - 1))
+            #u_init[k] = (np.maximum(1-(kk*(mm-1))/(2*mm)*np.abs(x[k])**2,0))**(1/(mm-1))
         u_init = torch.Tensor(u_init)
         return u_init
 
@@ -84,6 +89,19 @@ class PME():
         term_const=0
         return term_const
 
+    def funct_diffusion(self,u):
+        power = self.params["power"]
+        u_diff = u ** power
+        return u_diff
+
+    def funct_convection(self, u):
+        return u
+
+    def funct_derivative(self,u):
+        u_der =u**0
+        return u_der
+
+
     def funct(self, u):
         power = self.params["power"]
         u = u**power
@@ -91,13 +109,15 @@ class PME():
 
     def exact(self):
         T = self.params["T"]
-        m = self.space_steps
         mm = self.params["power"]
+        d = self.params["d"]
+        alpha = d / ((mm - 1) * d + 2)
+        kk = (alpha * (mm - 1)) / (2 * mm * d)
         n,_, _,_,_ = self.__compute_n_t_h_x_time()
         x, time = self.x, self.time
-        kk = 1/(mm+1)
-        u_ex = np.zeros(m + 1)
-        u_ex = (1/T**kk) * (np.maximum(1-((kk*(mm-1))/(2*mm))*((np.abs(x)**2)/T**(2*kk)),0))**(1/(mm - 1))
+        #kk = 1/(mm+1)
+        #u_ex = (1/T**kk) * (np.maximum(1-((kk*(mm-1))/(2*mm))*((np.abs(x)**2)/T**(2*kk)),0))**(1/(mm - 1))
+        u_ex = (T**(-alpha))*(np.maximum(1-kk*((np.abs(x))**2)*T**(-2*alpha/d), 0)) ** (1/(mm-1))
         return u_ex
 
     def err(self, u_last):
@@ -106,6 +126,21 @@ class PME():
         xerr = np.absolute(u_ex - u_last)
         xmaxerr = np.max(xerr)
         return xmaxerr
+
+    def whole_exact(self):
+        mm = self.params["power"]
+        d = self.params["d"]
+        alpha = d / ((mm - 1) * d + 2)
+        kk = (alpha * (mm - 1)) / (2 * mm * d)
+        n, _, _, _, _ = self.__compute_n_t_h_x_time()
+        x, time = self.x, self.time
+        m = self.space_steps
+        # kk = 1/(mm+1)
+        # u_ex = (1/T**kk) * (np.maximum(1-((kk*(mm-1))/(2*mm))*((np.abs(x)**2)/T**(2*kk)),0))**(1/(mm - 1))
+        u_whole_ex = np.zeros((m+1,n+1))
+        for k in range(0,n+1):
+            u_whole_ex[:,k] = (time[k] ** (-alpha)) * (np.maximum(1 - kk * ((np.abs(x)) ** 2) * time[k] ** (-2 * alpha / d), 0)) ** (1 / (mm - 1))
+        return u_whole_ex
 
     def transformation(self, u):
         u = u

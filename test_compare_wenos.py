@@ -9,7 +9,7 @@ from define_problem_Buckley_Leverett import Buckley_Leverett
 
 torch.set_default_dtype(torch.float64)
 
-train_model = torch.load('model')
+train_model = torch.load('model2')
 
 params=None
 #params = {'T': 2, 'e': 1e-13, 'L': 6, 'power' : 5}
@@ -19,7 +19,7 @@ params=None
 #problem= Digital_option_GS
 #problem = PME
 problem = Buckley_Leverett
-my_problem = problem(space_steps=100, time_steps=100, params = params)
+my_problem = problem(space_steps=100, time_steps=200, params = params)
 #u = train_model.run_weno( my_problem, trainable=False, vectorized=False)
 train_model.compare_wenos(my_problem)
 my_problem.get_params()

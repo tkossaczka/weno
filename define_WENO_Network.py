@@ -128,7 +128,7 @@ class WENONetwork(nn.Module):
 
         if mapped:
             def get_alpha(omega, d):
-                return (omega * (d + d ^ 2 - 3 * d * omega + omega ** 2)) / (d ^ 2 + omega * (1 - 2 * d))
+                return (omega * (d + d ** 2 - 3 * d * omega + omega ** 2)) / (d ** 2 + omega * (1 - 2 * d))
 
             [alphap0, alphap1, alphap2] = [get_alpha(omega, d) for omega, d in zip([omegap0, omegap1, omegap2],
                                                                                    [d0, d1, d2])]
@@ -234,7 +234,7 @@ class WENONetwork(nn.Module):
             d2 = -2 / 15
 
             def get_alpha(omega, d):
-                return (omega * (d + d ^ 2 - 3 * d * omega + omega ** 2)) / (d ^ 2 + omega * (1 - 2 * d))
+                return (omega * (d + d ** 2 - 3 * d * omega + omega ** 2)) / (d ** 2 + omega * (1 - 2 * d))
 
             [alphap0, alphap1, alphap2] = [get_alpha(omega, d) for omega, d in zip([omegap0, omegap1, omegap2],
                                                                                    [d0, d1, d2])]
@@ -261,7 +261,9 @@ class WENONetwork(nn.Module):
         dif_final = 0.5 * dif_left + 0.5 * dif_right
         return dif_final
 
-    def run_weno(self, problem, trainable, vectorized):
+    def run_weno(self, problem, trainable, vectorized, just_one_time_step=False):
+        mweno = False
+        mapped = True
         m = problem.space_steps
         e = problem.params['e']
         n, t, h = problem.time_steps, problem.t, problem.h
@@ -280,7 +282,12 @@ class WENONetwork(nn.Module):
 
         u[:,0] = problem.initial_condition
 
-        for l in range(1, n+1):
+        if just_one_time_step is True:
+            nn = 1
+        else:
+            nn = n
+
+        for l in range(1, nn+1):
             u = torch.Tensor(u)
             if vectorized:
                 ll=1
@@ -290,20 +297,20 @@ class WENONetwork(nn.Module):
             uu_conv = problem.funct_convection(u[:, ll - 1])
             uu_diff = problem.funct_diffusion(u[:, ll - 1])
             u1 = torch.zeros(x.shape[0])
-            RHSd = self.WENO6(uu_diff, e, mweno=True, mapped=False, trainable=trainable)
+            RHSd = self.WENO6(uu_diff, e, mweno=mweno, mapped=mapped, trainable=trainable)
             if w5_minus=='both':
-                RHSc_p = self.WENO5(uu_conv, e, w5_minus=False, mweno=True, mapped=False, trainable=trainable)
-                RHSc_n= self.WENO5(uu_conv, e, w5_minus=True, mweno=True, mapped=False, trainable=trainable)
+                RHSc_p = self.WENO5(uu_conv, e, w5_minus=False, mweno=mweno, mapped=mapped, trainable=trainable)
+                RHSc_n= self.WENO5(uu_conv, e, w5_minus=True, mweno=mweno, mapped=mapped, trainable=trainable)
                 u1[3:-3] = u[3:-3, ll - 1] + t * ((term_2[3:-3] / h ** 2) * RHSd + ((term_1>=0)[3:-3])*(term_1[3:-3] / h) * RHSc_n
                                                   + ((term_1<0)[3:-3])*(term_1[3:-3] / h) * RHSc_p + term_0 * u[3:-3, ll - 1])
             elif w5_minus=='Lax-Friedrichs':
-                max_der = torch.max(torch.abs(problem.funct_derivative(u)))
-                RHSc_p = self.WENO5(0.5*(uu_conv+max_der*u[:, ll - 1]), e, w5_minus=False, mweno=True, mapped=False, trainable=trainable)
-                RHSc_n = self.WENO5(0.5*(uu_conv-max_der*u[:, ll - 1]), e, w5_minus=True, mweno=True, mapped=False, trainable=trainable)
+                max_der = torch.max(torch.abs(problem.funct_derivative(u[:, ll - 1])))
+                RHSc_p = self.WENO5(0.5*(uu_conv+max_der*u[:, ll - 1]), e, w5_minus=False, mweno=mweno, mapped=mapped, trainable=trainable)
+                RHSc_n = self.WENO5(0.5*(uu_conv-max_der*u[:, ll - 1]), e, w5_minus=True, mweno=mweno, mapped=mapped, trainable=trainable)
                 RHSc = RHSc_p + RHSc_n
                 u1[3:-3] = u[3:-3, ll - 1] + t * ((term_2 / h ** 2) * RHSd - (term_1 / h) * RHSc + term_0 * u[3:-3, ll - 1])
             else:
-                RHSc = self.WENO5(uu_conv, e, w5_minus=w5_minus, mweno=True, mapped=False, trainable=trainable)
+                RHSc = self.WENO5(uu_conv, e, w5_minus=w5_minus, mweno=mweno, mapped=mapped, trainable=trainable)
                 u1[3:-3] = u[3:-3, ll - 1] + t * ((term_2 / h ** 2) * RHSd - (term_1 / h) * RHSc + term_0 * u[3:-3, ll - 1])
 
             u1[0:3] = u1_bc_l[:,l - 1]
@@ -312,20 +319,20 @@ class WENONetwork(nn.Module):
             uu1_conv = problem.funct_convection(u1)
             uu1_diff = problem.funct_diffusion(u1)
             u2 = torch.zeros(x.shape[0])
-            RHS1d = self.WENO6(uu1_diff, e, mweno=True, mapped=False, trainable=trainable)
+            RHS1d = self.WENO6(uu1_diff, e, mweno=mweno, mapped=mapped, trainable=trainable)
             if w5_minus=='both':
-                RHS1c_p = self.WENO5(uu1_conv, e, w5_minus=False, mweno=True, mapped=False, trainable=trainable)
-                RHS1c_n = self.WENO5(uu1_conv, e, w5_minus=True, mweno=True, mapped=False, trainable=trainable)
+                RHS1c_p = self.WENO5(uu1_conv, e, w5_minus=False, mweno=mweno, mapped=mapped, trainable=trainable)
+                RHS1c_n = self.WENO5(uu1_conv, e, w5_minus=True, mweno=mweno, mapped=mapped, trainable=trainable)
                 u2[3:-3] = 0.75*u[3:-3,ll-1]+0.25*u1[3:-3]+0.25*t*((term_2[3:-3]/h ** 2)*RHS1d+ (term_1>=0)[3:-3]*(term_1[3:-3] / h)*RHS1c_n
                                                                    + (term_1<0)[3:-3]*(term_1[3:-3] / h) * RHS1c_p +term_0*u1[3:-3])
             elif w5_minus=='Lax-Friedrichs':
                 max_der = torch.max(torch.abs(problem.funct_derivative(u1)))
-                RHS1c_p = self.WENO5(0.5*(uu1_conv+max_der*u1), e, w5_minus=False, mweno=True, mapped=False, trainable=trainable)
-                RHS1c_n = self.WENO5(0.5*(uu1_conv-max_der*u1), e, w5_minus=True, mweno=True, mapped=False, trainable=trainable)
+                RHS1c_p = self.WENO5(0.5*(uu1_conv+max_der*u1), e, w5_minus=False, mweno=mweno, mapped=mapped, trainable=trainable)
+                RHS1c_n = self.WENO5(0.5*(uu1_conv-max_der*u1), e, w5_minus=True, mweno=mweno, mapped=mapped, trainable=trainable)
                 RHS1c = RHS1c_p + RHS1c_n
                 u2[3:-3] = 0.75*u[3:-3,ll-1]+0.25*u1[3:-3]+0.25*t*((term_2/h ** 2)*RHS1d-(term_1/h)*RHS1c+term_0*u1[3:-3])
             else:
-                RHS1c = self.WENO5(uu1_conv, e, w5_minus=w5_minus, mweno=True, mapped=False, trainable=trainable)
+                RHS1c = self.WENO5(uu1_conv, e, w5_minus=w5_minus, mweno=mweno, mapped=mapped, trainable=trainable)
                 u2[3:-3] = 0.75*u[3:-3,ll-1]+0.25*u1[3:-3]+0.25*t*((term_2/h ** 2)*RHS1d-(term_1/h)*RHS1c+term_0*u1[3:-3])
 
             u2[0:3] = u2_bc_l[:,l - 1]
@@ -333,10 +340,10 @@ class WENONetwork(nn.Module):
 
             uu2_conv = problem.funct_convection(u2)
             uu2_diff = problem.funct_diffusion(u2)
-            RHS2d = self.WENO6(uu2_diff, e, mweno=True, mapped=False, trainable=trainable)
+            RHS2d = self.WENO6(uu2_diff, e, mweno=mweno, mapped=mapped, trainable=trainable)
             if w5_minus=='both':
-                RHS2c_p = self.WENO5(uu2_conv, e, w5_minus=False, mweno=True, mapped=False, trainable=trainable)
-                RHS2c_n = self.WENO5(uu2_conv, e, w5_minus=True, mweno=True, mapped=False, trainable=trainable)
+                RHS2c_p = self.WENO5(uu2_conv, e, w5_minus=False, mweno=mweno, mapped=mapped, trainable=trainable)
+                RHS2c_n = self.WENO5(uu2_conv, e, w5_minus=True, mweno=mweno, mapped=mapped, trainable=trainable)
                 if vectorized:
                     u[3:-3, 0] = (1 / 3) * u[3:-3, ll - 1] + (2 / 3) * u2[3:-3] + (2 / 3) * t * (
                             (term_2[3:-3] / h ** 2) * RHS2d + (term_1>=0)[3:-3]*(term_1[3:-3] / h) * RHS2c_n
@@ -351,9 +358,9 @@ class WENONetwork(nn.Module):
                     u[m - 2:, l] = u_bc_r[:, l]
             elif w5_minus == 'Lax-Friedrichs':
                 max_der = torch.max(torch.abs(problem.funct_derivative(u2)))
-                RHS2c_p = self.WENO5(0.5 * (uu2_conv + max_der * u2), e, w5_minus=False, mweno=True, mapped=False,
+                RHS2c_p = self.WENO5(0.5 * (uu2_conv + max_der * u2), e, w5_minus=False, mweno=mweno, mapped=mapped,
                                      trainable=trainable)
-                RHS2c_n = self.WENO5(0.5 * (uu2_conv - max_der * u2), e, w5_minus=True, mweno=True, mapped=False,
+                RHS2c_n = self.WENO5(0.5 * (uu2_conv - max_der * u2), e, w5_minus=True, mweno=mweno, mapped=mapped,
                                      trainable=trainable)
                 RHS2c = RHS2c_p + RHS2c_n
                 if vectorized:
@@ -367,7 +374,7 @@ class WENONetwork(nn.Module):
                     u[0:3, l] = u_bc_l[:, l]
                     u[m - 2:, l] = u_bc_r[:, l]
             else:
-                RHS2c = self.WENO5(uu2_conv, e, w5_minus=w5_minus, mweno=True, mapped=False, trainable=trainable)
+                RHS2c = self.WENO5(uu2_conv, e, w5_minus=w5_minus, mweno=mweno, mapped=mapped, trainable=trainable)
                 if vectorized:
                     u[3:-3, 0] = (1 / 3) * u[3:-3, ll - 1] + (2 / 3) * u2[3:-3] + (2 / 3) * t * (
                             (term_2 / h ** 2) * RHS2d - (term_1 / h) * RHS2c + term_0 * u2[3:-3])
@@ -385,7 +392,7 @@ class WENONetwork(nn.Module):
         V,_,_ = problem.transformation(u)
         return V
 
-    def full_WENO(self, problem, trainable=True, plot=True, vectorized=False):
+    def full_WENO(self, problem, trainable, plot=True, vectorized=False):
         u = self.run_weno(problem, trainable=trainable, vectorized=vectorized)
         V, S, tt = problem.transformation(u)
         V = V.detach().numpy()
@@ -397,30 +404,86 @@ class WENONetwork(nn.Module):
         return V, S, tt
 
     def compare_wenos(self, problem):
-        u_trained = self.run_weno(problem, trainable=True, vectorized=False)
+        u_trained = self.run_weno(problem, trainable=True, vectorized=False, just_one_time_step=True)
         V_trained, S, tt = problem.transformation(u_trained)
-        u_classic = self.run_weno(problem, trainable=False, vectorized=False)
+        u_classic = self.run_weno(problem, trainable=False, vectorized=False, just_one_time_step=True)
         V_classic, S, tt = problem.transformation(u_classic)
-        plt.plot(S, V_classic.detach().numpy()[:,100], S, V_trained.detach().numpy()[:,100])
+        plt.plot(S, V_classic.detach().numpy()[:,1], S, V_trained.detach().numpy()[:,1])
+
+    def compute_exact(self, problem_class, space_steps, time_steps, space_steps_exact, time_steps_exact, params, just_one_time_step, trainable):
+        problem = problem_class(space_steps=space_steps_exact, time_steps=time_steps_exact, params=params)
+        if hasattr(problem_class, 'exact'):
+            print('nic netreba')
+        else:
+            #u_exact,_,_ = self.full_WENO(problem, trainable=False, plot=False, vectorized=False)
+            u_exact = self.run_weno(problem, trainable=trainable, vectorized=True , just_one_time_step=just_one_time_step)
+        divider_space = space_steps_exact / space_steps
+        divider_time = time_steps_exact / time_steps
+        divider_space = int(divider_space)
+        divider_time = int(divider_time)
+        u_exact_adjusted = u_exact[0:space_steps_exact+1:divider_space,0:time_steps_exact+1:divider_time]
+        return u_exact, u_exact_adjusted
+
+    # def compute_error(self, problem):
+    #     u = self.run_weno(problem, vectorized=True, trainable=False, just_one_time_step=True)
+    #     u_last = u[:, -1]
+    #     u_last = u_last.detach().numpy()
+    #     _, u_ex = self.compute_exact(problem,)
 
     def order_compute(self, iterations, initial_space_steps, params, problem_class, trainable):
         problem = problem_class(space_steps=initial_space_steps, time_steps=None, params=params)
         vecerr = np.zeros((iterations))[:, None]
         order = np.zeros((iterations - 1))[:, None]
-        u = self.run_weno(problem, trainable=trainable, vectorized=True)
-        u_last = u[:,-1]
-        xmaxerr = problem.err(u_last)
-        vecerr[0] = xmaxerr
-        print(problem.space_steps)
-        for i in range(1, iterations):
-            problem = problem_class(space_steps=problem.space_steps * 2, time_steps=None, params=params)
+        if hasattr(problem_class,'exact'):
+            u = self.run_weno(problem, trainable=trainable, vectorized=True)
+            u_last = u[:,-1]
+            xmaxerr = problem.err(u_last)
+            vecerr[0] = xmaxerr
+            print(problem.space_steps)
+            for i in range(1, iterations):
+                problem = problem_class(space_steps=problem.space_steps * 2, time_steps=None, params=params)
+                u = self.run_weno(problem, trainable=trainable, vectorized=True)
+                u_last = u[:, -1]
+                xmaxerr = problem.err(u_last)
+                vecerr[i] = xmaxerr
+                order[i - 1] = np.log(vecerr[i - 1] / vecerr[i]) / np.log(2)
+                print(problem.space_steps)
+        else:
             u = self.run_weno(problem, trainable=trainable, vectorized=True)
             u_last = u[:, -1]
-            xmaxerr = problem.err(u_last)
-            vecerr[i] = xmaxerr
-            order[i - 1] = np.log(vecerr[i - 1] / vecerr[i]) / np.log(2)
+            u_last = u_last.detach().numpy()
+            problem_fine = problem_class(space_steps=320, time_steps=None, params=params)
+            m = problem.space_steps
+            u_ex = self.run_weno(problem_fine, trainable=trainable, vectorized=True)
+            u_ex_last = u_ex[:,-1]
+            u_ex_last = u_ex_last.detach().numpy()
+            divider = 320/m
+            divider = int(divider)
+            u_ex_short = u_ex_last[0:321:divider]
+            xerr = np.absolute(u_ex_short - u_last)
+            xmaxerr = np.max(xerr)
+            vecerr[0] = xmaxerr
             print(problem.space_steps)
+            for i in range(1, iterations):
+                problem = problem_class(space_steps=problem.space_steps * 2, time_steps=None, params=params)
+                m = problem.space_steps
+                u = self.run_weno(problem, trainable=trainable, vectorized=True)
+                u_last = u[:, -1]
+                u_last = u_last.detach().numpy()
+                divider = 320 / m
+                divider = int(divider)
+                u_ex_short = u_ex_last[0:321:divider]
+                xerr = np.absolute(u_ex_short - u_last)
+                xmaxerr = np.max(xerr)
+                vecerr[i] = xmaxerr
+                order[i - 1] = np.log(vecerr[i - 1] / vecerr[i]) / np.log(2)
+                print(problem.space_steps)
         return vecerr, order
+
+    def exact_in_1(self,params,problem_class):
+        problem = problem_class(space_steps=800, time_steps=1, params=params)
+        u_ex_in_1 = self.run_weno(problem, trainable=False, vectorized=True)
+        return u_ex_in_1
 
 
 
