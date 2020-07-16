@@ -388,7 +388,7 @@ class WENONetwork(nn.Module):
         return u
 
     def forward(self, problem):
-        u = self.run_weno(problem, trainable=True, vectorized=True)
+        u = self.run_weno(problem, trainable=True, vectorized=True, just_one_time_step = True)
         V,_,_ = problem.transformation(u)
         return V
 
@@ -410,13 +410,14 @@ class WENONetwork(nn.Module):
         V_classic, S, tt = problem.transformation(u_classic)
         plt.plot(S, V_classic.detach().numpy()[:,1], S, V_trained.detach().numpy()[:,1])
 
-    def compute_exact(self, problem_class, space_steps, time_steps, space_steps_exact, time_steps_exact, params, just_one_time_step, trainable):
-        problem = problem_class(space_steps=space_steps_exact, time_steps=time_steps_exact, params=params)
+    def compute_exact(self,problem_class, problem, space_steps, time_steps, just_one_time_step, trainable):
         if hasattr(problem_class, 'exact'):
             print('nic netreba')
         else:
             #u_exact,_,_ = self.full_WENO(problem, trainable=False, plot=False, vectorized=False)
             u_exact = self.run_weno(problem, trainable=trainable, vectorized=True , just_one_time_step=just_one_time_step)
+        space_steps_exact = problem.space_steps
+        time_steps_exact = problem.time_steps
         divider_space = space_steps_exact / space_steps
         divider_time = time_steps_exact / time_steps
         divider_space = int(divider_space)
@@ -424,11 +425,12 @@ class WENONetwork(nn.Module):
         u_exact_adjusted = u_exact[0:space_steps_exact+1:divider_space,0:time_steps_exact+1:divider_time]
         return u_exact, u_exact_adjusted
 
-    # def compute_error(self, problem):
-    #     u = self.run_weno(problem, vectorized=True, trainable=False, just_one_time_step=True)
-    #     u_last = u[:, -1]
-    #     u_last = u_last.detach().numpy()
-    #     _, u_ex = self.compute_exact(problem,)
+    def compute_error(self, u, u_ex):
+        u_last = u[:, -1]
+        u_ex_last = u_ex[:, -1]
+        xerr = torch.abs(u_ex_last - u_last)
+        xmaxerr = torch.max(xerr)
+        return xmaxerr
 
     def order_compute(self, iterations, initial_space_steps, params, problem_class, trainable):
         problem = problem_class(space_steps=initial_space_steps, time_steps=None, params=params)
@@ -480,10 +482,6 @@ class WENONetwork(nn.Module):
                 print(problem.space_steps)
         return vecerr, order
 
-    def exact_in_1(self,params,problem_class):
-        problem = problem_class(space_steps=800, time_steps=1, params=params)
-        u_ex_in_1 = self.run_weno(problem, trainable=False, vectorized=True)
-        return u_ex_in_1
 
 
 

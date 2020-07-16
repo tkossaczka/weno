@@ -1,4 +1,5 @@
 import torch
+import matplotlib.pyplot as plt
 from define_problem_Digital import Digital_option
 from define_WENO_Network import WENONetwork
 from define_problem_heat_eq import heat_equation
@@ -19,7 +20,16 @@ params=None
 #problem= Digital_option_GS
 #problem = PME
 problem = Buckley_Leverett
-my_problem = problem(space_steps=100, time_steps=200, params = params)
+my_problem = problem(space_steps=100, time_steps=50, params = params)
 #u = train_model.run_weno( my_problem, trainable=False, vectorized=False)
 train_model.compare_wenos(my_problem)
-my_problem.get_params()
+params = my_problem.get_params()
+
+problem_ex = problem(space_steps=100*2*2*2*2*2*2*2, time_steps=50*4*4*4*4*4*4*4, params = params)
+u = train_model.run_weno(my_problem, vectorized=True, trainable = True, just_one_time_step = True)
+uu=u.detach().numpy()
+_,x,t = my_problem.transformation(u)
+u_exact, u_exact_adjusted = train_model.compute_exact(Buckley_Leverett, problem_ex, 100, 50, just_one_time_step = True, trainable= True)
+uue = u_exact_adjusted.detach().numpy()
+plt.figure(2)
+plt.plot(x, uu[:, -1], x, uue[:,-1])
