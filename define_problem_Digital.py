@@ -48,7 +48,10 @@ class Digital_option():
         L = np.log(Smax / E)
         theta = T
         h = (-G + L) / m
-        n = np.ceil((theta * sigma ** 2) / (0.8 * (h ** 2)))
+        if self.time_steps is None:
+            n = np.ceil(np.max(theta * sigma ** 2) / (0.8 * (h ** 2)))
+        else:
+            n = self.time_steps
         n = int(n)
         t = T / n
         x = np.linspace(G, L, m + 1)
@@ -157,8 +160,8 @@ class Digital_option():
         E = self.params["E"]
         tt = T - self.time
         S = E * np.exp(self.x)
-        #V = torch.zeros((m + 1, n+1))
-        V = np.zeros((m + 1, n+1))
+        V = torch.zeros((m + 1, n+1))
+        #V = np.zeros((m + 1, n+1))
         for k in range(0, m + 1):
             V[k, :] = E * u[k, :]
         return V, S, tt

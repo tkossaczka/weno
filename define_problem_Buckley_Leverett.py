@@ -26,7 +26,7 @@ class Buckley_Leverett():
         params["e"] = 10 ** (-13)
         params["L"] = 1
         params["R"] = 1
-        params["C"] = np.abs(5 * np.random.randn())
+        params["C"] = np.abs(2 * np.random.randn())
         self.params = params
 
     def get_params(self):
