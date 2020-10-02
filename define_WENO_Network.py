@@ -261,9 +261,9 @@ class WENONetwork(nn.Module):
         dif_final = 0.5 * dif_left + 0.5 * dif_right
         return dif_final
 
-    def run_weno(self, problem, trainable, vectorized, just_one_time_step=False):
-        mweno = False
-        mapped = True
+    def run_weno(self, problem, trainable, vectorized, just_one_time_step):
+        mweno = True
+        mapped = False
         m = problem.space_steps
         e = problem.params['e']
         n, t, h = problem.time_steps, problem.t, problem.h
@@ -397,7 +397,7 @@ class WENONetwork(nn.Module):
         return S, t
 
     def full_WENO(self, problem, trainable, plot=True, vectorized=False):
-        u = self.run_weno(problem, trainable=trainable, vectorized=vectorized)
+        u = self.run_weno(problem, trainable=trainable, vectorized=vectorized, just_one_time_step=False)
         V, S, tt = problem.transformation(u)
         V = V.detach().numpy()
         if plot:
@@ -413,6 +413,7 @@ class WENONetwork(nn.Module):
         u_classic = self.run_weno(problem, trainable=False, vectorized=False, just_one_time_step=True)
         V_classic, S, tt = problem.transformation(u_classic)
         plt.plot(S, V_classic.detach().numpy()[:,1], S, V_trained.detach().numpy()[:,1])
+        plt.show()
 
     def compute_exact(self,problem_class, problem, space_steps, time_steps, just_one_time_step, trainable):
         if hasattr(problem_class, 'exact'):
@@ -441,9 +442,9 @@ class WENONetwork(nn.Module):
         vecerr = np.zeros((iterations))[:, None]
         order = np.zeros((iterations - 1))[:, None]
         if hasattr(problem_class,'exact'):
-            u = self.run_weno(problem, trainable=trainable, vectorized=True)
+            u = self.run_weno(problem, trainable=trainable, vectorized=True, just_one_time_step=False)
             u_last = u[:,-1]
-            xmaxerr = problem.err(u_last)
+            xmaxerr = problem.err(u_last, first_step=False)
             vecerr[0] = xmaxerr
             print(problem.space_steps, problem.time_steps)
             for i in range(1, iterations):
@@ -452,14 +453,14 @@ class WENONetwork(nn.Module):
                 else:
                     spec_time_steps = problem.time_steps*4
                 problem = problem_class(space_steps=problem.space_steps * 2, time_steps=spec_time_steps, params=params)
-                u = self.run_weno(problem, trainable=trainable, vectorized=True)
+                u = self.run_weno(problem, trainable=trainable, vectorized=True, just_one_time_step=False)
                 u_last = u[:, -1]
-                xmaxerr = problem.err(u_last)
+                xmaxerr = problem.err(u_last, first_step=False)
                 vecerr[i] = xmaxerr
                 order[i - 1] = np.log(vecerr[i - 1] / vecerr[i]) / np.log(2)
                 print(problem.space_steps, problem.time_steps)
         else:
-            u = self.run_weno(problem, trainable=trainable, vectorized=True)
+            u = self.run_weno(problem, trainable=trainable, vectorized=True, just_one_time_step=False)
             u_last = u[:, -1]
             u_last = u_last.detach().numpy()
             fine_space_steps = initial_space_steps*2*2*2*2*2
@@ -469,7 +470,7 @@ class WENONetwork(nn.Module):
                 fine_time_steps = initial_time_steps*4*4*4*4*4
             problem_fine = problem_class(space_steps=fine_space_steps, time_steps=fine_time_steps, params=params)
             m = problem.space_steps
-            u_ex = self.run_weno(problem_fine, trainable=False, vectorized=True)
+            u_ex = self.run_weno(problem_fine, trainable=False, vectorized=True, just_one_time_step=False)
             u_ex_last = u_ex[:,-1]
             u_ex_last = u_ex_last.detach().numpy()
             divider = fine_space_steps/m
@@ -486,7 +487,7 @@ class WENONetwork(nn.Module):
                     spec_time_steps = problem.time_steps*4
                 problem = problem_class(space_steps=problem.space_steps * 2, time_steps=spec_time_steps, params=params)
                 m = problem.space_steps
-                u = self.run_weno(problem, trainable=trainable, vectorized=True)
+                u = self.run_weno(problem, trainable=trainable, vectorized=True, just_one_time_step=False)
                 u_last = u[:, -1]
                 u_last = u_last.detach().numpy()
                 divider = fine_space_steps / m

@@ -128,7 +128,7 @@ class Digital_option():
         u_der = u ** 0
         return u_der
 
-    def exact(self):
+    def exact(self, first_step):
         m = self.space_steps
         n,_, _,_,_ = self.__compute_n_t_h_x_time()
         sigma = self.params["sigma"]
@@ -143,11 +143,16 @@ class Digital_option():
             for j in range(0, m + 1):
                 Digital[j, k] = np.exp(-rate * (T - tt[k])) * norm.cdf(
                     (np.log(S[j] / E) + (rate - (sigma ** 2) / 2) * (T - tt[k])) / (sigma * np.sqrt(T - tt[k])))
-        u_Digital = Digital[:, n] / E
-        return u_Digital
+        if first_step:
+            u_Digital = Digital[:,1]/E
+            Digital = Digital[:,1]
+        else:
+            u_Digital = Digital[:, n] / E
+            Digital = Digital[:, n]
+        return u_Digital, Digital
 
-    def err(self, u_last):
-        u_Digital = self.exact()
+    def err(self, u_last, first_step):
+        u_Digital,_ = self.exact(first_step)
         u_last = u_last.detach().numpy()
         xerr = np.absolute([u_Digital - u_last])
         xmaxerr = np.max([xerr])
@@ -156,6 +161,7 @@ class Digital_option():
     def transformation(self, u):
         m = self.space_steps
         n = self.time_steps
+        #n = u.shape[1]-1
         T = self.params["T"]
         E = self.params["E"]
         tt = T - self.time

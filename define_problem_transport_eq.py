@@ -23,9 +23,10 @@ class transport_equation():
 
     def init_params(self):
         params = dict()
-        params["T"] = 1
+        params["T"] = 1 #5 #1
         params["e"] = 10 ** (-13)
-        params["L"] = 1
+        params["L"] = -1 #0 # -1
+        params["R"] = 1 #2 # 1
         self.params = params
 
     def get_params(self):
@@ -34,12 +35,13 @@ class transport_equation():
     def __compute_n_t_h_x_time(self):
         T = self.params["T"]
         L= self.params["L"]
+        R = self.params["R"]
         m = self.space_steps
-        h = 2 * L / m
-        n = np.ceil(T / (0.4 * h**(5/3)))
+        h = (np.abs(L) + np.abs(R)) / m
+        n = np.ceil(T / (0.4 * h**(5/3)))  #0.4
         n = int(n)
         t = T / n
-        x = np.linspace(-L, L, m + 1)
+        x = np.linspace(L, R, m + 1)
         time = np.linspace(0, T, n + 1)
         return n, t, h, x, time
 
@@ -47,6 +49,11 @@ class transport_equation():
         m = self.space_steps
         x = self.x
         u_init = torch.zeros(m+1)
+        # for k in range(0, m + 1):
+        #     if x[k] > 1:
+        #         u_init[k] = 1
+        #     else:
+        #         u_init[k] = 0
         for k in range(0, m + 1):
             u_init[k] = np.sin(np.pi*x[k])
         return u_init
@@ -59,6 +66,19 @@ class transport_equation():
         t = self.t
         x = self.x
         time = time[0:n+1]
+
+        # u_bc_l = torch.zeros(3, n + 1)
+        # u_bc_r = torch.zeros(3, n + 1)
+        # u_bc_r[0:2,:]=torch.ones(2,n + 1)
+        #
+        # u1_bc_l = torch.zeros(3, n + 1)
+        # u1_bc_r = torch.zeros(3, n + 1)
+        # u1_bc_r[0:2,:]=torch.ones(2,n + 1)
+        #
+        # u2_bc_l = torch.zeros(3, n + 1)
+        # u2_bc_r = torch.zeros(3, n + 1)
+        # u2_bc_r[0:2,:]=torch.ones(2,n + 1)
+
 
         u_bc_l = torch.zeros((3, n+1))
         u_bc_r = torch.zeros((3, n + 1))
