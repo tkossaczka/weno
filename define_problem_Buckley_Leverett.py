@@ -39,7 +39,7 @@ class Buckley_Leverett():
         m = self.space_steps
         h = (L+R) / m
         if self.time_steps is None:
-            n = np.ceil(0.05*T/(h**2))
+            n = np.ceil(0.07*T/(h**2))
         else:
             n=self.time_steps
         #n = np.ceil(0.5*T / (h ** 2))

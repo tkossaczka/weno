@@ -1,5 +1,8 @@
 import torch
 import matplotlib.pyplot as plt
+import numpy as np
+from matplotlib import cm
+from mpl_toolkits.mplot3d import Axes3D
 from define_problem_Digital import Digital_option
 from define_WENO_Network import WENONetwork
 from define_problem_heat_eq import heat_equation
@@ -31,13 +34,19 @@ problem= Digital_option
 #problem = Digital_option_GS
 #problem = Buckley_Leverett
 
-problem_main = problem(space_steps=160, time_steps=None, params = params)
+problem_main = problem(space_steps=100, time_steps=None, params = params)
 params = problem_main.get_params()
 #problem_ex = problem(space_steps=100*2*2, time_steps=40*4*4, params = params)
 #problem_ex = problem(space_steps=100*2*2*2*2*2*2*2, time_steps=40*4*4*4*4*4*4*4, params = params)
 u = train_model.run_weno(problem_main, vectorized=False, trainable = False, just_one_time_step = False)
 uu=u.detach().numpy()
 V,x,t = problem_main.transformation(u)
+
+VV = V.detach().numpy()
+X, Y = np.meshgrid(x, t, indexing="ij")
+fig = plt.figure()
+ax = fig.gca(projection='3d')
+ax.plot_surface(X, Y, VV, cmap=cm.viridis)
 
 u_last = uu[:,-1]
 error = problem_main.err(u_last,first_step=False)
