@@ -1,14 +1,15 @@
 import numpy as np
 import torch
 from scipy.stats import norm
+from initial_condition_switch import init_cond
 
 class Digital_option():
-    def __init__(self, space_steps, time_steps=None, params=None, w5_minus='Lax-Friedrichs'):
+    def __init__(self, ic_numb, space_steps, time_steps=None, params=None, w5_minus='Lax-Friedrichs'):
         """
         Atributes needed to be initialized to make WENO network functional
         space_steps, time_steps, initial_condition, boundary_condition, x, time, h, n
         """
-
+        self.ic_numb = ic_numb
         self.params = params
         if params is None:
             self.init_params()
@@ -59,15 +60,19 @@ class Digital_option():
         return n, t, h, x, time
 
     def compute_initial_condition(self):
-        m = self.space_steps
-        E = self.params["E"]
         x = self.x
-        u_init = torch.zeros(m+1)
-        for k in range(0, m + 1):
-            if x[k] > 0:
-                u_init[k] = 1 / E
-            else:
-                u_init[k] = 0
+        ic_numb = self.ic_numb
+        u_init = init_cond(ic_numb, x)
+        u_init = torch.Tensor(u_init)
+        # m = self.space_steps
+        # E = self.params["E"]
+        # x = self.x
+        # u_init = torch.zeros(m+1)
+        # for k in range(0, m + 1):
+        #     if x[k] > 0:
+        #         u_init[k] = 1 / E
+        #     else:
+        #         u_init[k] = 0
         return u_init
 
     def compute_boundary_condition(self):
