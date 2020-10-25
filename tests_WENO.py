@@ -13,8 +13,8 @@ from define_problem_Call_GS import Call_option_GS
 from define_problem_Digital_GS import Digital_option_GS
 from define_problem_Buckley_Leverett import Buckley_Leverett
 
-#train_model = WENONetwork()
-train_model = torch.load('model')
+train_model = WENONetwork()
+#train_model = torch.load('model')
 
 torch.set_default_dtype(torch.float64)
 
@@ -23,12 +23,12 @@ params=None
 #params = {'T': 0.4, 'e': 1e-13, 'L': 1, 'R': 1, 'C': 5.467189905555848}
 #params = {'sigma': 0.3, 'rate': 0.02, 'E': 50, 'T': 1, 'e': 1e-13, 'xl': -6, 'xr': 1.5, 'psi':20}
 #params = {'sigma': 0.3, 'rate': 0.25, 'E': 50, 'T': 1, 'e': 1e-13, 'xl': -1.5, 'xr': 2, 'psi':30}
-params = {'sigma': 0.3, 'rate': 0.1, 'E': 50, 'T': 1, 'e': 1e-13, 'xl': -6, 'xr': 1.5}
+#params = {'sigma': 0.3, 'rate': 0.1, 'E': 50, 'T': 1, 'e': 1e-13, 'xl': -6, 'xr': 1.5}
 
 #problem = PME
 #problem = heat_equation
-#problem = transport_equation
-problem= Digital_option
+problem = transport_equation
+#problem= Digital_option
 #problem= Call_option
 #problem = Call_option_GS
 #problem = Digital_option_GS
@@ -49,9 +49,9 @@ ax = fig.gca(projection='3d')
 ax.plot_surface(X, Y, VV, cmap=cm.viridis)
 
 u_last = uu[:,-1]
-u_ex = problem_main.exact(first_step=False)
+u_ex = problem_main.exact()
 
-error = problem_main.err(u_last,first_step=False)
+error = problem_main.err(u_last)
 
 #plt.plot(x, uu[:, -1])
 #params = problem_main.get_params()

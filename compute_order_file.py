@@ -10,7 +10,8 @@ from define_problem_Digital_GS import Digital_option_GS
 from define_problem_Buckley_Leverett import Buckley_Leverett
 
 with torch.no_grad():
-    train_model = torch.load('model')
+    #train_model = torch.load('model')
+    train_model = WENONetwork()
     problem = transport_equation
     #problem = heat_equation
     #problem = Call_option
@@ -27,5 +28,5 @@ with torch.no_grad():
     #params = {'sigma': 0.3, 'rate': 0.2, 'E': 50, 'T': 1, 'e': 1e-13, 'xl': -6, 'xr': 1.5}
     #params = {'sigma': 0.3, 'rate': 0.02, 'E': 50, 'T': 1, 'e': 1e-13, 'xl': -1.5, 'xr': 2, 'psi': 30}
     # params = {'T': 1, 'e': 1e-13, 'L': 3.141592653589793}
-    err_trained, order_trained = train_model.order_compute(5, 10, None,  params, problem, trainable=True)
-    err_not_trained, order_not_trained = train_model.order_compute(5,10,None, params, problem, trainable=False)
+    #err_trained, order_trained = train_model.order_compute(5, 10, None,  params, problem, trainable=True)
+    err_not_trained, order_not_trained = train_model.order_compute(7,10,None, params, problem, trainable=False)
