@@ -444,7 +444,7 @@ class WENONetwork(nn.Module):
         if hasattr(problem_class,'exact'):
             u = self.run_weno(problem, trainable=trainable, vectorized=True, just_one_time_step=False)
             u_last = u[:,-1]
-            xmaxerr = problem.err(u_last, first_step=False)
+            xmaxerr = problem.err(u_last) #, first_step=False)
             vecerr[0] = xmaxerr
             print(problem.space_steps, problem.time_steps)
             for i in range(1, iterations):
@@ -455,7 +455,7 @@ class WENONetwork(nn.Module):
                 problem = problem_class(space_steps=problem.space_steps * 2, time_steps=spec_time_steps, params=params)
                 u = self.run_weno(problem, trainable=trainable, vectorized=True, just_one_time_step=False)
                 u_last = u[:, -1]
-                xmaxerr = problem.err(u_last, first_step=False)
+                xmaxerr = problem.err(u_last) #, first_step=False)
                 vecerr[i] = xmaxerr
                 order[i - 1] = np.log(vecerr[i - 1] / vecerr[i]) / np.log(2)
                 print(problem.space_steps, problem.time_steps)

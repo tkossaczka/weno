@@ -154,9 +154,9 @@ class Digital_option():
     def err(self, u_last, first_step):
         u_Digital,_ = self.exact(first_step)
 #        u_last = u_last.detach().numpy()
-        xerr = np.absolute([u_Digital - u_last])
-        xmaxerr = np.max([xerr])
-        return xmaxerr
+        # xerr = np.max(np.absolute(u_ex - u_last))
+        xerr = np.mean((u_Digital - u_last) ** 2)
+        return xerr
 
     def transformation(self, u):
         m = self.space_steps
