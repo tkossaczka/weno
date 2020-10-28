@@ -48,10 +48,11 @@ class Digital_option():
         L = np.log(Smax / E)
         theta = T
         h = (-G + L) / m
-        if self.time_steps is None:
-            n = np.ceil(np.max(theta * sigma ** 2) / (0.8 * (h ** 2)))
-        else:
-            n = self.time_steps
+        # if self.time_steps is None:
+        #     n = np.ceil(np.max(theta * sigma ** 2) / (0.8 * (h ** 2)))
+        # else:
+        #     n = self.time_steps
+        n = np.ceil(np.max(theta * sigma ** 2) / (0.8 * (h ** 2)))
         n = int(n)
         t = T / n
         x = np.linspace(G, L, m + 1)

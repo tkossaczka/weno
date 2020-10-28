@@ -38,7 +38,7 @@ class transport_equation():
         R = self.params["R"]
         m = self.space_steps
         h = (np.abs(L) + np.abs(R)) / m
-        n = np.ceil(T / (0.4 * h**(5/3)))  #0.4
+        n = np.ceil(T / (8 * h**(5/3)))
         n = int(n)
         t = T / n
         x = np.linspace(L, R, m + 1)
