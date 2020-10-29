@@ -397,7 +397,7 @@ class WENONetwork(nn.Module):
         return u
 
     def run_weno_Euler(self, problem, trainable, vectorized, just_one_time_step):
-        mweno = True
+        mweno = False
         mapped = False
         m = problem.space_steps
         e = problem.params['e']

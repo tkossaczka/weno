@@ -1,5 +1,6 @@
 import numpy as np
 import torch
+from scipy.optimize import root_scalar
 
 class Euler_system():
     def __init__(self, space_steps, time_steps=None, params=None, w5_minus='Lax-Friedrichs'):
@@ -49,19 +50,19 @@ class Euler_system():
         m = self.space_steps
         x = self.x
         gamma = self.params["gamma"]
-        p = np.array([1.0, 0.1])
-        u = np.array([0.0, 0.0])
-        rho = np.array([1.0, 0.125])
+        self.p = np.array([1.0, 0.1])
+        self.u = np.array([0.0, 0.0])
+        self.rho = np.array([1.0, 0.125])
         x_mid = 0.5
         r0 = np.zeros(m+1)
         u0 = np.zeros(m+1)
         p0 = np.zeros(m+1)
-        r0[x<=x_mid] = rho[0]
-        r0[x>x_mid] = rho[1]
-        u0[x <= x_mid] = u[0]
-        u0[x > x_mid] = u[1]
-        p0[x <= x_mid] = p[0]
-        p0[x > x_mid] = p[1]
+        r0[x<=x_mid] = self.rho[0]
+        r0[x>x_mid] = self.rho[1]
+        u0[x <= x_mid] = self.u[0]
+        u0[x > x_mid] = self.u[1]
+        p0[x <= x_mid] = self.p[0]
+        p0[x > x_mid] = self.p[1]
         a0 = np.sqrt(gamma*p0/r0)
         E0 = p0/(gamma-1) +0.5*r0*u0**2
         q0 = np.array([r0, r0*u0, E0]).T
@@ -135,16 +136,75 @@ class Euler_system():
         return u_der
 
     def exact(self):
-        m = self.space_steps
-        n,_, _,_,_ = self.__compute_n_t_h_x_time()
-        x, time = self.x, self.time
-        uex = np.zeros((m + 1, n + 1))
-        for k in range(0, n + 1):
-            for j in range(0, m + 1):
-                # uex[j, k] = np.sin(np.pi*(x[j]-time[k]))
-                uex[j, k] = (x[j]-time[k])**3 + np.cos((x[j]-time[k]))
-        u_ex = uex[:, n]
-        return u_ex
+        rho1 = self.rho[0]
+        rho4 = self.rho[1]
+        u1 = self.u[0]
+        u4 = self.u[1]
+        p1 = self.p[0]
+        p4 = self.p[1]
+        T = self.params["T"]
+        gamma = self.params["gamma"]
+        alph = (gamma+1)/(gamma-1)
+        PRL = p4/p1
+        c1 = np.sqrt((gamma*p1)/rho1)
+        c4 = np.sqrt((gamma*p4)/rho4)
+        def func(P,gamma,u1,u4,c1,c4):
+            return (1/P) * (1 + (gamma-1)/2 * (u1-u4)/c1 - ((gamma-1)*c4*(P-1))/(c1*np.sqrt(2*gamma*(gamma-1+(gamma+1)*P))) ) ** ((2*gamma)/(gamma-1)) - PRL
+        sol = root_scalar(func, args=(gamma,u1,u4,c1,c4), method='bisect', bracket=[1,5], x0=3)
+        P = sol.root
+        p3 = P*p4
+        rho3 = rho4*((1+alph*P)/(alph+P))
+        rho2 = rho1*(P*p4/p1)**(1/gamma)
+        u2 = u1 - u4 + 2/(gamma-1) * c1 * (1 - (P*p4/p1)**((gamma-1)/(2*gamma)))
+        c2 = np.sqrt(gamma*p3/rho2)
+        c3 = np.sqrt(gamma*p3/rho3)
+
+        x0 = 0.5
+        pos1 = x0 + (u1 - c1)*T
+        pos2 = x0 + (u2 + u4 - c2)*T
+        conpos = x0 + (u2 + u4)*T
+        spos = x0 + T*(c4 * np.sqrt( (gamma-1)/(2*gamma) + (gamma+1)*P/(2*gamma) ) + u4)
+
+        x = np.linspace(0, 1, 1024+1)
+        p = np.zeros(x.size)
+        u = np.zeros(x.size)
+        rho = np.zeros(x.size)
+        mach = np.zeros(x.size)
+        c = np.zeros(x.size)
+
+        for k in range(x.size):
+            if x[k] <= pos1:
+                p[k] = p1
+                u[k] = u1
+                rho[k] = rho1
+                c[k] = c1
+                mach[k] = u1/c1
+            elif x[k] <= pos2:
+                p[k] = p1 * (1 + (pos1 - x[k])/(c1*alph*T)) ** (2*gamma/(gamma-1))
+                rho[k] = rho1 * (1 + (pos1 - x[k])/(c1*alph*T)) ** (2/(gamma-1))
+                u[k] = u1 + (2/(gamma+1)) * ((x[k]-pos1)/T)
+                c[k] = np.sqrt(gamma*p[k]/rho[k])
+                mach[k] = u[k]/c[k]
+            elif x[k] <= conpos:
+                p[k] = p3
+                rho[k] = rho2
+                u[k] = u2+u4
+                c[k] = c2
+                mach[k] = (u2+u4)/c2
+            elif x[k] <= spos:
+                p[k] = p3
+                rho[k] = rho3
+                u[k] = u2 + u4
+                c[k] = c3
+                mach[k] = (u2 + u4) / c3
+            else:
+                p[k] = p4
+                rho[k] = rho4
+                u[k] = u4
+                c[k] = c4
+                mach[k] =  u4 / c4
+
+        return x, p, rho, u, c, mach
 
     def err(self, u_last):
         u_ex = self.exact()
