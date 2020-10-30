@@ -13,15 +13,13 @@ params=None
 problem = Euler_system
 problem_main = problem(space_steps=128*2, time_steps=None, params = params)
 params = problem_main.get_params()
+gamma = params['gamma']
 
-q_0, q_1, q_2, rho, u, p = train_model.run_weno_Euler(problem_main, vectorized=False, trainable = False, just_one_time_step = False)
-_,x,t = problem_main.transformation(u)
-# plt.figure(1)
-# plt.plot(x,r)
-# plt.figure(2)
-# plt.plot(x,u)
-# plt.figure(3)
-# plt.plot(x,p)
+q_0, q_1, q_2, lamb, nn = train_model.init_Euler(problem_main, vectorized = True, just_one_time_step=False)
+
+for k in range(nn):
+    q_0, q_1, q_2, lamb = train_model.run_weno_Euler(problem_main, mweno = True, mapped = False, q_0=q_0, q_1=q_1, q_2=q_2, lamb=lamb, vectorized=True, trainable = False, k=k)
+_,x,t = problem_main.transformation(q_0)
 
 q_0_np = q_0.detach().numpy()
 q_1_np = q_1.detach().numpy()
@@ -46,6 +44,11 @@ for k in range(0,t.shape[0]):
 # fig = plt.figure()
 # ax = fig.gca(projection='3d')
 # ax.plot_surface(X, Y, u_ex, cmap=cm.viridis)
+
+rho = q_0
+u = q_1/rho
+E = q_2
+p = (gamma - 1)*(E-0.5*rho*u**2)
 
 plt.figure(1)
 plt.plot(x,rho[:,-1],x_ex,rho_ex[:,-1])
