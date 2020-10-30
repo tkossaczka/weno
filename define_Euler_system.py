@@ -162,8 +162,8 @@ class Euler_system():
         x0 = 0.5
         pos1 = x0 + (u1 - c1)*T
         pos2 = x0 + (u2 + u4 - c2)*T
-        conpos = x0 + (u2 + u4)*T
-        spos = x0 + T*(c4 * np.sqrt( (gamma-1)/(2*gamma) + (gamma+1)*P/(2*gamma) ) + u4)
+        pos3 = x0 + (u2 + u4)*T
+        pos4 = x0 + T*(c4 * np.sqrt( (gamma-1)/(2*gamma) + (gamma+1)*P/(2*gamma) ) + u4)
 
         x = np.linspace(0, 1, 1024+1)
         p = np.zeros(x.size)
@@ -185,13 +185,13 @@ class Euler_system():
                 u[k] = u1 + (2/(gamma+1)) * ((x[k]-pos1)/T)
                 c[k] = np.sqrt(gamma*p[k]/rho[k])
                 mach[k] = u[k]/c[k]
-            elif x[k] <= conpos:
+            elif x[k] <= pos3:
                 p[k] = p3
                 rho[k] = rho2
                 u[k] = u2+u4
                 c[k] = c2
                 mach[k] = (u2+u4)/c2
-            elif x[k] <= spos:
+            elif x[k] <= pos4:
                 p[k] = p3
                 rho[k] = rho3
                 u[k] = u2 + u4
@@ -202,7 +202,7 @@ class Euler_system():
                 rho[k] = rho4
                 u[k] = u4
                 c[k] = c4
-                mach[k] =  u4 / c4
+                mach[k] = u4 / c4
 
         return x, p, rho, u, c, mach
 

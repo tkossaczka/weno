@@ -397,7 +397,7 @@ class WENONetwork(nn.Module):
         return u
 
     def run_weno_Euler(self, problem, trainable, vectorized, just_one_time_step):
-        mweno = False
+        mweno = True
         mapped = False
         m = problem.space_steps
         e = problem.params['e']
@@ -413,9 +413,12 @@ class WENONetwork(nn.Module):
         if vectorized:
             q0 = init_cond
         else:
-            q0_0 = init_cond[:,0]
-            q0_1 = init_cond[:,1]
-            q0_2 = init_cond[:,2]
+            q0_0 = torch.zeros((m+1,n+1))
+            q0_1 = torch.zeros((m+1,n+1))
+            q0_2 = torch.zeros((m+1,n+1))
+            q0_0[:,0] = init_cond[:,0]  # rho
+            q0_1[:,0] = init_cond[:,1]  # rho * u
+            q0_2[:,0] = init_cond[:,2]  # E
 
         if just_one_time_step is True:
             nn = 1
@@ -423,49 +426,110 @@ class WENONetwork(nn.Module):
             nn = n
 
         lamb = lambda0
-        q = q0
 
-        for l in range(1, nn+1):
-            q0 = q
-            rho = q[:,0]
-            u = q[:,1]/rho
-            E = q[:,2]
-            p = (gamma - 1)*(E-0.5*rho*u**2)
+        if vectorized:
+            q = q0
+            for l in range(1, nn+1):
+                q0 = q
+                rho = q[:,0]
+                u = q[:,1]/rho
+                E = q[:,2]
+                p = (gamma - 1)*(E-0.5*rho*u**2)
 
-            u1 = torch.zeros(x.shape[0],3)
-            flux = self.flux_func(problem, q)
-            RHSc_p = self.WENO5(0.5 * (flux + lamb * q), e, w5_minus=False, mweno=mweno, mapped=mapped, trainable=trainable)
-            RHSc_n = self.WENO5(0.5 * (flux - lamb * q), e, w5_minus=True, mweno=mweno, mapped=mapped, trainable=trainable)
-            RHSc = RHSc_p + RHSc_n
-            u1[3:-3, :] = q[3:-3, :] + t * (-(1 / h) * RHSc)
-            u1[0:3, :] = q0[0:3, :]
-            u1[-3:, :] = q0[-3:, :]
+                u1 = torch.zeros(x.shape[0],3)
+                flux = self.flux_func(problem, q)
+                RHSc_p = self.WENO5(0.5 * (flux + lamb * q), e, w5_minus=False, mweno=mweno, mapped=mapped, trainable=trainable)
+                RHSc_n = self.WENO5(0.5 * (flux - lamb * q), e, w5_minus=True, mweno=mweno, mapped=mapped, trainable=trainable)
+                RHSc = RHSc_p + RHSc_n
+                u1[3:-3, :] = q[3:-3, :] + t * (-(1 / h) * RHSc)
+                u1[0:3, :] = q0[0:3, :]
+                u1[-3:, :] = q0[-3:, :]
 
-            u2 = torch.zeros(x.shape[0],3)
-            flux = self.flux_func(problem, u1)
-            RHS1c_p = self.WENO5(0.5 * (flux + lamb * u1), e, w5_minus=False, mweno=mweno, mapped=mapped,trainable=trainable)
-            RHS1c_n = self.WENO5(0.5 * (flux - lamb * u1), e, w5_minus=True, mweno=mweno, mapped=mapped,trainable=trainable)
-            RHS1c = RHS1c_p + RHS1c_n
-            u2[3:-3, :] = 0.75 * q[3:-3, :] + 0.25 * u1[3:-3, :] + 0.25 * t * ( - (1/ h) * RHS1c)
-            u2[0:3, :] = q0[0:3, :]
-            u2[-3:, :] = q0[-3:, :]
+                u2 = torch.zeros(x.shape[0],3)
+                flux = self.flux_func(problem, u1)
+                RHS1c_p = self.WENO5(0.5 * (flux + lamb * u1), e, w5_minus=False, mweno=mweno, mapped=mapped,trainable=trainable)
+                RHS1c_n = self.WENO5(0.5 * (flux - lamb * u1), e, w5_minus=True, mweno=mweno, mapped=mapped,trainable=trainable)
+                RHS1c = RHS1c_p + RHS1c_n
+                u2[3:-3, :] = 0.75 * q[3:-3, :] + 0.25 * u1[3:-3, :] + 0.25 * t * ( - (1/ h) * RHS1c)
+                u2[0:3, :] = q0[0:3, :]
+                u2[-3:, :] = q0[-3:, :]
 
-            flux = self.flux_func(problem, u2)
-            RHS2c_p = self.WENO5(0.5 * (flux + lamb * u2), e, w5_minus=False, mweno=mweno, mapped=mapped,trainable=trainable)
-            RHS2c_n = self.WENO5(0.5 * (flux - lamb * u2), e, w5_minus=True, mweno=mweno, mapped=mapped,trainable=trainable)
-            RHS2c = RHS2c_p + RHS2c_n
-            q[3:-3, :] = (1 / 3) * q[3:-3, :] + (2 / 3) * u2[3:-3, :] + (2 / 3)* t * (- (1 / h) * RHS2c)
-            q[0:3, :] = q0[0:3, :]
-            q[-3:, :] = q0[-3:, :]
+                flux = self.flux_func(problem, u2)
+                RHS2c_p = self.WENO5(0.5 * (flux + lamb * u2), e, w5_minus=False, mweno=mweno, mapped=mapped,trainable=trainable)
+                RHS2c_n = self.WENO5(0.5 * (flux - lamb * u2), e, w5_minus=True, mweno=mweno, mapped=mapped,trainable=trainable)
+                RHS2c = RHS2c_p + RHS2c_n
+                q[3:-3, :] = (1 / 3) * q[3:-3, :] + (2 / 3) * u2[3:-3, :] + (2 / 3)* t * (- (1 / h) * RHS2c)
+                q[0:3, :] = q0[0:3, :]
+                q[-3:, :] = q0[-3:, :]
 
-            r = q[:,0]
-            u = q[:,1]/r
-            E = q[:,2]
-            p = (gamma-1)*(E-0.5*r*u**2)
-            a = (gamma*p/r)**(1/2)
-            lamb = torch.max(torch.abs(u)+a)
+                rho = q[:,0]
+                u = q[:,1]/rho
+                E = q[:,2]
+                p = (gamma-1)*(E-0.5*rho*u**2)
+                a = (gamma*p/rho)**(1/2)
+                lamb = torch.max(torch.abs(u)+a)
 
-        return q, r, u, p
+                q_0 = q[:,0]
+                q_1 = q[:,1]
+                q_2 = q[:,2]
+        else:
+            q_0 = q0_0
+            q_1 = q0_1
+            q_2 = q0_2
+            for l in range(1, nn + 1):
+                q0_0 = q_0[:,l-1]
+                q0_1 = q_1[:,l-1]
+                q0_2 = q_2[:,l-1]
+                q = torch.stack([q0_0,q0_1,q0_2]).T
+                rho = q0_0
+                u = q0_1 / rho
+                E = q0_2
+                p = (gamma - 1) * (E - 0.5 * rho * u ** 2)
+
+                u1 = torch.zeros(x.shape[0], 3)
+                flux = self.flux_func(problem, q)
+                RHSc_p = self.WENO5(0.5 * (flux + lamb * q), e, w5_minus=False, mweno=mweno, mapped=mapped,
+                                    trainable=trainable)
+                RHSc_n = self.WENO5(0.5 * (flux - lamb * q), e, w5_minus=True, mweno=mweno, mapped=mapped,
+                                    trainable=trainable)
+                RHSc = RHSc_p + RHSc_n
+                u1[3:-3, :] = q[3:-3, :] + t * (-(1 / h) * RHSc)
+                u1[0:3, :] = q[0:3, :]
+                u1[-3:, :] = q[-3:, :]
+
+                u2 = torch.zeros(x.shape[0], 3)
+                flux = self.flux_func(problem, u1)
+                RHS1c_p = self.WENO5(0.5 * (flux + lamb * u1), e, w5_minus=False, mweno=mweno, mapped=mapped,
+                                     trainable=trainable)
+                RHS1c_n = self.WENO5(0.5 * (flux - lamb * u1), e, w5_minus=True, mweno=mweno, mapped=mapped,
+                                     trainable=trainable)
+                RHS1c = RHS1c_p + RHS1c_n
+                u2[3:-3, :] = 0.75 * q[3:-3, :] + 0.25 * u1[3:-3, :] + 0.25 * t * (- (1 / h) * RHS1c)
+                u2[0:3, :] = q[0:3, :]
+                u2[-3:, :] = q[-3:, :]
+
+                flux = self.flux_func(problem, u2)
+                RHS2c_p = self.WENO5(0.5 * (flux + lamb * u2), e, w5_minus=False, mweno=mweno, mapped=mapped,
+                                     trainable=trainable)
+                RHS2c_n = self.WENO5(0.5 * (flux - lamb * u2), e, w5_minus=True, mweno=mweno, mapped=mapped,
+                                     trainable=trainable)
+                RHS2c = RHS2c_p + RHS2c_n
+                q[3:-3, :] = (1 / 3) * q[3:-3, :] + (2 / 3) * u2[3:-3, :] + (2 / 3) * t * (- (1 / h) * RHS2c)
+                q[0:3, :] = q[0:3, :]
+                q[-3:, :] = q[-3:, :]
+
+                rho = q[:, 0]
+                u = q[:, 1] / rho
+                E = q[:, 2]
+                p = (gamma - 1) * (E - 0.5 * rho * u ** 2)
+                a = (gamma * p / rho) ** (1 / 2)
+                lamb = torch.max(torch.abs(u) + a)
+
+                q_0[:,l] = q[:,0]
+                q_1[:,l] = q[:,1]
+                q_2[:,l] = q[:,2]
+
+        return q_0, q_1, q_2, rho, u, p
 
     def forward(self, problem):
         u = self.run_weno(problem, trainable=True, vectorized=True, just_one_time_step = True)
