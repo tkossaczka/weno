@@ -135,14 +135,13 @@ class Euler_system():
         u_der = u ** 0
         return u_der
 
-    def exact(self):
+    def exact(self, x, T):
         rho1 = self.rho[0]
         rho4 = self.rho[1]
         u1 = self.u[0]
         u4 = self.u[1]
         p1 = self.p[0]
         p4 = self.p[1]
-        T = self.params["T"]
         gamma = self.params["gamma"]
         alph = (gamma+1)/(gamma-1)
         PRL = p4/p1
@@ -165,7 +164,6 @@ class Euler_system():
         pos3 = x0 + (u2 + u4)*T
         pos4 = x0 + T*(c4 * np.sqrt( (gamma-1)/(2*gamma) + (gamma+1)*P/(2*gamma) ) + u4)
 
-        x = np.linspace(0, 1, 1024+1)
         p = np.zeros(x.size)
         u = np.zeros(x.size)
         rho = np.zeros(x.size)
@@ -204,7 +202,7 @@ class Euler_system():
                 c[k] = c4
                 mach[k] = u4 / c4
 
-        return x, p, rho, u, c, mach
+        return p, rho, u, c, mach
 
     def err(self, u_last):
         u_ex = self.exact()

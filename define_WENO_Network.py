@@ -528,6 +528,11 @@ class WENONetwork(nn.Module):
                 q_0[:,l] = q[:,0]
                 q_1[:,l] = q[:,1]
                 q_2[:,l] = q[:,2]
+                rho = q_0
+                u = q_1 / rho
+                E = q_2
+                p = (gamma - 1) * (E - 0.5 * rho * u ** 2)
+
 
         return q_0, q_1, q_2, rho, u, p
 
