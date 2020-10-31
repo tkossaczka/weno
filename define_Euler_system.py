@@ -53,22 +53,22 @@ class Euler_system():
         self.p = np.array([1.0, 0.1])
         self.u = np.array([0.0, 0.0])
         self.rho = np.array([1.0, 0.125])
+        self.p = torch.Tensor(self.p)
+        self.u = torch.Tensor(self.u)
+        self.rho = torch.Tensor(self.rho)
         x_mid = 0.5
-        r0 = np.zeros(m+1)
-        u0 = np.zeros(m+1)
-        p0 = np.zeros(m+1)
+        r0 = torch.zeros(m+1)
+        u0 = torch.zeros(m+1)
+        p0 = torch.zeros(m+1)
         r0[x<=x_mid] = self.rho[0]
         r0[x>x_mid] = self.rho[1]
         u0[x <= x_mid] = self.u[0]
         u0[x > x_mid] = self.u[1]
         p0[x <= x_mid] = self.p[0]
         p0[x > x_mid] = self.p[1]
-        a0 = np.sqrt(gamma*p0/r0)
+        a0 = torch.sqrt(gamma*p0/r0)
         E0 = p0/(gamma-1) +0.5*r0*u0**2
-        q0 = np.array([r0, r0*u0, E0]).T
-        q0 = torch.Tensor(q0)
-        a0 = torch.Tensor(a0)
-        u0 = torch.Tensor(u0)
+        q0 = torch.stack([r0, r0*u0, E0]).T
         return q0, u0, a0
 
     def __compute_boundary_condition(self):
@@ -145,8 +145,8 @@ class Euler_system():
         gamma = self.params["gamma"]
         alph = (gamma+1)/(gamma-1)
         PRL = p4/p1
-        c1 = np.sqrt((gamma*p1)/rho1)
-        c4 = np.sqrt((gamma*p4)/rho4)
+        c1 = torch.sqrt((gamma*p1)/rho1)
+        c4 = torch.sqrt((gamma*p4)/rho4)
         def func(P,gamma,u1,u4,c1,c4):
             return (1/P) * (1 + (gamma-1)/2 * (u1-u4)/c1 - ((gamma-1)*c4*(P-1))/(c1*np.sqrt(2*gamma*(gamma-1+(gamma+1)*P))) ) ** ((2*gamma)/(gamma-1)) - PRL
         sol = root_scalar(func, args=(gamma,u1,u4,c1,c4), method='bisect', bracket=[1,5], x0=3)
@@ -164,13 +164,13 @@ class Euler_system():
         pos3 = x0 + (u2 + u4)*T
         pos4 = x0 + T*(c4 * np.sqrt( (gamma-1)/(2*gamma) + (gamma+1)*P/(2*gamma) ) + u4)
 
-        p = np.zeros(x.size)
-        u = np.zeros(x.size)
-        rho = np.zeros(x.size)
-        mach = np.zeros(x.size)
-        c = np.zeros(x.size)
+        p = torch.zeros(x.shape[0])
+        u = torch.zeros(x.shape[0])
+        rho = torch.zeros(x.shape[0])
+        mach = torch.zeros(x.shape[0])
+        c = torch.zeros(x.shape[0])
 
-        for k in range(x.size):
+        for k in range(x.shape[0]):
             if x[k] <= pos1:
                 p[k] = p1
                 u[k] = u1
@@ -181,7 +181,7 @@ class Euler_system():
                 p[k] = p1 * (1 + (pos1 - x[k])/(c1*alph*T)) ** (2*gamma/(gamma-1))
                 rho[k] = rho1 * (1 + (pos1 - x[k])/(c1*alph*T)) ** (2/(gamma-1))
                 u[k] = u1 + (2/(gamma+1)) * ((x[k]-pos1)/T)
-                c[k] = np.sqrt(gamma*p[k]/rho[k])
+                c[k] = torch.sqrt(gamma*p[k]/rho[k])
                 mach[k] = u[k]/c[k]
             elif x[k] <= pos3:
                 p[k] = p3
