@@ -8,11 +8,13 @@ from define_WENO_Euler import WENONetwork_Euler
 from define_Euler_system import Euler_system
 
 #train_model = WENONetwork_Euler()
-train_model = torch.load('model4')
+train_model = torch.load('model6')
 torch.set_default_dtype(torch.float64)
 params=None
 problem = Euler_system
-problem_main = problem(space_steps=128, time_steps=None, params = params)
+sp_st = 64*2*2
+init_cond = "Sod"
+problem_main = problem(space_steps=sp_st, init_cond = init_cond, time_steps=None, params = params)
 params = problem_main.get_params()
 gamma = params['gamma']
 
@@ -39,7 +41,7 @@ q_2_nt = q_2_nt.detach().numpy()
 # ax = fig.gca(projection='3d')
 # ax.plot_surface(X, Y, q_1_np/q_0_np, cmap=cm.viridis)
 
-x_ex = np.linspace(0, 1, 128+1)
+x_ex = np.linspace(0, 1, sp_st+1)
 p_ex = torch.zeros((x_ex.shape[0],t.shape[0]))
 rho_ex = torch.zeros((x_ex.shape[0],t.shape[0]))
 u_ex = torch.zeros((x_ex.shape[0],t.shape[0]))
@@ -52,7 +54,7 @@ for k in range(0,t.shape[0]):
 # X, Y = np.meshgrid(x_ex, t, indexing="ij")
 # fig = plt.figure()
 # ax = fig.gca(projection='3d')
-# ax.plot_surface(X, Y, u_ex, cmap=cm.viridis)
+# ax.plot_surface(X, Y, rho_ex.detach().numpy(), cmap=cm.viridis)
 
 rho_t = q_0_t
 u_t = q_1_t/rho_t
@@ -78,20 +80,15 @@ error_p_nt_mean = np.mean((p_nt - p_ex.detach().numpy()[:,-1]) ** 2)
 error_p_t_mean = np.mean((p_t - p_ex.detach().numpy()[:,-1]) ** 2)
 
 err_mat = np.zeros((4,3))
-err_mat[0,:] = np.array([error_rho_nt_max, error_u_nt_max, error_p_nt_max])
-err_mat[1,:] = np.array([error_rho_t_max, error_u_t_max, error_p_t_max])
-err_mat[2,:] = np.array([error_rho_nt_mean, error_u_nt_mean, error_p_nt_mean])
-err_mat[3,:] = np.array([error_rho_t_mean, error_u_t_mean, error_p_t_mean])
+err_mat[0,:] = np.array([error_rho_nt_max, error_p_nt_max, error_u_nt_max])
+err_mat[1,:] = np.array([error_rho_t_max, error_p_t_max, error_u_t_max])
+err_mat[2,:] = np.array([error_rho_nt_mean, error_p_nt_mean, error_u_nt_mean])
+err_mat[3,:] = np.array([error_rho_t_mean, error_p_t_mean, error_u_t_mean])
 
 plt.figure(1)
-plt.plot(x,rho_t,x_ex,rho_ex[:,-1].detach().numpy())
+plt.plot(x,rho_nt,x,rho_t,x_ex,rho_ex[:,-1].detach().numpy())
 plt.figure(2)
-plt.plot(x,p_t,x_ex,p_ex[:,-1].detach().numpy())
+plt.plot(x,p_nt, x,p_t,x_ex,p_ex[:,-1].detach().numpy())
 plt.figure(3)
-plt.plot(x,u_t,x_ex,u_ex[:,-1].detach().numpy())
-plt.figure(4)
-plt.plot(x,rho_nt,x_ex,rho_ex[:,-1].detach().numpy())
-plt.figure(5)
-plt.plot(x,p_nt,x_ex,p_ex[:,-1].detach().numpy())
-plt.figure(6)
-plt.plot(x,u_nt,x_ex,u_ex[:,-1].detach().numpy())
+plt.plot(x,u_nt, x,u_t,x_ex,u_ex[:,-1].detach().numpy())
+

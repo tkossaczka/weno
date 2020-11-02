@@ -14,8 +14,18 @@ train_model = WENONetwork_Euler()
 problem_class = Euler_system
 
 def monotonicity_loss(u):
-    monotonicity = torch.sum(torch.max(u[:-1]-u[1:], torch.Tensor([0.0])))
+    monotonicity = torch.sum(torch.abs(torch.min(u[:-1]-u[1:], torch.Tensor([0.0]))))
     loss = monotonicity
+    return loss
+
+def monotonicity_loss_mid(u, x):
+    monotonicity = torch.zeros(x.shape[0])
+    for k in range(x.shape[0]-1):
+        if x[k] <= 0.5:
+            monotonicity[k] = (torch.abs(torch.max(u[:-1]-u[1:], torch.Tensor([0.0]))))[k]
+        else:
+            monotonicity[k] = (torch.abs(torch.min(u[:-1]-u[1:], torch.Tensor([0.0]))))[k]
+    loss = torch.sum(monotonicity)
     return loss
 
 def exact_loss(u, u_ex):
@@ -26,15 +36,17 @@ def exact_loss(u, u_ex):
 #optimizer = optim.SGD(train_model.parameters(), lr=0.1)
 optimizer = optim.Adam(train_model.parameters())
 
-for k in range(1):
+for k in range(300):
     # Forward path
     params = None
-    problem_main = problem_class(space_steps=64*2, time_steps=None, params=params)
-    print(problem_main.time_steps)
+    sp_st = 64*2
+    init_cond = "Sod"
+    problem_main = problem_class(space_steps=sp_st, init_cond=init_cond, time_steps=None, params=params)
+    print(k, problem_main.time_steps)
     gamma = problem_main.params['gamma']
     q_0, q_1, q_2, lamb, nn = train_model.init_Euler(problem_main, vectorized=True, just_one_time_step=False)
     _, x, t = problem_main.transformation(q_0)
-    x_ex = torch.linspace(0, 1, 64*2 + 1)
+    x_ex = torch.linspace(0, 1, sp_st + 1)
     p_ex = torch.zeros((x_ex.shape[0], t.shape[0]))
     rho_ex = torch.zeros((x_ex.shape[0], t.shape[0]))
     u_ex = torch.zeros((x_ex.shape[0], t.shape[0]))
@@ -52,19 +64,22 @@ for k in range(1):
         p = (gamma - 1) * (E - 0.5 * rho * u ** 2)
         p_ex[:, k+1], rho_ex[:, k+1], u_ex[:, k+1], _, _ = problem_main.exact(x_ex, t[k+1])
         # Train model:
-        optimizer.zero_grad()  # Clear gradients
-        # Calculate loss
-        loss_0 = exact_loss(rho, rho_ex[:,k+1])
-        loss_1 = exact_loss(u, u_ex[:, k + 1])
-        loss_2 = exact_loss(p, p_ex[:, k + 1])
-        loss = loss_0 + loss_1 + loss_2
-        loss.backward()  # Backward pass
-        optimizer.step()  # Optimize weights
-        print(k, loss)
-        q_0_train = q_0_train.detach()
-        q_1_train = q_1_train.detach()
-        q_2_train = q_2_train.detach()
-        lamb = lamb.detach()
+    optimizer.zero_grad()  # Clear gradients
+    # Calculate loss
+    loss_0 = monotonicity_loss(rho) #, rho_ex[:, k+1])
+    loss_00 = exact_loss(rho, rho_ex[:, k+1])
+    loss_1 = monotonicity_loss_mid(u, x)
+    loss_11 = exact_loss(u, u_ex[:, k + 1])
+    loss_2 = monotonicity_loss(p)
+    loss_22 = exact_loss(p, p_ex[:, k + 1])
+    loss = loss_0 + 1.5*loss_00 + loss_2 + 1.5*loss_22 + loss_1 + 1.5*loss_11
+    loss.backward()  # Backward pass
+    optimizer.step()  # Optimize weights
+    print(k, loss)
+    q_0_train = q_0_train.detach()
+    q_1_train = q_1_train.detach()
+    q_2_train = q_2_train.detach()
+    lamb = lamb.detach()
         #print(params)
 
 #plt.plot(S, V_train.detach().numpy())
@@ -72,4 +87,4 @@ for k in range(1):
 # g=train_model.parameters()
 # g.__next__()
 
-torch.save(train_model, "model4")
+torch.save(train_model, "model7")

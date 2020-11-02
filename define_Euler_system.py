@@ -3,7 +3,7 @@ import torch
 from scipy.optimize import root_scalar
 
 class Euler_system():
-    def __init__(self, space_steps, time_steps=None, params=None, w5_minus='Lax-Friedrichs'):
+    def __init__(self, space_steps, init_cond, time_steps=None, params=None, w5_minus='Lax-Friedrichs'):
         """
         Atributes needed to be initialized to make WENO network functional
         space_steps, time_steps, initial_condition, boundary_condition, x, time, h, n
@@ -17,7 +17,7 @@ class Euler_system():
         n, self.t, self.h, self.x, self.time = self.__compute_n_t_h_x_time()
         if time_steps is None:
             self.time_steps = n
-        self.initial_condition, self.u0, self.a0 = self.__compute_initial_condition()
+        self.initial_condition, self.u0, self.a0 = self.__compute_initial_condition(init_cond)
         self.boundary_condition = self.__compute_boundary_condition()
         self.w5_minus = w5_minus
 
@@ -39,33 +39,53 @@ class Euler_system():
         R = self.params["R"]
         m = self.space_steps
         h = (np.abs(L) + np.abs(R)) / m
-        n = np.ceil(T / (1.0 * h**(5/3)))  #0.4
+        n = np.ceil(T / (10 * h**(5/3)))  # 10 sod # 1 lax
         n = int(n)
         t = T / n
         x = np.linspace(L, R, m + 1)
         time = np.linspace(0, T, n + 1)
         return n, t, h, x, time
 
-    def __compute_initial_condition(self):
+    def __compute_initial_condition(self, init_cond):
         m = self.space_steps
         x = self.x
         gamma = self.params["gamma"]
-        self.p = np.array([1.0, 0.1])
-        self.u = np.array([0.0, 0.0])
-        self.rho = np.array([1.0, 0.125])
+        r0 = torch.zeros(m + 1)
+        u0 = torch.zeros(m + 1)
+        p0 = torch.zeros(m + 1)
+        if init_cond == "Sod":
+            self.p = np.array([1.0, 0.1])
+            self.u = np.array([0.0, 0.0])
+            self.rho = np.array([1.0, 0.125])
+            x_mid = 0.5
+            r0[x <= x_mid] = self.rho[0]
+            r0[x > x_mid] = self.rho[1]
+            u0[x <= x_mid] = self.u[0]
+            u0[x > x_mid] = self.u[1]
+            p0[x <= x_mid] = self.p[0]
+            p0[x > x_mid] = self.p[1]
+        elif init_cond == "Lax":
+            self.p = np.array([3.528, 0.571])
+            self.u = np.array([0.698, 0.0])
+            self.rho = np.array([0.445, 0.5])
+            x_mid = 0.5
+            r0[x <= x_mid] = self.rho[0]
+            r0[x > x_mid] = self.rho[1]
+            u0[x <= x_mid] = self.u[0]
+            u0[x > x_mid] = self.u[1]
+            p0[x <= x_mid] = self.p[0]
+            p0[x > x_mid] = self.p[1]
+        elif init_cond == "shock_entropy":
+            self.p = np.array([31/3, 1.0])
+            self.u = np.array([(4*np.sqrt(35))/9, 0.0])
+            self.rho = np.array([27/7, 1+0.2*np.sin(5*x)])
+        elif init_cond == "blast_waves":
+            self.p = np.array([1.0, 0.1])
+            self.u = np.array([0, 0.0])
+            self.rho = np.array([1.0, 0.125])
         self.p = torch.Tensor(self.p)
         self.u = torch.Tensor(self.u)
         self.rho = torch.Tensor(self.rho)
-        x_mid = 0.5
-        r0 = torch.zeros(m+1)
-        u0 = torch.zeros(m+1)
-        p0 = torch.zeros(m+1)
-        r0[x<=x_mid] = self.rho[0]
-        r0[x>x_mid] = self.rho[1]
-        u0[x <= x_mid] = self.u[0]
-        u0[x > x_mid] = self.u[1]
-        p0[x <= x_mid] = self.p[0]
-        p0[x > x_mid] = self.p[1]
         a0 = torch.sqrt(gamma*p0/r0)
         E0 = p0/(gamma-1) +0.5*r0*u0**2
         q0 = torch.stack([r0, r0*u0, E0]).T
