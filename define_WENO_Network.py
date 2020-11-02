@@ -437,9 +437,8 @@ class WENONetwork(nn.Module):
     def compute_error(self, u, u_ex):
         u_last = u
         u_ex_last = u_ex
-        xerr = torch.abs(u_ex_last - u_last)
-        xmaxerr = torch.max(xerr)
-        return xmaxerr
+        err = torch.mean((u_ex_last - u_last)**2)
+        return err
 
     def order_compute(self, iterations, initial_space_steps, initial_time_steps, params, problem_class, trainable):
         problem = problem_class(space_steps=initial_space_steps, time_steps=initial_time_steps, params=params)

@@ -72,4 +72,4 @@ for k in range(1):
 # g=train_model.parameters()
 # g.__next__()
 
-#torch.save(train_model, "model4")
+torch.save(train_model, "model4")
