@@ -78,14 +78,31 @@ class Euler_system():
         elif init_cond == "shock_entropy":
             self.p = np.array([31/3, 1.0])
             self.u = np.array([(4*np.sqrt(35))/9, 0.0])
-            self.rho = np.array([27/7, 1+0.2*np.sin(5*x)])
+            x_mid = -4
+            r0[x <= x_mid] = 27/7
+            r0[x > x_mid] = 1+0.2*torch.sin(5*torch.Tensor(x[x > x_mid]))
+            u0[x <= x_mid] = self.u[0]
+            u0[x > x_mid] = self.u[1]
+            p0[x <= x_mid] = self.p[0]
+            p0[x > x_mid] = self.p[1]
         elif init_cond == "blast_waves":
-            self.p = np.array([1.0, 0.1])
-            self.u = np.array([0, 0.0])
-            self.rho = np.array([1.0, 0.125])
+            self.p = np.array([1000.0, 0.01, 100.0])
+            self.u = np.array([0.0, 0.0, 0.0])
+            self.rho = np.array([1.0, 1.0, 1.0])
+            x_mid_1 = 0.1
+            x_mid_2 = 0.9
+            r0[x <= x_mid_1] = self.rho[0]
+            r0[(x > x_mid_1) & (x <= x_mid_2)]  = self.rho[1]
+            r0[x > x_mid_2] = self.rho[2]
+            u0[x <= x_mid_1] = self.u[0]
+            u0[(x > x_mid_1) & (x <= x_mid_2)] = self.u[1]
+            u0[x > x_mid_2] = self.u[2]
+            p0[x <= x_mid_1] = self.p[0]
+            p0[(x > x_mid_1) & (x <= x_mid_2)] = self.p[1]
+            p0[x > x_mid_2] = self.p[2]
         self.p = torch.Tensor(self.p)
         self.u = torch.Tensor(self.u)
-        self.rho = torch.Tensor(self.rho)
+        #self.rho = torch.Tensor(self.rho)
         a0 = torch.sqrt(gamma*p0/r0)
         E0 = p0/(gamma-1) +0.5*r0*u0**2
         q0 = torch.stack([r0, r0*u0, E0]).T

@@ -438,6 +438,7 @@ class WENONetwork(nn.Module):
         u_last = u
         u_ex_last = u_ex
         err = torch.mean((u_ex_last - u_last)**2)
+        #err = torch.mean(torch.abs(u_ex_last - u_last))
         return err
 
     def order_compute(self, iterations, initial_space_steps, initial_time_steps, params, problem_class, trainable):

@@ -7,8 +7,23 @@ from define_WENO_Network import WENONetwork
 from define_WENO_Euler import WENONetwork_Euler
 from define_Euler_system import Euler_system
 
+def monotonicity_loss(u):
+    monotonicity = np.sum(np.abs(np.minimum(u[:-1]-u[1:], 0)))
+    loss = monotonicity
+    return loss
+
+def monotonicity_loss_mid(u, x):
+    monotonicity = np.zeros(x.shape[0])
+    for k in range(x.shape[0]-1):
+        if x[k] <= 0.5:
+            monotonicity[k] = (np.abs(np.maximum((u[:-1]-u[1:])[k], 0)))
+        elif x[k] > 0.5:
+            monotonicity[k] = (np.abs(np.minimum((u[:-1]-u[1:])[k], 0)))
+    loss = np.sum(monotonicity)
+    return loss
+
 #train_model = WENONetwork_Euler()
-train_model = torch.load('model6')
+train_model = torch.load("C:/Users/Tatiana/Desktop/Research/Research_ML_WENO/Euler_System_Test/Models/Model_07/4")
 torch.set_default_dtype(torch.float64)
 params=None
 problem = Euler_system
@@ -79,11 +94,22 @@ error_p_t_max = np.max(np.abs(p_t - p_ex.detach().numpy()[:,-1]))
 error_p_nt_mean = np.mean((p_nt - p_ex.detach().numpy()[:,-1]) ** 2)
 error_p_t_mean = np.mean((p_t - p_ex.detach().numpy()[:,-1]) ** 2)
 
+loss_rho_nt = monotonicity_loss(rho_nt)
+loss_rho_t = monotonicity_loss(rho_t)
+loss_p_nt = monotonicity_loss(p_nt)
+loss_p_t = monotonicity_loss(p_t)
+loss_u_nt = monotonicity_loss_mid(u_nt,x)
+loss_u_t = monotonicity_loss_mid(u_t,x)
+
 err_mat = np.zeros((4,3))
 err_mat[0,:] = np.array([error_rho_nt_max, error_p_nt_max, error_u_nt_max])
 err_mat[1,:] = np.array([error_rho_t_max, error_p_t_max, error_u_t_max])
 err_mat[2,:] = np.array([error_rho_nt_mean, error_p_nt_mean, error_u_nt_mean])
 err_mat[3,:] = np.array([error_rho_t_mean, error_p_t_mean, error_u_t_mean])
+
+loss_mat = np.zeros((2,3))
+loss_mat[0,:] = np.array([loss_rho_nt, loss_p_nt, loss_u_nt])
+loss_mat[1,:] = np.array([loss_rho_t, loss_p_t, loss_u_t])
 
 plt.figure(1)
 plt.plot(x,rho_nt,x,rho_t,x_ex,rho_ex[:,-1].detach().numpy())
