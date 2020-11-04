@@ -23,11 +23,11 @@ def monotonicity_loss_mid(u, x):
     return loss
 
 #train_model = WENONetwork_Euler()
-train_model = torch.load("C:/Users/Tatiana/Desktop/Research/Research_ML_WENO/Euler_System_Test/Models/Model_07/4")
+train_model = torch.load("C:/Users/Tatiana/Desktop/Research/Research_ML_WENO/Euler_System_Test/Models/Model_08/4")
 torch.set_default_dtype(torch.float64)
 params=None
 problem = Euler_system
-sp_st = 64*2*2
+sp_st = 64*2*2*2
 init_cond = "Sod"
 problem_main = problem(space_steps=sp_st, init_cond = init_cond, time_steps=None, params = params)
 params = problem_main.get_params()

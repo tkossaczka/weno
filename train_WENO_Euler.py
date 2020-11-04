@@ -40,10 +40,10 @@ optimizer = optim.Adam(train_model.parameters())
 
 losses = []
 
-for j in range(15):
+for j in range(5):
     # Forward path
     params = None
-    sp_st = 64*2*2
+    sp_st = 64*2*2*2
     init_cond = "Sod"
     problem_main = problem_class(space_steps=sp_st, init_cond=init_cond, time_steps=None, params=params)
     #print(k, problem_main.time_steps)
@@ -87,7 +87,7 @@ for j in range(15):
         q_1_train = q_1_train.detach()
         q_2_train = q_2_train.detach()
         lamb = lamb.detach()
-    path = "C:/Users/Tatiana/Desktop/Research/Research_ML_WENO/Euler_System_Test/Models/Model_07/{}".format(j)
+    path = "C:/Users/Tatiana/Desktop/Research/Research_ML_WENO/Euler_System_Test/Models/Model_08/{}".format(j)
     torch.save(train_model, path)
     losses.append(single_problem_losses)
 
