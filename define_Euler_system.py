@@ -3,7 +3,7 @@ import torch
 from scipy.optimize import root_scalar
 
 class Euler_system():
-    def __init__(self, space_steps, init_cond, time_steps=None, params=None, w5_minus='Lax-Friedrichs'):
+    def __init__(self, space_steps, init_cond, time_steps=None, params=None, time_disc=None, w5_minus='Lax-Friedrichs'):
         """
         Atributes needed to be initialized to make WENO network functional
         space_steps, time_steps, initial_condition, boundary_condition, x, time, h, n
@@ -14,17 +14,17 @@ class Euler_system():
             self.init_params()
         self.space_steps = space_steps
         self.time_steps = time_steps
-        n, self.t, self.h, self.x, self.time = self.__compute_n_t_h_x_time()
+        n, self.t, self.h, self.x, self.time = self.__compute_n_t_h_x_time(time_disc)
         if time_steps is None:
             self.time_steps = n
         self.initial_condition, self.u0, self.a0 = self.__compute_initial_condition(init_cond)
-        self.boundary_condition = self.__compute_boundary_condition()
+        #self.boundary_condition = self.__compute_boundary_condition()
         self.w5_minus = w5_minus
 
     def init_params(self):
         params = dict()
         params["T"] = 0.1 #5 #1
-        params["e"] = 10 ** (-13)
+        params["e"] = 10 ** (-6)
         params["L"] = 0 #0 # -1
         params["R"] = 1 #2 # 1
         params["gamma"] = 1.4
@@ -33,17 +33,22 @@ class Euler_system():
     def get_params(self):
         return self.params
 
-    def __compute_n_t_h_x_time(self):
+    def __compute_n_t_h_x_time(self, time_disc):
         T = self.params["T"]
         L= self.params["L"]
         R = self.params["R"]
         m = self.space_steps
         h = (np.abs(L) + np.abs(R)) / m
-        n = np.ceil(T / (1 * h**(5/3)))  # 10 sod # 1 lax
-        n = int(n)
-        t = T / n
+        if time_disc == "adaptive":
+            n = None
+            t = None
+            time = None
+        elif time_disc == None:
+            n = np.ceil(T / (0.25 * h))  # 10 sod # 1 lax
+            n = int(n)
+            t = T / n
+            time = np.linspace(0, T, n + 1)
         x = np.linspace(L, R, m + 1)
-        time = np.linspace(0, T, n + 1)
         return n, t, h, x, time
 
     def __compute_initial_condition(self, init_cond):

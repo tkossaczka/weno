@@ -37,16 +37,16 @@ class WENONetwork_Euler(WENONetwork):
 
     def comp_eigenvectors_matrix(self, problem, q):
         gamma = problem.params['gamma']
-        R_right = torch.zeros(q.shape[0]-6,3,3)
-        R_left = torch.zeros(q.shape[0]-6,3,3)
-        rho_left = q[2:-4,0]
-        rho_right = q[3:-3,0]
-        rho_sqrt_left = torch.sqrt(q[2:-4,0])
-        rho_sqrt_right = torch.sqrt(q[3:-3,0])
-        E_left = q[2:-4,2]
-        E_right = q[3:-3,2]
-        rho_u_left = q[2:-4,1]
-        rho_u_right = q[3:-3,1]
+        R_right = torch.zeros(q.shape[0]-5,3,3)
+        R_left = torch.zeros(q.shape[0]-5,3,3)
+        rho_left = q[1:-4,0]
+        rho_right = q[2:-3,0]
+        rho_sqrt_left = torch.sqrt(q[1:-4,0])
+        rho_sqrt_right = torch.sqrt(q[2:-3,0])
+        E_left = q[1:-4,2]
+        E_right = q[2:-3,2]
+        rho_u_left = q[1:-4,1]
+        rho_u_right = q[2:-3,1]
         p_left = (gamma-1)*(E_left - 0.5*(rho_u_left**2)/rho_left)
         p_right = (gamma - 1) * (E_right - 0.5 * (rho_u_right ** 2) / rho_right)
         u = (rho_u_left/rho_sqrt_left + rho_u_right/rho_sqrt_right) / (rho_sqrt_left + rho_sqrt_right)
@@ -54,7 +54,7 @@ class WENONetwork_Euler(WENONetwork):
         c = torch.sqrt( (gamma-1)*(H-0.5*u**2) )
         b1 = (gamma-1)/c**2
         b2 = 0.5*(u**2)*b1
-        for i in range(0,q.shape[0]-6):
+        for i in range(0,q.shape[0]-5):
             R_right[i,:,:] = torch.Tensor([[1., 1., 1.],[u[i]-c[i], u[i], u[i]+c[i]],[H[i]-u[i]*c[i], 0.5*u[i]**2, H[i]+u[i]*c[i]]])
             R_left[i,:,:] = 0.5*torch.Tensor([[b2[i]+u[i]/c[i], -(b1[i]*u[i]+1/c[i]), b1[i]],[2*(1-b2[i]), 2*b1[i]*u[i], -2*b1[i]],[b2[i]-u[i]/c[i], -(b1[i]*u[i]-1/c[i]), b1[i]]])
         return R_left, R_right
@@ -167,6 +167,7 @@ class WENONetwork_Euler(WENONetwork):
 
     def init_Euler(self,problem, vectorized, just_one_time_step):
         m = problem.space_steps
+        h = problem.h
         n, t, h = problem.time_steps, problem.t, problem.h
         init_cond = problem.initial_condition
         a0 = problem.a0
@@ -196,11 +197,15 @@ class WENONetwork_Euler(WENONetwork):
         q_1 = q0_1
         q_2 = q0_2
 
-        return q_0, q_1, q_2, lamb, nn
+        return q_0, q_1, q_2, lamb, nn, h
 
-    def run_weno(self, problem, mweno, mapped, method, q_0, q_1, q_2, lamb, trainable, vectorized, k):
+    def run_weno(self, problem, mweno, mapped, method, q_0, q_1, q_2, lamb, trainable, vectorized, k, dt):
         gamma = problem.params['gamma']
         n, t, h = problem.time_steps, problem.t, problem.h
+        if dt == None:
+            t=t
+        else:
+            t=dt
         e = problem.params['e']
         if vectorized:
             q = torch.stack([q_0, q_1, q_2]).T
