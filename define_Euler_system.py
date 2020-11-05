@@ -39,7 +39,7 @@ class Euler_system():
         R = self.params["R"]
         m = self.space_steps
         h = (np.abs(L) + np.abs(R)) / m
-        n = np.ceil(T / (10 * h**(5/3)))  # 10 sod # 1 lax
+        n = np.ceil(T / (1 * h**(5/3)))  # 10 sod # 1 lax
         n = int(n)
         t = T / n
         x = np.linspace(L, R, m + 1)

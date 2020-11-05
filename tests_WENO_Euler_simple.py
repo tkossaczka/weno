@@ -11,8 +11,8 @@ train_model = WENONetwork_Euler()
 torch.set_default_dtype(torch.float64)
 params=None
 problem = Euler_system
-sp_st = 128*2
-init_cond = "shock_entropy"
+sp_st = 128
+init_cond = "Sod"
 problem_main = problem(space_steps=sp_st, init_cond = init_cond, time_steps=None, params = params)
 params = problem_main.get_params()
 gamma = params['gamma']
@@ -40,15 +40,15 @@ q_2_nt = q_2_nt.detach().numpy()
 # ax = fig.gca(projection='3d')
 # ax.plot_surface(X, Y, q_1_np/q_0_np, cmap=cm.viridis)
 
-x_ex = np.linspace(0, 1, 128*2*2+1)
+x_ex = np.linspace(0, 1, 128+1)
 p_ex = torch.zeros((x_ex.shape[0],t.shape[0]))
 rho_ex = torch.zeros((x_ex.shape[0],t.shape[0]))
 u_ex = torch.zeros((x_ex.shape[0],t.shape[0]))
 c_ex = torch.zeros((x_ex.shape[0],t.shape[0]))
 mach_ex = torch.zeros((x_ex.shape[0],t.shape[0]))
 
-# for k in range(0,t.shape[0]):
-#     p_ex[:,k], rho_ex[:,k], u_ex[:,k], c_ex[:,k], mach_ex[:,k] = problem_main.exact(x_ex, t[k])
+for k in range(0,t.shape[0]):
+    p_ex[:,k], rho_ex[:,k], u_ex[:,k], c_ex[:,k], mach_ex[:,k] = problem_main.exact(x_ex, t[k])
 
 # X, Y = np.meshgrid(x_ex, t, indexing="ij")
 # fig = plt.figure()
@@ -90,16 +90,17 @@ p_nt = (gamma - 1)*(E_nt-0.5*rho_nt*u_nt**2)
 # plt.plot(x,p_t,x_ex,p_ex[:,-1].detach().numpy())
 # plt.figure(3)
 # plt.plot(x,u_t,x_ex,u_ex[:,-1].detach().numpy())
-# plt.figure(4)
-# plt.plot(x,rho_nt,x_ex,rho_ex[:,-1].detach().numpy())
-# plt.figure(5)
-# plt.plot(x,p_nt,x_ex,p_ex[:,-1].detach().numpy())
-# plt.figure(6)
-# plt.plot(x,u_nt,x_ex,u_ex[:,-1].detach().numpy())
 
-plt.figure(1)
-plt.plot(x,rho_nt)
-plt.figure(2)
-plt.plot(x,p_nt)
-plt.figure(3)
-plt.plot(x,u_nt)
+plt.figure(4)
+plt.plot(x,rho_nt,x_ex,rho_ex[:,-1].detach().numpy())
+plt.figure(5)
+plt.plot(x,p_nt,x_ex,p_ex[:,-1].detach().numpy())
+plt.figure(6)
+plt.plot(x,u_nt,x_ex,u_ex[:,-1].detach().numpy())
+
+# plt.figure(1)
+# plt.plot(x,rho_nt)
+# plt.figure(2)
+# plt.plot(x,p_nt)
+# plt.figure(3)
+# plt.plot(x,u_nt)
