@@ -21,12 +21,14 @@ R_left, R_right = train_model.comp_eigenvectors_matrix(problem_main, problem_mai
 q_0, q_1, q_2, lamb, nn, h = train_model.init_Euler(problem_main, vectorized = True, just_one_time_step=False)
 q_0_nt, q_1_nt, q_2_nt, lamb_nt = q_0, q_1, q_2, lamb
 t_update = 0
-t = 0.95*h/lamb_nt
+t = 0.55*h/lamb_nt
 T = params['T']
 while t_update < T:
+    if (t_update + t) > T:
+        t=T-t_update
     t_update = t_update + t
-    q_0_nt, q_1_nt, q_2_nt, lamb_nt = train_model.run_weno(problem_main, mweno=False, mapped=False, method="char",q_0=q_0_nt, q_1=q_1_nt, q_2=q_2_nt, lamb=lamb_nt, vectorized=True, trainable=False, k=0, dt=t)
-    t = 0.95*h/lamb_nt
+    q_0_nt, q_1_nt, q_2_nt, lamb_nt = train_model.run_weno(problem_main, mweno=False, mapped=False, method="comp",q_0=q_0_nt, q_1=q_1_nt, q_2=q_2_nt, lamb=lamb_nt, vectorized=True, trainable=False, k=0, dt=t)
+    t = 0.55*h/lamb_nt
 # for k in range(nn):
 #     q_0_nt, q_1_nt, q_2_nt, lamb_nt = train_model.run_weno(problem_main, mweno = False, mapped = False, method="char", q_0=q_0_nt, q_1=q_1_nt, q_2=q_2_nt, lamb=lamb_nt, vectorized=True, trainable=False, k=k, dt=None)
 _,x,t = problem_main.transformation(q_0)
