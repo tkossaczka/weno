@@ -75,9 +75,7 @@ class WENONetwork_Euler(WENONetwork):
             uu_p = uu_p.T
             uu_n = uu_n.T
             uu_p_left = uu_p[:-1]
-            uu_p_right = uu_p[1:]
             uu_n_left = uu_n[:-1]
-            uu_n_right = uu_n[1:]
 
             def get_fluxes(uu):
                 if w5_minus is True:
@@ -111,23 +109,23 @@ class WENONetwork_Euler(WENONetwork):
             betap0, betap1, betap2 = get_betas(uu_p_left)
             betan0, betan1, betan2 = get_betas(uu_n_left)
 
-            # if trainable:
-            #     dif = self.__get_average_diff(uu)
-            #     dif = self.prepare_dif(dif)
-            #     beta_multiplicators = self.inner_nn_weno5(dif)[0, :, :].T + self.weno5_mult_bias
-            #     # beta_multiplicators_left = beta_multiplicators[:-1]
-            #     # beta_multiplicators_right = beta_multiplicators[1:]
-            #
-            #     betap_corrected_list = []
-            #     betan_corrected_list = []
-            #     for k, beta in enumerate([betap0, betap1, betap2]):
-            #         shift = k -1
-            #         betap_corrected_list.append(beta * (beta_multiplicators[3+shift:-3+shift]))
-            #     for k, beta in enumerate([betan0, betan1, betan2]):
-            #         shift = k - 1
-            #         betan_corrected_list.append(beta * (beta_multiplicators[3+shift:-3+shift]))
-            #     [betap0, betap1, betap2] = betap_corrected_list
-            #     [betan0, betan1, betan2] = betan_corrected_list
+            if trainable:
+                dif = self.__get_average_diff(uu_n)  # TODO is this allright???
+                dif = self.prepare_dif(dif)
+                beta_multiplicators = self.inner_nn_weno5(dif)[0, :, :].T + self.weno5_mult_bias
+                # beta_multiplicators_left = beta_multiplicators[:-1]
+                # beta_multiplicators_right = beta_multiplicators[1:]
+
+                betap_corrected_list = []
+                betan_corrected_list = []
+                for k, beta in enumerate([betap0, betap1, betap2]):
+                    shift = k -1
+                    betap_corrected_list.append(beta * (beta_multiplicators[3+shift:-3+shift]))
+                for k, beta in enumerate([betan0, betan1, betan2]):
+                    shift = k - 1
+                    betan_corrected_list.append(beta * (beta_multiplicators[3+shift:-3+shift]))
+                [betap0, betap1, betap2] = betap_corrected_list
+                [betan0, betan1, betan2] = betan_corrected_list
 
             d0 = 1 / 10
             d1 = 6 / 10
