@@ -26,6 +26,17 @@ class WENONetwork_Euler(WENONetwork):
     def prepare_dif(self, dif):
         return dif.T[None, :, :]
 
+    def __get_average_diff(self, uu):
+        dif = uu[1:] - uu[:-1]
+        dif_left = torch.zeros_like(uu)
+        dif_right = torch.zeros_like(uu)
+        dif_left[:-1] = dif
+        dif_left[-1] = dif[-1]
+        dif_right[1:] = dif
+        dif_right[0] = dif[0]
+        dif_final = 0.5 * dif_left + 0.5 * dif_right
+        return dif_final
+
     def flux_func(self, problem, q):
         gamma = problem.params['gamma']
         rho = q[:,0]
@@ -54,9 +65,11 @@ class WENONetwork_Euler(WENONetwork):
         c = torch.sqrt( (gamma-1)*(H-0.5*u**2) )
         b1 = (gamma-1)/c**2
         b2 = 0.5*(u**2)*b1
-        for i in range(0,q.shape[0]-5):
-            R_right[i,:,:] = torch.Tensor([[1., 1., 1.],[u[i]-c[i], u[i], u[i]+c[i]],[H[i]-u[i]*c[i], 0.5*u[i]**2, H[i]+u[i]*c[i]]])
-            R_left[i,:,:] = 0.5*torch.Tensor([[b2[i]+u[i]/c[i], -(b1[i]*u[i]+1/c[i]), b1[i]],[2*(1-b2[i]), 2*b1[i]*u[i], -2*b1[i]],[b2[i]-u[i]/c[i], -(b1[i]*u[i]-1/c[i]), b1[i]]])
+        R_right[:,:,:] = torch.stack([torch.stack([torch.ones_like(u), torch.ones_like(u), torch.ones_like(u)]), torch.stack([u - c, u, u + c]),torch.stack([H - u * c, 0.5 * u ** 2, H + u * c])]).permute([2, 0, 1])
+        R_left[:,:,:] = 0.5*torch.stack([torch.stack([b2+u/c, -(b1*u+1/c), b1]),torch.stack([2*(1-b2), 2*b1*u, -2*b1]),torch.stack([b2-u/c, -(b1*u-1/c), b1])]).permute([2, 0, 1])
+        # for i in range(0,q.shape[0]-6):
+        #     R_right[i,:,:] = torch.Tensor([[1., 1., 1.],[u[i]-c[i], u[i], u[i]+c[i]],[H[i]-u[i]*c[i], 0.5*u[i]**2, H[i]+u[i]*c[i]]])
+        #     R_left[i,:,:] = 0.5*torch.Tensor([[b2[i]+u[i]/c[i], -(b1[i]*u[i]+1/c[i]), b1[i]],[2*(1-b2[i]), 2*b1[i]*u[i], -2*b1[i]],[b2[i]-u[i]/c[i], -(b1[i]*u[i]-1/c[i]), b1[i]]])
         return R_left, R_right
 
     def WENO5_char(self, q, R_left, R_right, flux, lamb, e, w5_minus, mweno=True, mapped=False, trainable=True):
@@ -166,7 +179,10 @@ class WENONetwork_Euler(WENONetwork):
             fluxp_r = torch.matmul(R_right[i+1, :, :], fluxp.T)
             fluxn_r = torch.matmul(R_right[i, :, :], fluxn.T)
 
-            RHS[i,:] = fluxp_r - fluxn_r
+            if trainable:
+                RHS[i,:] = fluxp_r[:,0] - fluxn_r[:,0]
+            else:
+                RHS[i, :] = fluxp_r - fluxn_r
 
         return RHS
 
@@ -334,6 +350,6 @@ class WENONetwork_Euler(WENONetwork):
 
         return q_0_ret, q_1_ret, q_2_ret, lamb_ret
 
-    def forward(self, problem, q_0, q_1, q_2, lamb, k):
-        q_0, q_1, q_2, lamb = self.run_weno(problem, mweno=True, mapped=False, q_0=q_0, q_1=q_1, q_2=q_2, lamb=lamb, trainable=True, vectorized=True, k=k)
+    def forward(self, problem, method, q_0, q_1, q_2, lamb, k, dt):
+        q_0, q_1, q_2, lamb = self.run_weno(problem, mweno=True, mapped=False, method=method, q_0=q_0, q_1=q_1, q_2=q_2, lamb=lamb, trainable=True, vectorized=True, k=k, dt=dt)
         return q_0, q_1, q_2, lamb
