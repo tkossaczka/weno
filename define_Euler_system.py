@@ -23,7 +23,7 @@ class Euler_system():
 
     def init_params(self):
         params = dict()
-        params["T"] = 0.2 #5 #1
+        params["T"] = 0.1 #5 #1
         params["e"] = 10 ** (-6)
         params["L"] = 0 #0 # -1
         params["R"] = 1 #2 # 1

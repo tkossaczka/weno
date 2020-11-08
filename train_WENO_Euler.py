@@ -45,7 +45,7 @@ for j in range(25):
     # Forward path
     params = None
     sp_st = 64
-    init_cond = "Sod"
+    init_cond = "Lax"
     problem_main = problem_class(space_steps=sp_st, init_cond=init_cond, time_steps=None, params=params, time_disc=time_disc)
     #print(k, problem_main.time_steps)
     gamma = problem_main.params['gamma']
@@ -100,7 +100,7 @@ for j in range(25):
     q_1_train = q_1_train.detach()
     q_2_train = q_2_train.detach()
     lamb = lamb.detach()
-    path = "C:/Users/Tatiana/Desktop/Research/Research_ML_WENO/Euler_System_Test/Models/Model_12/{}".format(j)
+    path = "C:/Users/Tatiana/Desktop/Research/Research_ML_WENO/Euler_System_Test/Models/Model_13/{}".format(j)
     torch.save(train_model, path)
     losses.append(single_problem_losses)
 
