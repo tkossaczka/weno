@@ -350,6 +350,6 @@ class WENONetwork_Euler(WENONetwork):
 
         return q_0_ret, q_1_ret, q_2_ret, lamb_ret
 
-    def forward(self, problem, method, q_0, q_1, q_2, lamb, k, dt):
-        q_0, q_1, q_2, lamb = self.run_weno(problem, mweno=True, mapped=False, method=method, q_0=q_0, q_1=q_1, q_2=q_2, lamb=lamb, trainable=True, vectorized=True, k=k, dt=dt)
+    def forward(self, problem, method, q_0, q_1, q_2, lamb, k, dt, mweno, mapped):
+        q_0, q_1, q_2, lamb = self.run_weno(problem, mweno=mweno, mapped=mapped, method=method, q_0=q_0, q_1=q_1, q_2=q_2, lamb=lamb, trainable=True, vectorized=True, k=k, dt=dt)
         return q_0, q_1, q_2, lamb

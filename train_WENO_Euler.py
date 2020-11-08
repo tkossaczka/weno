@@ -40,13 +40,13 @@ optimizer = optim.Adam(train_model.parameters(), lr=0.01)
 
 losses = []
 method = "char"
-
+time_disc = None
 for j in range(25):
     # Forward path
     params = None
     sp_st = 64
     init_cond = "Sod"
-    problem_main = problem_class(space_steps=sp_st, init_cond=init_cond, time_steps=None, params=params)
+    problem_main = problem_class(space_steps=sp_st, init_cond=init_cond, time_steps=None, params=params, time_disc=time_disc)
     #print(k, problem_main.time_steps)
     gamma = problem_main.params['gamma']
     q_0, q_1, q_2, lamb, nn, h = train_model.init_Euler(problem_main, vectorized=True, just_one_time_step=True)
@@ -63,8 +63,16 @@ for j in range(25):
     q_2_train = q_2
     single_problem_losses = []
     print(nn)
+    # t = 0.5 * h / lamb
+    # q_0_train, q_1_train, q_2_train, lamb = train_model.forward(problem_main, method, q_0_train, q_1_train, q_2_train, lamb, k=0, dt=t, mweno=False, mapped=False)
+    # rho = q_0_train
+    # u = q_1_train / rho
+    # E = q_2_train
+    # p = (gamma - 1) * (E - 0.5 * rho * u ** 2)
+    # k=0
+    # p_ex, rho_ex, u_ex, _, _ = problem_main.exact(x_ex, t)
     for k in range(nn):
-        q_0_train, q_1_train, q_2_train, lamb = train_model.forward(problem_main, method, q_0_train, q_1_train, q_2_train, lamb, k, dt=None)
+        q_0_train, q_1_train, q_2_train, lamb = train_model.forward(problem_main, method, q_0_train, q_1_train, q_2_train, lamb, k, dt=None, mweno=True, mapped=False)
         rho = q_0_train
         u = q_1_train / rho
         E = q_2_train
@@ -74,13 +82,15 @@ for j in range(25):
     # Train model:
     optimizer.zero_grad()  # Clear gradients
     # Calculate loss
-    loss_0 = monotonicity_loss(rho) #, rho_ex[:, k+1])
+    # loss_0 = monotonicity_loss(rho)
     loss_00 = exact_loss(rho, rho_ex[:, k+1])
-    loss_1 = monotonicity_loss_mid(u, x)
+    # loss_00 = exact_loss(rho, rho_ex)
+    # loss_1 = monotonicity_loss_mid(u, x)
     loss_11 = exact_loss(u, u_ex[:, k + 1])
-    loss_2 = monotonicity_loss(p)
+    # loss_11 = exact_loss(u, u_ex)
+    # loss_2 = monotonicity_loss(p)
     loss_22 = exact_loss(p, p_ex[:, k + 1])
-    # loss = loss_0 + 1*loss_00 + loss_2 + 1*loss_22 + loss_1 + 1*loss_11
+    # loss_22 = exact_loss(p, p_ex)
     loss = loss_00 + loss_22 + loss_11
     loss.backward()  # Backward pass
     optimizer.step()  # Optimize weights
@@ -90,7 +100,7 @@ for j in range(25):
     q_1_train = q_1_train.detach()
     q_2_train = q_2_train.detach()
     lamb = lamb.detach()
-    path = "C:/Users/Tatiana/Desktop/Research/Research_ML_WENO/Euler_System_Test/Models/Model_11/{}".format(j)
+    path = "C:/Users/Tatiana/Desktop/Research/Research_ML_WENO/Euler_System_Test/Models/Model_12/{}".format(j)
     torch.save(train_model, path)
     losses.append(single_problem_losses)
 
