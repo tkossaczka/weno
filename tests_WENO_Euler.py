@@ -22,20 +22,20 @@ def monotonicity_loss_mid(u, x):
     loss = np.sum(monotonicity)
     return loss
 
-#train_model = WENONetwork_Euler()
-train_model = torch.load("C:/Users/Tatiana/Desktop/Research/Research_ML_WENO/Euler_System_Test/Models/Model_13/19")
+train_model = WENONetwork_Euler()
+train_model = torch.load("C:/Users/Tatiana/Desktop/Research/Research_ML_WENO/Euler_System_Test/Models/Model_16/9")
 torch.set_default_dtype(torch.float64)
 params=None
 problem = Euler_system
-sp_st = 64*2
-init_cond = "Lax"
+sp_st = 64*2*2 #*2*2*2
+init_cond = "shock_entropy"
 problem_main = problem(space_steps=sp_st, init_cond = init_cond, time_steps=None, params = params, time_disc="adaptive")
 params = problem_main.get_params()
 gamma = params['gamma']
 method = "char"
 T = params['T']
 
-q_0, q_1, q_2, lamb, nn, h = train_model.init_Euler(problem_main, vectorized = True, just_one_time_step=False)
+q_0, q_1, q_2, lamb, nn, h = train_model.init_Euler(problem_main, vectorized = True, just_one_time_step=True)
 q_0_t, q_1_t, q_2_t, lamb_t = q_0, q_1, q_2, lamb
 q_0_nt, q_1_nt, q_2_nt, lamb_nt = q_0, q_1, q_2, lamb
 
@@ -91,8 +91,6 @@ x_ex = np.linspace(0, 1, sp_st+1)
 # for k in range(0,t.shape[0]):
 #     p_ex[:,k], rho_ex[:,k], u_ex[:,k], c_ex[:,k], mach_ex[:,k] = problem_main.exact(x_ex, t[k])
 
-p_ex, rho_ex, u_ex, _,_ = problem_main.exact(x_ex, T)
-
 # X, Y = np.meshgrid(x_ex, t, indexing="ij")
 # fig = plt.figure()
 # ax = fig.gca(projection='3d')
@@ -107,6 +105,8 @@ rho_nt = q_0_nt
 u_nt = q_1_nt/rho_nt
 E_nt = q_2_nt
 p_nt = (gamma - 1)*(E_nt-0.5*rho_nt*u_nt**2)
+
+p_ex, rho_ex, u_ex, _,_ = problem_main.exact(x_ex, T)
 
 error_rho_nt_max = np.max(np.abs(rho_nt - rho_ex.detach().numpy()))
 error_rho_t_max = np.max(np.abs(rho_t - rho_ex.detach().numpy()))
@@ -145,3 +145,16 @@ plt.plot(x,p_nt, x,p_t,x_ex,p_ex.detach().numpy())
 plt.figure(3)
 plt.plot(x,u_nt, x,u_t,x_ex,u_ex.detach().numpy())
 
+# plt.figure(1)
+# plt.plot(x,rho_nt,x,rho_t)
+# plt.figure(2)
+# plt.plot(x,p_nt, x,p_t)
+# plt.figure(3)
+# plt.plot(x,u_nt, x,u_t)
+
+plt.figure(1)
+plt.plot(x,rho_nt)
+plt.figure(2)
+plt.plot(x,p_nt)
+plt.figure(3)
+plt.plot(x,u_nt)

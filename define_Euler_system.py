@@ -23,10 +23,10 @@ class Euler_system():
 
     def init_params(self):
         params = dict()
-        params["T"] = 0.1 #5 #1
+        params["T"] = 1.8 #0.1 #2 #0.1 #0.1 #5 #1
         params["e"] = 10 ** (-6)
-        params["L"] = 0 #0 # -1
-        params["R"] = 1 #2 # 1
+        params["L"] = -5 #-5 #0 #0 #0 # -1
+        params["R"] = 5 #5 #1 #1 #2 # 1
         params["gamma"] = 1.4
         self.params = params
 
@@ -45,6 +45,7 @@ class Euler_system():
             time = None
         elif time_disc == None:
             n = np.ceil(T / (0.5 * h))  # 10 sod # 1 lax
+            n = 256
             n = int(n)
             t = T / n
             time = np.linspace(0, T, n + 1)
