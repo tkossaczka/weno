@@ -122,6 +122,9 @@ class WENONetwork_Euler(WENONetwork):
             betap0, betap1, betap2 = get_betas(uu_p_left)
             betan0, betan1, betan2 = get_betas(uu_n_left)
 
+            old_betas_p = [betap0, betap1, betap2]
+            old_betas_n = [betan0, betan1, betan2]
+
             if trainable:
                 dif = self.__get_average_diff(uu_n)  # TODO is this allright???
                 dif = self.prepare_dif(dif)
@@ -144,16 +147,16 @@ class WENONetwork_Euler(WENONetwork):
             d1 = 6 / 10
             d2 = 3 / 10
 
-            def get_omegas_mweno(betas, ds):
-                beta_range_square = (betas[2] - betas[0]) ** 2
+            def get_omegas_mweno(betas, ds, old_betas):
+                beta_range_square = (old_betas[2] - old_betas[0]) ** 2
                 return [d / (e + beta) ** 2 * (beta_range_square + (e + beta) ** 2) for beta, d in zip(betas, ds)]
 
             def get_omegas_weno(betas, ds):
                 return [d / (e + beta) ** 2 for beta, d in zip(betas, ds)]
 
             omegas_func_dict = {0: get_omegas_weno, 1: get_omegas_mweno}
-            [omegap_0, omegap_1, omegap_2] = omegas_func_dict[int(mweno)]([betap0, betap1, betap2], [d0, d1, d2])
-            [omegan_0, omegan_1, omegan_2] = omegas_func_dict[int(mweno)]([betan0, betan1, betan2], [d0, d1, d2])
+            [omegap_0, omegap_1, omegap_2] = omegas_func_dict[int(mweno)]([betap0, betap1, betap2], [d0, d1, d2], old_betas_p)
+            [omegan_0, omegan_1, omegan_2] = omegas_func_dict[int(mweno)]([betan0, betan1, betan2], [d0, d1, d2], old_betas_n)
 
             def normalize(tensor_list):
                 sum_ = sum(tensor_list)  # note, that inbuilt sum applies __add__ iteratively therefore its overloaded-
