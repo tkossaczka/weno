@@ -213,7 +213,7 @@ class WENONetwork_Euler(WENONetwork):
         else:
             nn = n
 
-        lamb = lambda0
+        lamb = int(lambda0)
         q_0 = q0_0
         q_1 = q0_1
         q_2 = q0_2
@@ -286,12 +286,13 @@ class WENONetwork_Euler(WENONetwork):
             E = q_ret[:,2]
             p = (gamma-1)*(E-0.5*rho*u**2)
             a = (gamma*p/rho)**(1/2)
-            lamb_ret = torch.max(torch.abs(u)+a)
+            lamb_ret_0 = torch.max(torch.abs(u)+a)
+            lamb_ret = int(lamb_ret_0)
 
             q_0_ret = q_ret[:,0]
             q_1_ret = q_ret[:,1]
             q_2_ret = q_ret[:,2]
-        else:
+        else:     # ZATIAL NEFUNGUJE !
             q0_0 = q_0[:,k]
             q0_1 = q_1[:,k]
             q0_2 = q_2[:,k]

@@ -12,8 +12,8 @@ train_model = WENONetwork_Euler()
 torch.set_default_dtype(torch.float64)
 params=None
 problem = Euler_system
-sp_st = 2048
-init_cond = "shock_entropy"
+sp_st = 128
+init_cond = "Sod"
 problem_main = problem(space_steps=sp_st, init_cond = init_cond, time_steps=None, params = params, time_disc=None)
 params = problem_main.get_params()
 gamma = params['gamma']
@@ -30,8 +30,14 @@ T = params['T']
 #     t_update = t_update + t
 #     q_0_nt, q_1_nt, q_2_nt, lamb_nt = train_model.run_weno(problem_main, mweno=False, mapped=False, method="char",q_0=q_0_nt, q_1=q_1_nt, q_2=q_2_nt, lamb=lamb_nt, vectorized=True, trainable=False, k=0, dt=t)
 #     t = 0.55*h/lamb_nt
-for k in range(8):
+matr_0 = np.zeros((2049,40))
+matr_1 = np.zeros((2049,40))
+matr_2 = np.zeros((2049,40))
+for k in range(8*5):
     q_0_nt, q_1_nt, q_2_nt, lamb_nt = train_model.run_weno(problem_main, mweno = True, mapped = False, method="char", q_0=q_0_nt, q_1=q_1_nt, q_2=q_2_nt, lamb=lamb_nt, vectorized=True, trainable=False, k=k, dt=None)
+    matr_0[:, k] = q_0_nt.detach().numpy()
+    matr_1[:, k] = q_1_nt.detach().numpy()
+    matr_2[:, k] = q_2_nt.detach().numpy()
     print(k)
 _,x,t = problem_main.transformation(q_0)
 
@@ -49,7 +55,15 @@ x_ex = np.linspace(0, 1, 128+1)
 # for k in range(0,t.shape[0]):
 #     p_ex[:,k], rho_ex[:,k], u_ex[:,k], c_ex[:,k], mach_ex[:,k] = problem_main.exact(x_ex, t[k])
 
-p_ex, rho_ex, u_ex, _,_ = problem_main.exact(x_ex, T)
+p_ex, rho_ex, u_ex, _,_ = problem_main.exact(x_ex, 0.05)
+
+plt.figure(1)
+plt.plot(x_ex,rho_ex.detach().numpy())
+plt.figure(2)
+plt.plot(x_ex,p_ex.detach().numpy())
+plt.figure(3)
+plt.plot(x_ex,u_ex.detach().numpy())
+
 
 rho_nt = q_0_nt
 u_nt = q_1_nt/rho_nt

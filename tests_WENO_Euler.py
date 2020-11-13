@@ -23,20 +23,21 @@ def monotonicity_loss_mid(u, x):
     return loss
 
 train_model = WENONetwork_Euler()
-train_model = torch.load("C:/Users/Tatiana/Desktop/Research/Research_ML_WENO/Euler_System_Test/Models/Model_16/9")
+train_model = torch.load("C:/Users/Tatiana/Desktop/Research/Research_ML_WENO/Euler_System_Test/Models/Model_20/19")
 torch.set_default_dtype(torch.float64)
 params=None
 problem = Euler_system
-sp_st = 64*2*2 #*2*2*2
-init_cond = "shock_entropy"
-problem_main = problem(space_steps=sp_st, init_cond = init_cond, time_steps=None, params = params, time_disc="adaptive")
+sp_st = 64*2 #*2*2*2 #*2*2*2
+init_cond = "Sod"
+time_disc = None
+problem_main = problem(space_steps=sp_st, init_cond = init_cond, time_steps=None, params = params, time_disc=time_disc)
 params = problem_main.get_params()
 gamma = params['gamma']
 method = "char"
 T = params['T']
 
-q_0, q_1, q_2, lamb, nn, h = train_model.init_Euler(problem_main, vectorized = True, just_one_time_step=True)
-q_0_t, q_1_t, q_2_t, lamb_t = q_0, q_1, q_2, lamb
+q_0, q_1, q_2, lamb, nn, h = train_model.init_Euler(problem_main, vectorized = True, just_one_time_step=False)
+q_0_t_input, q_1_t_input, q_2_t_input, lamb_t_input = q_0, q_1, q_2, lamb
 q_0_nt, q_1_nt, q_2_nt, lamb_nt = q_0, q_1, q_2, lamb
 
 time_numb=0
@@ -50,20 +51,35 @@ while t_update < T:
     t = 0.9*h/lamb_nt
     time_numb = time_numb+1
 
-t_update = 0
-t = 0.9*h/lamb_t
-T = params['T']
-while t_update < T:
-    if (t_update + t) > T:
-        t=T-t_update
-    t_update = t_update + t
-    q_0_t, q_1_t, q_2_t, lamb_t = train_model.run_weno(problem_main, mweno=True, mapped=False, method="char",q_0=q_0_t, q_1=q_1_t, q_2=q_2_t, lamb=lamb_t, vectorized=True, trainable=True, k=0, dt=t)
-    t = 0.9*h/lamb_t
+with torch.no_grad():
+    t_update = 0
+    t = 0.9*h/lamb_t_input
+    T = params['T']
+    while t_update < T:
+        if (t_update + t) > T:
+            t=T-t_update
+        t_update = t_update + t
+        q_0_t, q_1_t, q_2_t, lamb_t = train_model.run_weno(problem_main, mweno=True, mapped=False, method="char",q_0=q_0_t_input, q_1=q_1_t_input, q_2=q_2_t_input, lamb=lamb_t_input, vectorized=True, trainable=True, k=0, dt=t)
+        t = 0.9*h/lamb_t
+        q_0_t_input = q_0_t.detach().numpy()
+        q_1_t_input = q_1_t.detach().numpy()
+        q_2_t_input = q_2_t.detach().numpy()
+        # lamb_t_input = lamb_t.detach().numpy()
+        q_0_t_input = torch.Tensor(q_0_t_input)
+        q_1_t_input = torch.Tensor(q_1_t_input)
+        q_2_t_input = torch.Tensor(q_2_t_input)
+        # lamb_t_input = torch.Tensor(lamb_t_input)
 
 _,x,t = problem_main.transformation(q_0)
 
 # for k in range(nn):
-#     q_0_t, q_1_t, q_2_t, lamb_t = train_model.run_weno(problem_main, mweno = True, mapped = False, method=method, q_0=q_0_t, q_1=q_1_t, q_2=q_2_t, lamb=lamb_t, vectorized=True, trainable=True, k=k, dt=None)
+#     q_0_t, q_1_t, q_2_t, lamb_t = train_model.run_weno(problem_main, mweno = True, mapped = False, method=method, q_0=q_0_t_input, q_1=q_1_t_input, q_2=q_2_t_input, lamb=lamb_t_input, vectorized=True, trainable=True, k=k, dt=None)
+#     q_0_t_input = q_0_t.detach().numpy()
+#     q_1_t_input = q_1_t.detach().numpy()
+#     q_2_t_input = q_2_t.detach().numpy()
+#     q_0_t_input = torch.Tensor(q_0_t_input)
+#     q_1_t_input = torch.Tensor(q_1_t_input)
+#     q_2_t_input = torch.Tensor(q_2_t_input)
 # for k in range(nn):
 #     q_0_nt, q_1_nt, q_2_nt, lamb_nt = train_model.run_weno(problem_main, mweno = True, mapped = False, method=method, q_0=q_0_nt, q_1=q_1_nt, q_2=q_2_nt, lamb=lamb_nt, vectorized=True, trainable=False, k=k, dt=None)
 # _,x,t = problem_main.transformation(q_0)
@@ -152,9 +168,16 @@ plt.plot(x,u_nt, x,u_t,x_ex,u_ex.detach().numpy())
 # plt.figure(3)
 # plt.plot(x,u_nt, x,u_t)
 
-plt.figure(1)
-plt.plot(x,rho_nt)
-plt.figure(2)
-plt.plot(x,p_nt)
-plt.figure(3)
-plt.plot(x,u_nt)
+# plt.figure(1)
+# plt.plot(x,rho_t)
+# plt.figure(2)
+# plt.plot(x,p_t)
+# plt.figure(3)
+# plt.plot(x,u_t)
+#
+# plt.figure(1)
+# plt.plot(x,rho_nt)
+# plt.figure(2)
+# plt.plot(x,p_nt)
+# plt.figure(3)
+# plt.plot(x,u_nt)

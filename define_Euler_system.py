@@ -23,10 +23,10 @@ class Euler_system():
 
     def init_params(self):
         params = dict()
-        params["T"] = 1.8 #0.1 #2 #0.1 #0.1 #5 #1
+        params["T"] = 0.1 #0.1 #2 #0.1 #0.1 #5 #1
         params["e"] = 10 ** (-6)
-        params["L"] = -5 #-5 #0 #0 #0 # -1
-        params["R"] = 5 #5 #1 #1 #2 # 1
+        params["L"] = 0 #-5 #0 #0 #0 # -1
+        params["R"] = 1 #5 #1 #1 #2 # 1
         params["gamma"] = 1.4
         self.params = params
 
@@ -45,7 +45,7 @@ class Euler_system():
             time = None
         elif time_disc == None:
             n = np.ceil(T / (0.5 * h))  # 10 sod # 1 lax
-            n = 256
+            #n = 2048
             n = int(n)
             t = T / n
             time = np.linspace(0, T, n + 1)
@@ -192,7 +192,7 @@ class Euler_system():
         c4 = torch.sqrt((gamma*p4)/rho4)
         def func(P,gamma,u1,u4,c1,c4):
             return (1/P) * (1 + (gamma-1)/2 * (u1-u4)/c1 - ((gamma-1)*c4*(P-1))/(c1*np.sqrt(2*gamma*(gamma-1+(gamma+1)*P))) ) ** ((2*gamma)/(gamma-1)) - PRL
-        sol = root_scalar(func, args=(gamma,u1,u4,c1,c4), method='bisect', bracket=[1,5], x0=3)
+        sol = root_scalar(func, args=(gamma,u1,u4,c1,c4), method='bisect', bracket=[1,10], x0=3)
         P = sol.root
         p3 = P*p4
         rho3 = rho4*((1+alph*P)/(alph+P))
