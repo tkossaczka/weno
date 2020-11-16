@@ -8,6 +8,7 @@ from scipy.stats import norm
 import torch.nn.functional as F # Sets of functions such as ReLU
 from torchvision import datasets, transforms # Popular datasets, architectures and common
 
+
 class WENONetwork(nn.Module):
     def __init__(self):
         super().__init__()

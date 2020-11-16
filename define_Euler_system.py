@@ -3,12 +3,11 @@ import torch
 from scipy.optimize import root_scalar
 
 class Euler_system():
-    def __init__(self, space_steps, init_cond, time_steps=None, params=None, time_disc=None, w5_minus='Lax-Friedrichs'):
+    def __init__(self, space_steps, init_cond, time_steps=None, params=None, time_disc=None, init_mid=False, w5_minus='Lax-Friedrichs'):
         """
         Atributes needed to be initialized to make WENO network functional
         space_steps, time_steps, initial_condition, boundary_condition, x, time, h, n
         """
-
         self.params = params
         if params is None:
             self.init_params()
@@ -17,7 +16,7 @@ class Euler_system():
         n, self.t, self.h, self.x, self.time = self.__compute_n_t_h_x_time(time_disc)
         if time_steps is None:
             self.time_steps = n
-        self.initial_condition, self.u0, self.a0 = self.__compute_initial_condition(init_cond)
+        self.initial_condition, self.u0, self.a0 = self.__compute_initial_condition(init_cond, init_mid)
         #self.boundary_condition = self.__compute_boundary_condition()
         self.w5_minus = w5_minus
 
@@ -52,24 +51,35 @@ class Euler_system():
         x = np.linspace(L, R, m + 1)
         return n, t, h, x, time
 
-    def __compute_initial_condition(self, init_cond):
+    def __compute_initial_condition(self, init_cond, init_mid=False):
         m = self.space_steps
         x = self.x
         gamma = self.params["gamma"]
+        T = self.params["T"]
         r0 = torch.zeros(m + 1)
         u0 = torch.zeros(m + 1)
         p0 = torch.zeros(m + 1)
         if init_cond == "Sod":
-            self.p = np.array([1.0, 0.1])
-            self.u = np.array([0.0, 0.0])
-            self.rho = np.array([1.0, 0.125])
-            x_mid = 0.5
-            r0[x <= x_mid] = self.rho[0]
-            r0[x > x_mid] = self.rho[1]
-            u0[x <= x_mid] = self.u[0]
-            u0[x > x_mid] = self.u[1]
-            p0[x <= x_mid] = self.p[0]
-            p0[x > x_mid] = self.p[1]
+            if init_mid == False:
+                self.p = np.array([1.0, 0.1])
+                self.u = np.array([0.0, 0.0])
+                self.rho = np.array([1.0, 0.125])
+                x_mid = 0.5
+                r0[x <= x_mid] = self.rho[0]
+                r0[x > x_mid] = self.rho[1]
+                u0[x <= x_mid] = self.u[0]
+                u0[x > x_mid] = self.u[1]
+                p0[x <= x_mid] = self.p[0]
+                p0[x > x_mid] = self.p[1]
+            elif init_mid == True:
+                self.p = np.array([1.0, 0.1])
+                self.u = np.array([0.0, 0.0])
+                self.rho = np.array([1.0, 0.125])
+                self.p = torch.Tensor(self.p)
+                self.u = torch.Tensor(self.u)
+                self.rho = torch.Tensor(self.rho)
+                x_ex = np.linspace(0, 1, m + 1)
+                p0, r0, u0, _, _ = self.exact(x_ex, T/2)
         elif init_cond == "Lax":
             self.p = np.array([3.528, 0.571])
             self.u = np.array([0.698, 0.0])
@@ -108,7 +118,7 @@ class Euler_system():
             p0[x > x_mid_2] = self.p[2]
         self.p = torch.Tensor(self.p)
         self.u = torch.Tensor(self.u)
-        #self.rho = torch.Tensor(self.rho)
+        self.rho = torch.Tensor(self.rho)
         a0 = torch.sqrt(gamma*p0/r0)
         E0 = p0/(gamma-1) +0.5*r0*u0**2
         q0 = torch.stack([r0, r0*u0, E0]).T
@@ -250,8 +260,8 @@ class Euler_system():
     def err(self, u_last):
         u_ex = self.exact()
         u_last = u_last.detach().numpy()
-        xerr = np.max(np.absolute(u_ex - u_last))
-        #xerr = np.mean((u_ex - u_last)**2)
+        #xerr = np.max(np.absolute(u_ex - u_last))
+        xerr = np.mean((u_ex - u_last)**2)
         return xerr
 
     def transformation(self, u):

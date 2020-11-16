@@ -5,6 +5,8 @@ from torch import optim
 from define_Euler_system import Euler_system
 import numpy as np
 import matplotlib.pyplot as plt
+import torch.onnx
+import os, sys
 
 torch.set_default_dtype(torch.float64)
 
@@ -41,15 +43,17 @@ optimizer = optim.Adam(train_model.parameters(), lr=0.01)
 losses = []
 method = "char"
 time_disc = None
-for j in range(10):
+for j in range(20):
     # Forward path
     params = None
     sp_st = 64
     init_cond = "Sod"
-    problem_main = problem_class(space_steps=sp_st, init_cond=init_cond, time_steps=None, params=params, time_disc=time_disc)
+    problem_main = problem_class(space_steps=sp_st, init_cond=init_cond, time_steps=None, params=params, time_disc=time_disc, init_mid=True)
     #print(k, problem_main.time_steps)
     gamma = problem_main.params['gamma']
-    q_0, q_1, q_2, lamb, nn, h = train_model.init_Euler(problem_main, vectorized=True, just_one_time_step=False)
+    T = problem_main.params["T"]
+    tt = problem_main.t
+    q_0, q_1, q_2, lamb, nn, h = train_model.init_Euler(problem_main, vectorized=True, just_one_time_step=True)
     _, x, t = problem_main.transformation(q_0)
     x_ex = torch.linspace(0, 1, sp_st + 1)
     p_ex = torch.zeros((x_ex.shape[0], t.shape[0]))
@@ -77,7 +81,8 @@ for j in range(10):
         u = q_1_train / rho
         E = q_2_train
         p = (gamma - 1) * (E - 0.5 * rho * u ** 2)
-        p_ex[:, k+1], rho_ex[:, k+1], u_ex[:, k+1], _, _ = problem_main.exact(x_ex, t[k+1])
+        #p_ex[:, k+1], rho_ex[:, k+1], u_ex[:, k+1], _, _ = problem_main.exact(x_ex, t[k+1])
+        p_ex[:, k+1], rho_ex[:, k+1], u_ex[:, k+1], _, _ = problem_main.exact(x_ex, T/2+tt)
         print(k)
     # Train model:
     optimizer.zero_grad()  # Clear gradients
@@ -99,9 +104,15 @@ for j in range(10):
     q_0_train = q_0_train.detach()
     q_1_train = q_1_train.detach()
     q_2_train = q_2_train.detach()
-    lamb = lamb.detach()
-    path = "C:/Users/Tatiana/Desktop/Research/Research_ML_WENO/Euler_System_Test/Models/Model_15/{}".format(j)
+    #lamb = lamb.detach()
+    base_path ="C:/Users/Tatiana/Desktop/Research/Research_ML_WENO/Euler_System_Test/Models/Model_22/"
+    if not os.path.exists(base_path):
+        os.mkdir(base_path)
+    path = os.path.join(base_path, "{}.pt".format(j))
     torch.save(train_model, path)
+    # onnx_path = os.path.join(base_path, "{}.onnx".format(j))
+    # torch.onnx.export(train_model, (problem_main, method, q_0_train, q_1_train, q_2_train, lamb, k, None, True, False),
+    #                   onnx_path, export_params=True,)
     losses.append(single_problem_losses)
 
 losses = np.array(losses)

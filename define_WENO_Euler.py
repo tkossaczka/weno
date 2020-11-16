@@ -136,10 +136,10 @@ class WENONetwork_Euler(WENONetwork):
                 betan_corrected_list = []
                 for k, beta in enumerate([betap0, betap1, betap2]):
                     shift = k -1
-                    betap_corrected_list.append(beta * (beta_multiplicators[3+shift:-3+shift]))
+                    betap_corrected_list.append(beta * (beta_multiplicators[3+shift:-3+shift,:]))
                 for k, beta in enumerate([betan0, betan1, betan2]):
                     shift = k - 1
-                    betan_corrected_list.append(beta * (beta_multiplicators[3+shift:-3+shift]))
+                    betan_corrected_list.append(beta * (beta_multiplicators[3+shift:-3+shift,:]))
                 [betap0, betap1, betap2] = betap_corrected_list
                 [betan0, betan1, betan2] = betan_corrected_list
 
@@ -151,7 +151,7 @@ class WENONetwork_Euler(WENONetwork):
                 beta_range_square = (old_betas[2] - old_betas[0]) ** 2
                 return [d / (e + beta) ** 2 * (beta_range_square + (e + beta) ** 2) for beta, d in zip(betas, ds)]
 
-            def get_omegas_weno(betas, ds):
+            def get_omegas_weno(betas, ds, old_betas):
                 return [d / (e + beta) ** 2 for beta, d in zip(betas, ds)]
 
             omegas_func_dict = {0: get_omegas_weno, 1: get_omegas_mweno}
@@ -216,7 +216,7 @@ class WENONetwork_Euler(WENONetwork):
         else:
             nn = n
 
-        lamb = int(lambda0)
+        lamb = float(lambda0)
         q_0 = q0_0
         q_1 = q0_1
         q_2 = q0_2
@@ -290,7 +290,7 @@ class WENONetwork_Euler(WENONetwork):
             p = (gamma-1)*(E-0.5*rho*u**2)
             a = (gamma*p/rho)**(1/2)
             lamb_ret_0 = torch.max(torch.abs(u)+a)
-            lamb_ret = int(lamb_ret_0)
+            lamb_ret = float(lamb_ret_0)
 
             q_0_ret = q_ret[:,0]
             q_1_ret = q_ret[:,1]
