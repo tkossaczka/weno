@@ -23,7 +23,7 @@ def monotonicity_loss_mid(u, x):
     return loss
 
 train_model = WENONetwork_Euler()
-train_model = torch.load("C:/Users/Tatiana/Desktop/Research/Research_ML_WENO/Euler_System_Test/Models/Model_22/19.pt")
+train_model = torch.load("C:/Users/Tatiana/Desktop/Research/Research_ML_WENO/Euler_System_Test/Models/Model_26/19.pt")
 torch.set_default_dtype(torch.float64)
 params=None
 problem = Euler_system
@@ -37,7 +37,7 @@ method = "char"
 T = params['T']
 
 q_0, q_1, q_2, lamb, nn, h = train_model.init_Euler(problem_main, vectorized = True, just_one_time_step=False)
-q_0_t_input, q_1_t_input, q_2_t_input, lamb_t_input = q_0, q_1, q_2, lamb
+q_0_t_input, q_1_t_input, q_2_t_input, lamb_t = q_0, q_1, q_2, lamb
 q_0_nt, q_1_nt, q_2_nt, lamb_nt = q_0, q_1, q_2, lamb
 
 time_numb=0
@@ -53,13 +53,13 @@ while t_update < T:
 
 with torch.no_grad():
     t_update = 0
-    t = 0.9*h/lamb_t_input
+    t = 0.9*h/lamb_t
     T = params['T']
     while t_update < T:
         if (t_update + t) > T:
             t=T-t_update
         t_update = t_update + t
-        q_0_t, q_1_t, q_2_t, lamb_t = train_model.run_weno(problem_main, mweno=True, mapped=False, method="char",q_0=q_0_t_input, q_1=q_1_t_input, q_2=q_2_t_input, lamb=lamb_t_input, vectorized=True, trainable=True, k=0, dt=t)
+        q_0_t, q_1_t, q_2_t, lamb_t = train_model.run_weno(problem_main, mweno=True, mapped=False, method="char",q_0=q_0_t_input, q_1=q_1_t_input, q_2=q_2_t_input, lamb=lamb_t, vectorized=True, trainable=True, k=0, dt=t)
         t = 0.9*h/lamb_t
         q_0_t_input = q_0_t.detach().numpy()
         q_1_t_input = q_1_t.detach().numpy()

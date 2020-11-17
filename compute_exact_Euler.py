@@ -41,6 +41,9 @@ for k in range(0,t.shape[0]):
 # ax = fig.gca(projection='3d')
 # ax.plot_surface(X, Y, rho_ex.detach().numpy()[0:2048 + 1:8], cmap=cm.viridis)
 
+# for k in range(x.shape[0]):
+#     plt.plot(x,u_ex_0[:,k])
+
 rho_ex_s = rho_ex[0:2048 + 1:8]
 u_ex_s = u_ex[0:2048 + 1:8]
 p_ex_s = p_ex[0:2048 + 1:8]
@@ -50,3 +53,5 @@ p_ex_s = p_ex[0:2048 + 1:8]
 torch.save(rho_ex, "C:/Users/Tatiana/Desktop/Research/Research_ML_WENO/Euler_System_Test/rho_ex")
 torch.save(u_ex, "C:/Users/Tatiana/Desktop/Research/Research_ML_WENO/Euler_System_Test/u_ex")
 torch.save(p_ex, "C:/Users/Tatiana/Desktop/Research/Research_ML_WENO/Euler_System_Test/p_ex")
+
+

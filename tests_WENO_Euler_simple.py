@@ -8,28 +8,37 @@ from define_WENO_Euler import WENONetwork_Euler
 from define_Euler_system import Euler_system
 
 train_model = WENONetwork_Euler()
+train_model = torch.load("C:/Users/Tatiana/Desktop/Research/Research_ML_WENO/Euler_System_Test/Models/Model_26/19.pt")
 torch.set_default_dtype(torch.float64)
 params=None
 problem = Euler_system
-sp_st = 64
+sp_st = 64*2
 init_cond = "Sod"
 problem_main = problem(space_steps=sp_st, init_cond = init_cond, time_steps=None, params = params)
 params = problem_main.get_params()
 gamma = params['gamma']
 
 q_0, q_1, q_2, lamb, nn, h = train_model.init_Euler(problem_main, vectorized = True, just_one_time_step=False)
-#q_0_t, q_1_t, q_2_t, lamb_t = q_0, q_1, q_2, lamb
+q_0_t_input, q_1_t_input, q_2_t_input, lamb_t = q_0, q_1, q_2, lamb
 q_0_nt, q_1_nt, q_2_nt, lamb_nt = q_0, q_1, q_2, lamb
 
-# for k in range(nn):
-#     q_0_t, q_1_t, q_2_t, lamb_t = train_model.run_weno(problem_main, mweno = True, mapped = False, q_0=q_0_t, q_1=q_1_t, q_2=q_2_t, lamb=lamb_t, vectorized=True, trainable=True, k=k)
+with torch.no_grad():
+    for k in range(nn):
+        q_0_t, q_1_t, q_2_t, lamb_t = train_model.run_weno(problem_main, mweno = True, mapped = False, method="char", q_0=q_0_t_input, q_1=q_1_t_input, q_2=q_2_t_input, lamb=lamb_t, vectorized=True, trainable=True, k=k, dt=None)
+        q_0_t_input = q_0_t.detach().numpy()
+        q_1_t_input = q_1_t.detach().numpy()
+        q_2_t_input = q_2_t.detach().numpy()
+        q_0_t_input = torch.Tensor(q_0_t_input)
+        q_1_t_input = torch.Tensor(q_1_t_input)
+        q_2_t_input = torch.Tensor(q_2_t_input)
+
 for k in range(nn):
     q_0_nt, q_1_nt, q_2_nt, lamb_nt = train_model.run_weno(problem_main, mweno = True, mapped = False, method="char", q_0=q_0_nt, q_1=q_1_nt, q_2=q_2_nt, lamb=lamb_nt, vectorized=True, trainable=False, k=k, dt=None)
 _,x,t = problem_main.transformation(q_0)
 
-# q_0_t = q_0_t.detach().numpy()
-# q_1_t = q_1_t.detach().numpy()
-# q_2_t = q_2_t.detach().numpy()
+q_0_t = q_0_t.detach().numpy()
+q_1_t = q_1_t.detach().numpy()
+q_2_t = q_2_t.detach().numpy()
 
 q_0_nt = q_0_nt.detach().numpy()
 q_1_nt = q_1_nt.detach().numpy()
@@ -55,10 +64,10 @@ for k in range(0,t.shape[0]):
 # ax = fig.gca(projection='3d')
 # ax.plot_surface(X, Y, rho_ex.detach().numpy(), cmap=cm.viridis)
 
-# rho_t = q_0_t
-# u_t = q_1_t/rho_t
-# E_t = q_2_t
-# p_t = (gamma - 1)*(E_t-0.5*rho_t*u_t**2)
+rho_t = q_0_t
+u_t = q_1_t/rho_t
+E_t = q_2_t
+p_t = (gamma - 1)*(E_t-0.5*rho_t*u_t**2)
 
 rho_nt = q_0_nt
 u_nt = q_1_nt/rho_nt
@@ -84,12 +93,12 @@ p_nt = (gamma - 1)*(E_nt-0.5*rho_nt*u_nt**2)
 # err_mat[2,:] = np.array([error_rho_nt_mean, error_p_nt_mean, error_u_nt_mean])
 # err_mat[3,:] = np.array([error_rho_t_mean, error_p_t_mean, error_u_t_mean])
 #
-# plt.figure(1)
-# plt.plot(x,rho_t,x_ex,rho_ex[:,-1].detach().numpy())
-# plt.figure(2)
-# plt.plot(x,p_t,x_ex,p_ex[:,-1].detach().numpy())
-# plt.figure(3)
-# plt.plot(x,u_t,x_ex,u_ex[:,-1].detach().numpy())
+plt.figure(1)
+plt.plot(x,rho_t,x_ex,rho_ex[:,-1].detach().numpy())
+plt.figure(2)
+plt.plot(x,p_t,x_ex,p_ex[:,-1].detach().numpy())
+plt.figure(3)
+plt.plot(x,u_t,x_ex,u_ex[:,-1].detach().numpy())
 
 plt.figure(4)
 plt.plot(x,rho_nt,x_ex,rho_ex[:,-1].detach().numpy())
