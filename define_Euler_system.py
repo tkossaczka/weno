@@ -44,7 +44,7 @@ class Euler_system():
             time = None
         elif time_disc == None:
             n = np.ceil(T / (0.5 * h))  # 10 sod # 1 lax
-            #n = 2048
+            n = 64
             n = int(n)
             t = T / n
             time = np.linspace(0, T, n + 1)

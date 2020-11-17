@@ -11,20 +11,20 @@ train_model = WENONetwork_Euler()
 torch.set_default_dtype(torch.float64)
 params=None
 problem = Euler_system
-sp_st = 128
+sp_st = 64
 init_cond = "Sod"
 problem_main = problem(space_steps=sp_st, init_cond = init_cond, time_steps=None, params = params)
 params = problem_main.get_params()
 gamma = params['gamma']
 
-q_0, q_1, q_2, lamb, nn = train_model.init_Euler(problem_main, vectorized = True, just_one_time_step=False)
+q_0, q_1, q_2, lamb, nn, h = train_model.init_Euler(problem_main, vectorized = True, just_one_time_step=False)
 #q_0_t, q_1_t, q_2_t, lamb_t = q_0, q_1, q_2, lamb
 q_0_nt, q_1_nt, q_2_nt, lamb_nt = q_0, q_1, q_2, lamb
 
 # for k in range(nn):
 #     q_0_t, q_1_t, q_2_t, lamb_t = train_model.run_weno(problem_main, mweno = True, mapped = False, q_0=q_0_t, q_1=q_1_t, q_2=q_2_t, lamb=lamb_t, vectorized=True, trainable=True, k=k)
 for k in range(nn):
-    q_0_nt, q_1_nt, q_2_nt, lamb_nt = train_model.run_weno(problem_main, mweno = True, mapped = False, q_0=q_0_nt, q_1=q_1_nt, q_2=q_2_nt, lamb=lamb_nt, vectorized=True, trainable=False, k=k)
+    q_0_nt, q_1_nt, q_2_nt, lamb_nt = train_model.run_weno(problem_main, mweno = True, mapped = False, method="char", q_0=q_0_nt, q_1=q_1_nt, q_2=q_2_nt, lamb=lamb_nt, vectorized=True, trainable=False, k=k, dt=None)
 _,x,t = problem_main.transformation(q_0)
 
 # q_0_t = q_0_t.detach().numpy()
