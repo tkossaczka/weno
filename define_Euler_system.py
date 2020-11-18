@@ -1,9 +1,10 @@
 import numpy as np
 import torch
 from scipy.optimize import root_scalar
+from initial_condition_generator import init_Euler
 
 class Euler_system():
-    def __init__(self, space_steps, init_cond, time_steps=None, params=None, time_disc=None, init_mid=False, w5_minus='Lax-Friedrichs'):
+    def __init__(self, space_steps, init_cond, time_steps=None, params=None, time_disc=None, init_mid=False, init_general=False, w5_minus='Lax-Friedrichs'):
         """
         Atributes needed to be initialized to make WENO network functional
         space_steps, time_steps, initial_condition, boundary_condition, x, time, h, n
@@ -16,7 +17,7 @@ class Euler_system():
         n, self.t, self.h, self.x, self.time = self.__compute_n_t_h_x_time(time_disc)
         if time_steps is None:
             self.time_steps = n
-        self.initial_condition, self.u0, self.a0 = self.__compute_initial_condition(init_cond, init_mid)
+        self.initial_condition, self.u0, self.a0 = self.__compute_initial_condition(init_cond, init_mid, init_general)
         #self.boundary_condition = self.__compute_boundary_condition()
         self.w5_minus = w5_minus
 
@@ -44,14 +45,14 @@ class Euler_system():
             time = None
         elif time_disc == None:
             n = np.ceil(T / (0.5 * h))  # 10 sod # 1 lax
-            #n = 416 Sod for 2048 space steps
+            #n = 416 #Sod for 2048 space steps
             n = int(n)
             t = T / n
             time = np.linspace(0, T, n + 1)
         x = np.linspace(L, R, m + 1)
         return n, t, h, x, time
 
-    def __compute_initial_condition(self, init_cond, init_mid=False):
+    def __compute_initial_condition(self, init_cond, init_mid, init_general):
         m = self.space_steps
         x = self.x
         gamma = self.params["gamma"]
@@ -60,7 +61,18 @@ class Euler_system():
         u0 = torch.zeros(m + 1)
         p0 = torch.zeros(m + 1)
         if init_cond == "Sod":
-            if init_mid == False:
+            if init_mid == True:
+                self.p = np.array([1.0, 0.1])
+                self.u = np.array([0.0, 0.0])
+                self.rho = np.array([1.0, 0.125])
+                self.p = torch.Tensor(self.p)
+                self.u = torch.Tensor(self.u)
+                self.rho = torch.Tensor(self.rho)
+                x_ex = np.linspace(0, 1, m + 1)
+                p0, r0, u0, _, _ = self.exact(x_ex, T / 2)
+            elif init_general == True:
+                r0, u0, p0, self.rho, self.u, self.p = init_Euler(x)
+            else:
                 self.p = np.array([1.0, 0.1])
                 self.u = np.array([0.0, 0.0])
                 self.rho = np.array([1.0, 0.125])
@@ -71,15 +83,6 @@ class Euler_system():
                 u0[x > x_mid] = self.u[1]
                 p0[x <= x_mid] = self.p[0]
                 p0[x > x_mid] = self.p[1]
-            elif init_mid == True:
-                self.p = np.array([1.0, 0.1])
-                self.u = np.array([0.0, 0.0])
-                self.rho = np.array([1.0, 0.125])
-                self.p = torch.Tensor(self.p)
-                self.u = torch.Tensor(self.u)
-                self.rho = torch.Tensor(self.rho)
-                x_ex = np.linspace(0, 1, m + 1)
-                p0, r0, u0, _, _ = self.exact(x_ex, T/2)
         elif init_cond == "Lax":
             self.p = np.array([3.528, 0.571])
             self.u = np.array([0.698, 0.0])
