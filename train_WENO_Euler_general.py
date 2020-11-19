@@ -59,27 +59,16 @@ def create_init_cond(df,x,row):
 #optimizer = optim.SGD(train_model.parameters(), lr=0.1)
 optimizer = optim.Adam(train_model.parameters(), lr=0.01)
 
-#df=pd.read_csv("C:/Users/Tatiana/Desktop/Research/Research_ML_WENO/Euler_System_Test/Euler_System_Data/parameters.txt")
-
+all_loss_test = []
 losses = []
 method = "char"
 time_disc = None
-for j in range(40):
+for j in range(20):
     # Forward path
     params = None
     sp_st = 64
     init_cond = "Sod"
-    #sample_id = random.randint(0,59)
-    #rho_ex = torch.load("C:/Users/Tatiana/Desktop/Research/Research_ML_WENO/Euler_System_Test/Euler_System_Data/rho_ex_{}".format(sample_id))
-    #u_ex = torch.load("C:/Users/Tatiana/Desktop/Research/Research_ML_WENO/Euler_System_Test/Euler_System_Data/u_ex_{}".format(sample_id))
-    #p_ex = torch.load("C:/Users/Tatiana/Desktop/Research/Research_ML_WENO/Euler_System_Test/Euler_System_Data/p_ex_{}".format(sample_id))
-    #divider = 32
-    #rho_ex_0 = rho_ex[0:2048 + 1:divider, 0:416 + 1:divider]
-    #u_ex_0 = u_ex[0:2048 + 1:divider, 0:416 + 1:divider]
-    #p_ex_0 = p_ex[0:2048 + 1:divider, 0:416 + 1:divider]
-    #time_st = p_ex_0.shape[1]
     problem_main = problem_class(space_steps=sp_st, init_cond=init_cond, time_steps=None, params=params, time_disc=time_disc, init_mid=False, init_general=True)
-    #print(k, problem_main.time_steps)
     gamma = problem_main.params['gamma']
     T = problem_main.params["T"]
     tt = problem_main.t
@@ -98,13 +87,13 @@ for j in range(40):
     q_1_train = q_1
     q_2_train = q_2
     single_problem_losses = []
+    loss_test = []
     for k in range(nn):
         q_0_train_out, q_1_train_out, q_2_train_out, lamb = train_model.forward(problem_main, method, q_0_train, q_1_train, q_2_train, lamb, k, dt=None, mweno=True, mapped=False)
         rho = q_0_train_out
         u = q_1_train_out / rho
         E = q_2_train_out
         p = (gamma - 1) * (E - 0.5 * rho * u ** 2)
-        #p_ex, rho_ex, u_ex, _, _ = problem_main.exact(x, t[k+1])
         q_0_train = q_0_train_out
         q_1_train = q_1_train_out
         q_2_train = q_2_train_out
@@ -131,18 +120,45 @@ for j in range(40):
     q_1_train = q_1_train.detach()
     q_2_train = q_2_train.detach()
     #lamb = lamb.detach()
-    base_path ="C:/Users/Tatiana/Desktop/Research/Research_ML_WENO/Euler_System_Test/Models/Model_29/"
+    base_path ="C:/Users/Tatiana/Desktop/Research/Research_ML_WENO/Euler_System_Test/Models/Model_30/"
     if not os.path.exists(base_path):
         os.mkdir(base_path)
     path = os.path.join(base_path, "{}.pt".format(j))
     torch.save(train_model, path)
-    # onnx_path = os.path.join(base_path, "{}.onnx".format(j))
-    # torch.onnx.export(train_model, (problem_main, method, q_0_train, q_1_train, q_2_train, lamb, k, None, True, False),
-    #                   onnx_path, export_params=True,)
     losses.append(single_problem_losses)
+    # TEST IF LOSS IS DECREASING WITH THE NUMBER OF ITERATIONS INCREASING
+    single_problem_loss_test = []
+    problem_test = problem_class(space_steps=sp_st, init_cond=init_cond, time_steps=None, params=params, time_disc=time_disc, init_mid=False, init_general=False)
+    q_0_test, q_1_test, q_2_test, lamb_test, nn, h = train_model.init_Euler(problem_test, vectorized=True, just_one_time_step=False)
+    q_0_input, q_1_input, q_2_input = q_0_test, q_1_test, q_2_test
+    with torch.no_grad():
+        for k in range(nn):
+            q_0_test, q_1_test, q_2_test, lamb_test = train_model.run_weno(problem_test, mweno = True, mapped = False, method="char", q_0=q_0_input, q_1=q_1_input, q_2=q_2_input, lamb=lamb_test, vectorized=True, trainable=True, k=k, dt=None)
+            q_0_input = q_0_test.detach().numpy()
+            q_1_input = q_1_test.detach().numpy()
+            q_2_input = q_2_test.detach().numpy()
+            q_0_input = torch.Tensor(q_0_input)
+            q_1_input = torch.Tensor(q_1_input)
+            q_2_input = torch.Tensor(q_2_input)
+    rho_test = q_0_test
+    u_test = q_1_test / rho_test
+    E_test = q_2_test
+    p_test = (gamma - 1) * (E_test - 0.5 * rho_test * u_test ** 2)
+    p_ex_test, rho_ex_test, u_ex_test, _, _ = problem_test.exact(x, T)
+    single_problem_loss_test.append(exact_loss(rho_test, rho_ex_test))
+    single_problem_loss_test.append(exact_loss(p_test, p_ex_test))
+    single_problem_loss_test.append(exact_loss(u_test, u_ex_test))
+    loss_test.append(single_problem_loss_test)
+    all_loss_test.append(loss_test)
 
 losses = np.array(losses)
-plt.plot(losses[:,-1])
+all_loss_test = np.array(all_loss_test)
+plt.figure(1)
+plt.plot(all_loss_test[:,:,0])
+plt.figure(2)
+plt.plot(all_loss_test[:,:,1])
+plt.figure(3)
+plt.plot(all_loss_test[:,:,2])
 
 #plt.plot(S, V_train.detach().numpy())
 #print("number of parameters:", sum(p.numel() for p in train_model.parameters()))
