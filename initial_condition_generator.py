@@ -19,7 +19,7 @@ def init_Euler(x):
     elif sw==2: #change p and rho
         rho[0] = random.uniform(0.5, 10.0)
         p[0]=rho[0]
-        rho[1] = rho[0]*(1/random.uniform(2,100))
+        rho[1] = rho[0]*(1/random.uniform(2,10))
         p[1] = rho[1]
     x_mid = 0.5
     r0[x <= x_mid] = rho[0]

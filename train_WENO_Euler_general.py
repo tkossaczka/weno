@@ -59,7 +59,7 @@ def create_init_cond(df,x,row):
 #optimizer = optim.SGD(train_model.parameters(), lr=0.1)
 optimizer = optim.Adam(train_model.parameters(), lr=0.01)
 
-df=pd.read_csv("C:/Users/Tatiana/Desktop/Research/Research_ML_WENO/Euler_System_Test/Euler_System_Data/parameters.txt")
+#df=pd.read_csv("C:/Users/Tatiana/Desktop/Research/Research_ML_WENO/Euler_System_Test/Euler_System_Data/parameters.txt")
 
 losses = []
 method = "char"
@@ -69,29 +69,31 @@ for j in range(40):
     params = None
     sp_st = 64
     init_cond = "Sod"
-    sample_id = random.randint(0,2)
-    rho_ex = torch.load("C:/Users/Tatiana/Desktop/Research/Research_ML_WENO/Euler_System_Test/Euler_System_Data/rho_ex_{}".format(sample_id))
-    u_ex = torch.load("C:/Users/Tatiana/Desktop/Research/Research_ML_WENO/Euler_System_Test/Euler_System_Data/u_ex_{}".format(sample_id))
-    p_ex = torch.load("C:/Users/Tatiana/Desktop/Research/Research_ML_WENO/Euler_System_Test/Euler_System_Data/p_ex_{}".format(sample_id))
-    divider = 32
-    rho_ex_0 = rho_ex[0:2048 + 1:divider, 0:416 + 1:divider]
-    u_ex_0 = u_ex[0:2048 + 1:divider, 0:416 + 1:divider]
-    p_ex_0 = p_ex[0:2048 + 1:divider, 0:416 + 1:divider]
-    time_st = p_ex_0.shape[1]
-    problem_main = problem_class(space_steps=sp_st, init_cond=init_cond, time_steps=None, params=params, time_disc=time_disc, init_mid=False, init_general=False)
+    #sample_id = random.randint(0,59)
+    #rho_ex = torch.load("C:/Users/Tatiana/Desktop/Research/Research_ML_WENO/Euler_System_Test/Euler_System_Data/rho_ex_{}".format(sample_id))
+    #u_ex = torch.load("C:/Users/Tatiana/Desktop/Research/Research_ML_WENO/Euler_System_Test/Euler_System_Data/u_ex_{}".format(sample_id))
+    #p_ex = torch.load("C:/Users/Tatiana/Desktop/Research/Research_ML_WENO/Euler_System_Test/Euler_System_Data/p_ex_{}".format(sample_id))
+    #divider = 32
+    #rho_ex_0 = rho_ex[0:2048 + 1:divider, 0:416 + 1:divider]
+    #u_ex_0 = u_ex[0:2048 + 1:divider, 0:416 + 1:divider]
+    #p_ex_0 = p_ex[0:2048 + 1:divider, 0:416 + 1:divider]
+    #time_st = p_ex_0.shape[1]
+    problem_main = problem_class(space_steps=sp_st, init_cond=init_cond, time_steps=None, params=params, time_disc=time_disc, init_mid=False, init_general=True)
     #print(k, problem_main.time_steps)
     gamma = problem_main.params['gamma']
     T = problem_main.params["T"]
     tt = problem_main.t
+    time_st = problem_main.time.shape[0]
+    x = problem_main.x
+    time = problem_main.time
     q_0, q_1, q_2, lamb, nn, h = train_model.init_Euler(problem_main, vectorized=True, just_one_time_step=True)
     init_id = random.randint(0,time_st-2)
     print(init_id)
-    # init_id = 60
-    q_0 = rho_ex_0[:,init_id] # rho
-    q_1 = u_ex_0[:,init_id]*rho_ex_0[:,init_id]   #rho*u
-    q_2 = p_ex_0[:,init_id]/(gamma-1) +0.5*rho_ex_0[:,init_id]*u_ex_0[:,init_id]*2 # E
+    p_ex_0, rho_ex_0, u_ex_0, _, _ = problem_main.exact(x, time[init_id])
+    q_0 = rho_ex_0 # rho
+    q_1 = u_ex_0*rho_ex_0  #rho*u
+    q_2 = p_ex_0/(gamma-1) +0.5*rho_ex_0*u_ex_0*2 # E
     lamb = float(torch.max(torch.abs(u_ex_0 + (gamma*p_ex_0/rho_ex_0)**(1/2))))
-    _, x, t = problem_main.transformation(q_0)
     q_0_train = q_0
     q_1_train = q_1
     q_2_train = q_2
@@ -107,9 +109,7 @@ for j in range(40):
         q_1_train = q_1_train_out
         q_2_train = q_2_train_out
         print(k)
-    rho_ex_1 = rho_ex_0[:,init_id + 1]
-    u_ex_1 = u_ex_0[:,init_id + 1]
-    p_ex_1 = p_ex_0[:, init_id + 1]
+    p_ex_1, rho_ex_1, u_ex_1, _, _ = problem_main.exact(x, time[init_id+1])
     # Train model:
     optimizer.zero_grad()  # Clear gradients
     # Calculate loss
@@ -131,7 +131,7 @@ for j in range(40):
     q_1_train = q_1_train.detach()
     q_2_train = q_2_train.detach()
     #lamb = lamb.detach()
-    base_path ="C:/Users/Tatiana/Desktop/Research/Research_ML_WENO/Euler_System_Test/Models/Model_28/"
+    base_path ="C:/Users/Tatiana/Desktop/Research/Research_ML_WENO/Euler_System_Test/Models/Model_29/"
     if not os.path.exists(base_path):
         os.mkdir(base_path)
     path = os.path.join(base_path, "{}.pt".format(j))

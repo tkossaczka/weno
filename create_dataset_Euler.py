@@ -15,7 +15,7 @@ sp_st = 2048
 init_cond = "Sod"
 base_path = "C:/Users/Tatiana/Desktop/Research/Research_ML_WENO/Euler_System_Test/Euler_System_Data/"
 
-for j in range(3):
+for j in range(60):
     print(j)
     problem_main = problem(space_steps=sp_st, init_cond=init_cond, time_steps=None, params=params, time_disc=None, init_mid=False, init_general=True)
     params = problem_main.get_params()

@@ -70,6 +70,7 @@ for j in range(40):
     q_0 = rho_ex_0[:,init_id] # rho
     q_1 = u_ex_0[:,init_id]*rho_ex_0[:,init_id]   #rho*u
     q_2 = p_ex_0[:,init_id]/(gamma-1) +0.5*rho_ex_0[:,init_id]*u_ex_0[:,init_id]*2 # E
+    lamb = float(torch.max(torch.abs(u_ex_0 + (gamma*p_ex_0/rho_ex_0)**(1/2))))
     _, x, t = problem_main.transformation(q_0)
     # x_ex = torch.linspace(0, 1, sp_st + 1)
     # p_ex = torch.zeros((x_ex.shape[0], t.shape[0]))
