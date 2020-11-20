@@ -63,7 +63,7 @@ all_loss_test = []
 losses = []
 method = "char"
 time_disc = None
-for j in range(20):
+for j in range(100):
     # Forward path
     params = None
     sp_st = 64
@@ -112,6 +112,8 @@ for j in range(20):
     loss_22 = exact_loss(p, p_ex_1)
     # loss_22 = exact_loss(p, p_ex)
     loss =  loss_00 + loss_11 + loss_22 #+ loss_00 + loss_22 + loss_11
+    if np.isnan(loss.detach().numpy())== True:
+        exit()
     loss.backward()  # Backward pass
     optimizer.step()  # Optimize weights
     print(j, k, loss)
@@ -120,7 +122,7 @@ for j in range(20):
     q_1_train = q_1_train.detach()
     q_2_train = q_2_train.detach()
     #lamb = lamb.detach()
-    base_path ="C:/Users/Tatiana/Desktop/Research/Research_ML_WENO/Euler_System_Test/Models/Model_30/"
+    base_path ="C:/Users/Tatiana/Desktop/Research/Research_ML_WENO/Euler_System_Test/Models/Model_38/"
     if not os.path.exists(base_path):
         os.mkdir(base_path)
     path = os.path.join(base_path, "{}.pt".format(j))
@@ -145,6 +147,8 @@ for j in range(20):
     E_test = q_2_test
     p_test = (gamma - 1) * (E_test - 0.5 * rho_test * u_test ** 2)
     p_ex_test, rho_ex_test, u_ex_test, _, _ = problem_test.exact(x, T)
+    if np.isnan(exact_loss(rho_test, rho_ex_test).detach().numpy())==True:
+        exit()
     single_problem_loss_test.append(exact_loss(rho_test, rho_ex_test))
     single_problem_loss_test.append(exact_loss(p_test, p_ex_test))
     single_problem_loss_test.append(exact_loss(u_test, u_ex_test))
