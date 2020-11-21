@@ -63,7 +63,7 @@ all_loss_test = []
 losses = []
 method = "char"
 time_disc = None
-for j in range(100):
+for j in range(150):
     # Forward path
     params = None
     sp_st = 64
@@ -122,7 +122,7 @@ for j in range(100):
     q_1_train = q_1_train.detach()
     q_2_train = q_2_train.detach()
     #lamb = lamb.detach()
-    base_path ="C:/Users/Tatiana/Desktop/Research/Research_ML_WENO/Euler_System_Test/Models/Model_38/"
+    base_path ="C:/Users/Tatiana/Desktop/Research/Research_ML_WENO/Euler_System_Test/Models/Model_39/"
     if not os.path.exists(base_path):
         os.mkdir(base_path)
     path = os.path.join(base_path, "{}.pt".format(j))

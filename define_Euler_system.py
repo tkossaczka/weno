@@ -46,6 +46,7 @@ class Euler_system():
         elif time_disc == None:
             n = np.ceil(T / (0.5 * h))  # 10 sod # 1 lax
             #n = 416 #Sod for 2048 space steps
+            #n = 2048 #shock_entropy for 2048 space steps
             n = int(n)
             t = T / n
             time = np.linspace(0, T, n + 1)
@@ -97,6 +98,7 @@ class Euler_system():
         elif init_cond == "shock_entropy":
             self.p = np.array([31/3, 1.0])
             self.u = np.array([(4*np.sqrt(35))/9, 0.0])
+            self.rho = 0
             x_mid = -4
             r0[x <= x_mid] = 27/7
             r0[x > x_mid] = 1+0.2*torch.sin(5*torch.Tensor(x[x > x_mid]))

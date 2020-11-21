@@ -347,10 +347,15 @@ class WENONetwork_Euler(WENONetwork):
             q_0[:,k+1] = q[:,0]
             q_1[:,k+1] = q[:,1]
             q_2[:,k+1] = q[:,2]
-            rho = q_0
-            u = q_1 / rho
-            E = q_2
-            p = (gamma - 1) * (E - 0.5 * rho * u ** 2)
+            # rho = q_0
+            # u = q_1 / rho
+            # E = q_2
+            # p = (gamma - 1) * (E - 0.5 * rho * u ** 2)
+
+            q_0_ret = q_0[:,k+1]
+            q_1_ret = q_1[:,k+1]
+            q_2_ret = q_2[:,k+1]
+            lamb_ret = float(lamb)
 
         return q_0_ret, q_1_ret, q_2_ret, lamb_ret
 

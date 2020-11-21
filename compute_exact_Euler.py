@@ -12,21 +12,36 @@ torch.set_default_dtype(torch.float64)
 params=None
 problem = Euler_system
 sp_st = 2048
-init_cond = "Sod"
-problem_main = problem(space_steps=sp_st, init_cond = init_cond, time_steps=None, params = params, time_disc=None, init_mid=False)
+init_cond = "shock_entropy"
+problem_main = problem(space_steps=sp_st, init_cond = init_cond, time_steps=None, params = params, time_disc=None, init_mid=False, init_general=False)
 params = problem_main.get_params()
 gamma = params['gamma']
 tt = problem_main.t
 
 #R_left, R_right = train_model.comp_eigenvectors_matrix(problem_main, problem_main.initial_condition)
-q_0, q_1, q_2, lamb, nn, h = train_model.init_Euler(problem_main, vectorized = True, just_one_time_step=False)
+q_0, q_1, q_2, lamb, nn, h = train_model.init_Euler(problem_main, vectorized = False, just_one_time_step=False)
 q_0_nt, q_1_nt, q_2_nt, lamb_nt = q_0, q_1, q_2, lamb
+
+for k in range(nn):
+    q_0_nt[:,k+1], q_1_nt[:,k+1], q_2_nt[:,k+1], lamb_nt = train_model.run_weno(problem_main, mweno = True, mapped = False, method="char", q_0=q_0_nt[:,k], q_1=q_1_nt[:,k], q_2=q_2_nt[:,k], lamb=lamb_nt, vectorized=True, trainable=False, k=k, dt=None)
 
 _,x,t = problem_main.transformation(q_0)
 
 q_0_nt = q_0_nt.detach().numpy()
 q_1_nt = q_1_nt.detach().numpy()
 q_2_nt = q_2_nt.detach().numpy()
+
+rho_nt = q_0_nt
+u_nt = q_1_nt/rho_nt
+E_nt = q_2_nt
+p_nt = (gamma - 1)*(E_nt-0.5*rho_nt*u_nt**2)
+
+plt.figure(1)
+plt.plot(x,rho_nt[:,-1])
+plt.figure(2)
+plt.plot(x,p_nt)
+plt.figure(3)
+plt.plot(x,u_nt)
 
 x_ex = np.linspace(0, 1, 2048+1)
 p_ex = torch.zeros((x_ex.shape[0],t.shape[0]))
