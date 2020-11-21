@@ -36,12 +36,18 @@ u_nt = q_1_nt/rho_nt
 E_nt = q_2_nt
 p_nt = (gamma - 1)*(E_nt-0.5*rho_nt*u_nt**2)
 
+rho_ex = torch.tensor(rho_nt)
+u_ex = torch.tensor(u_nt)
+E_ex = torch.tensor(E_nt)
+p_ex = torch.tensor(p_nt)
+
+
 plt.figure(1)
 plt.plot(x,rho_nt[:,-1])
 plt.figure(2)
-plt.plot(x,p_nt)
+plt.plot(x,p_nt[:,-1])
 plt.figure(3)
-plt.plot(x,u_nt)
+plt.plot(x,u_nt[:,-1])
 
 x_ex = np.linspace(0, 1, 2048+1)
 p_ex = torch.zeros((x_ex.shape[0],t.shape[0]))
@@ -50,11 +56,11 @@ u_ex = torch.zeros((x_ex.shape[0],t.shape[0]))
 
 for k in range(0,t.shape[0]):
     p_ex[:,k], rho_ex[:,k], u_ex[:,k], _,_ = problem_main.exact(x_ex, t[k])
-#
-# X, Y = np.meshgrid(x_ex[0:2048 + 1:8], t, indexing="ij")
-# fig = plt.figure()
-# ax = fig.gca(projection='3d')
-# ax.plot_surface(X, Y, rho_ex.detach().numpy()[0:2048 + 1:8], cmap=cm.viridis)
+
+X, Y = np.meshgrid(x, t, indexing="ij")
+fig = plt.figure()
+ax = fig.gca(projection='3d')
+ax.plot_surface(X, Y, rho_nt, cmap=cm.viridis)
 
 # for k in range(x.shape[0]):
 #     plt.plot(x,u_ex_0[:,k])
@@ -65,8 +71,15 @@ p_ex_s = p_ex[0:2048 + 1:8]
 # q0_ex = torch.Tensor(q0_ex)
 # q1_ex = torch.Tensor(q1_ex)
 # q2_ex = torch.Tensor(q2_ex)
-torch.save(rho_ex, "C:/Users/Tatiana/Desktop/Research/Research_ML_WENO/Euler_System_Test/rho_ex")
-torch.save(u_ex, "C:/Users/Tatiana/Desktop/Research/Research_ML_WENO/Euler_System_Test/u_ex")
-torch.save(p_ex, "C:/Users/Tatiana/Desktop/Research/Research_ML_WENO/Euler_System_Test/p_ex")
+torch.save(rho_ex, "C:/Users/Tatiana/Desktop/Research/Research_ML_WENO/Euler_System_Test/Shock_entropy_exact/rho_ex")
+torch.save(u_ex, "C:/Users/Tatiana/Desktop/Research/Research_ML_WENO/Euler_System_Test/Shock_entropy_exact/u_ex")
+torch.save(p_ex, "C:/Users/Tatiana/Desktop/Research/Research_ML_WENO/Euler_System_Test/Shock_entropy_exact/p_ex")
+torch.save(E_ex, "C:/Users/Tatiana/Desktop/Research/Research_ML_WENO/Euler_System_Test/Shock_entropy_exact/E_ex")
+torch.save(x, "C:/Users/Tatiana/Desktop/Research/Research_ML_WENO/Euler_System_Test/Shock_entropy_exact/x_ex")
+torch.save(t, "C:/Users/Tatiana/Desktop/Research/Research_ML_WENO/Euler_System_Test/Shock_entropy_exact/t_ex")
+
+
+
+
 
 
