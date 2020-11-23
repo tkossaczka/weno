@@ -27,10 +27,10 @@ train_model = torch.load("C:/Users/Tatiana/Desktop/Research/Research_ML_WENO/Eul
 torch.set_default_dtype(torch.float64)
 params=None
 problem = Euler_system
-sp_st = 64 #*2*2*2 #*2*2*2
-init_cond = "Sod"
+sp_st = 64*2*2 #*2*2*2 #*2*2*2
+init_cond = "shock_entropy"
 time_disc = None
-problem_main = problem(space_steps=sp_st, init_cond = init_cond, time_steps=None, params = params, time_disc=time_disc, init_mid=False, init_general=True)
+problem_main = problem(space_steps=sp_st, init_cond = init_cond, time_steps=None, params = params, time_disc=time_disc, init_mid=False, init_general=False)
 params = problem_main.get_params()
 gamma = params['gamma']
 method = "char"
@@ -122,7 +122,15 @@ u_nt = q_1_nt/rho_nt
 E_nt = q_2_nt
 p_nt = (gamma - 1)*(E_nt-0.5*rho_nt*u_nt**2)
 
-p_ex, rho_ex, u_ex, _,_ = problem_main.exact(x_ex, T)
+# p_ex, rho_ex, u_ex, _,_ = problem_main.exact(x_ex, T)
+rho_ex=torch.load("C:/Users/Tatiana/Desktop/Research/Research_ML_WENO/Euler_System_Test/Shock_entropy_exact/rho_ex")
+u_ex=torch.load("C:/Users/Tatiana/Desktop/Research/Research_ML_WENO/Euler_System_Test/Shock_entropy_exact/u_ex")
+p_ex=torch.load("C:/Users/Tatiana/Desktop/Research/Research_ML_WENO/Euler_System_Test/Shock_entropy_exact/p_ex")
+divider = 8
+rho_ex_s=rho_ex[0:2048 + 1:divider, 0:2048 + 1:divider]
+u_ex_s=u_ex[0:2048 + 1:divider, 0:2048 + 1:divider]
+p_ex_s=p_ex[0:2048 + 1:divider, 0:2048 + 1:divider]
+p_ex, rho_ex, u_ex = p_ex_s[:,-1], rho_ex_s[:,-1], u_ex_s[:,-1]
 
 error_rho_nt_max = np.max(np.abs(rho_nt - rho_ex.detach().numpy()))
 error_rho_t_max = np.max(np.abs(rho_t - rho_ex.detach().numpy()))
@@ -155,11 +163,11 @@ loss_mat[0,:] = np.array([loss_rho_nt, loss_p_nt, loss_u_nt])
 loss_mat[1,:] = np.array([loss_rho_t, loss_p_t, loss_u_t])
 
 plt.figure(1)
-plt.plot(x,rho_nt,x,rho_t,x_ex,rho_ex.detach().numpy())
+plt.plot(x,rho_nt,x,rho_t,x,rho_ex.detach().numpy())
 plt.figure(2)
-plt.plot(x,p_nt, x,p_t,x_ex,p_ex.detach().numpy())
+plt.plot(x,p_nt, x,p_t,x,p_ex.detach().numpy())
 plt.figure(3)
-plt.plot(x,u_nt, x,u_t,x_ex,u_ex.detach().numpy())
+plt.plot(x,u_nt, x,u_t,x,u_ex.detach().numpy())
 
 # plt.figure(1)
 # plt.plot(x,rho_nt,x,rho_t)
