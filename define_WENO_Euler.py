@@ -11,13 +11,13 @@ class WENONetwork_Euler(WENONetwork):
         net = nn.Sequential(
             nn.Conv1d(3, 20, kernel_size=5, stride=1, padding=2),
             nn.ELU(),
-            # nn.Conv1d(20, 40, kernel_size=5, stride=1, padding=2),
-            # nn.ELU(),
-            # nn.Conv1d(40, 80, kernel_size=1, stride=1, padding=0),
-            # nn.ELU(),
-            # nn.Conv1d(80, 40, kernel_size=1, stride=1, padding=0),
-            # nn.ELU(),
-            nn.Conv1d(20, 20, kernel_size=3, stride=1, padding=1),
+            nn.Conv1d(20, 40, kernel_size=5, stride=1, padding=2),
+            nn.ELU(),
+            nn.Conv1d(40, 80, kernel_size=1, stride=1, padding=0),
+            nn.ELU(),
+            nn.Conv1d(80, 40, kernel_size=1, stride=1, padding=0),
+            nn.ELU(),
+            nn.Conv1d(40, 20, kernel_size=3, stride=1, padding=1),
             nn.ELU(),
             nn.Conv1d(20, 3, kernel_size=1, stride=1, padding=0),
             nn.Sigmoid())
@@ -362,3 +362,5 @@ class WENONetwork_Euler(WENONetwork):
     def forward(self, problem, method, q_0, q_1, q_2, lamb, k, dt, mweno, mapped):
         q_0, q_1, q_2, lamb = self.run_weno(problem, mweno=mweno, mapped=mapped, method=method, q_0=q_0, q_1=q_1, q_2=q_2, lamb=lamb, trainable=True, vectorized=True, k=k, dt=dt)
         return q_0, q_1, q_2, lamb
+
+    
