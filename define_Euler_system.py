@@ -23,7 +23,7 @@ class Euler_system():
 
     def init_params(self):
         params = dict()
-        params["T"] = 0.03 #1.8 #0.1 #0.1 #2 #0.1 #0.1 #5 #1
+        params["T"] = 0.1 #1.8 #0.1 #0.1 #2 #0.1 #0.1 #5 #1
         params["e"] = 10 ** (-6)
         params["L"] = 0 #-5 #0 #0 #0 # -1
         params["R"] = 1 #5 #1 #1 #2 # 1
@@ -44,7 +44,7 @@ class Euler_system():
             t = None
             time = None
         elif time_disc == None:
-            n = np.ceil(T / (0.9 * h))  # 10 sod # 1 lax
+            n = np.ceil(T / (0.5 * h))  # 10 sod # 1 lax
             #n = 64
             #n = 416 #Sod for 2048 space steps
             #n = 2048 #shock_entropy for 2048 space steps
@@ -79,23 +79,23 @@ class Euler_system():
                 self.u = np.array([0.0, 0.0])
                 self.rho = np.array([1.0, 0.125])
                 x_mid = 0.5
-                r0[x < x_mid] = self.rho[0]
-                r0[x >= x_mid] = self.rho[1]
-                u0[x < x_mid] = self.u[0]
-                u0[x >= x_mid] = self.u[1]
-                p0[x < x_mid] = self.p[0]
-                p0[x >= x_mid] = self.p[1]
+                r0[x <= x_mid] = self.rho[0]
+                r0[x > x_mid] = self.rho[1]
+                u0[x <= x_mid] = self.u[0]
+                u0[x > x_mid] = self.u[1]
+                p0[x <= x_mid] = self.p[0]
+                p0[x > x_mid] = self.p[1]
         elif init_cond == "Lax":
             self.p = np.array([3.528, 0.571])
             self.u = np.array([0.698, 0.0])
             self.rho = np.array([0.445, 0.5])
             x_mid = 0.5
-            r0[x < x_mid] = self.rho[0]
-            r0[x >= x_mid] = self.rho[1]
-            u0[x < x_mid] = self.u[0]
-            u0[x >= x_mid] = self.u[1]
-            p0[x < x_mid] = self.p[0]
-            p0[x >= x_mid] = self.p[1]
+            r0[x <= x_mid] = self.rho[0]
+            r0[x > x_mid] = self.rho[1]
+            u0[x <= x_mid] = self.u[0]
+            u0[x > x_mid] = self.u[1]
+            p0[x <= x_mid] = self.p[0]
+            p0[x > x_mid] = self.p[1]
         elif init_cond == "shock_entropy":
             self.p = np.array([31/3, 1.0])
             self.u = np.array([(4*np.sqrt(35))/9, 0.0])

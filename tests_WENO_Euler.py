@@ -23,14 +23,14 @@ def monotonicity_loss_mid(u, x):
     return loss
 
 train_model = WENONetwork_Euler()
-train_model = torch.load("C:/Users/Tatiana/Desktop/Research/Research_ML_WENO/Euler_System_Test/Models/Model_39/62.pt")
+train_model = torch.load("C:/Users/Tatiana/Desktop/Research/Research_ML_WENO/Euler_System_Test/Models/Model_48/149.pt")  # 36.62 works good obtained with old IC
 torch.set_default_dtype(torch.float64)
 params=None
 problem = Euler_system
 sp_st = 64 #*2*2*2 #*2*2*2
-init_cond = "Lax"
+init_cond = "Sod"
 time_disc = None
-problem_main = problem(space_steps=sp_st, init_cond = init_cond, time_steps=None, params = params, time_disc=time_disc, init_mid=False, init_general=True)
+problem_main = problem(space_steps=sp_st, init_cond = init_cond, time_steps=None, params = params, time_disc=time_disc, init_mid=False, init_general=False)
 params = problem_main.get_params()
 gamma = params['gamma']
 method = "char"
@@ -123,6 +123,7 @@ E_nt = q_2_nt
 p_nt = (gamma - 1)*(E_nt-0.5*rho_nt*u_nt**2)
 
 p_ex, rho_ex, u_ex, _,_ = problem_main.exact(x_ex, T)
+E_ex = p_ex/(gamma-1)+0.5*rho_ex*u_ex**2
 # rho_ex=torch.load("C:/Users/Tatiana/Desktop/Research/Research_ML_WENO/Euler_System_Test/Shock_entropy_exact/rho_ex")
 # u_ex=torch.load("C:/Users/Tatiana/Desktop/Research/Research_ML_WENO/Euler_System_Test/Shock_entropy_exact/u_ex")
 # p_ex=torch.load("C:/Users/Tatiana/Desktop/Research/Research_ML_WENO/Euler_System_Test/Shock_entropy_exact/p_ex")
@@ -168,6 +169,8 @@ plt.figure(2)
 plt.plot(x,p_nt, x,p_t,x,p_ex.detach().numpy())
 plt.figure(3)
 plt.plot(x,u_nt, x,u_t,x,u_ex.detach().numpy())
+# plt.figure(4)
+# plt.plot(x,E_nt, x,E_t,x,E_ex.detach().numpy())
 
 # plt.figure(1)
 # plt.plot(x,rho_nt,x,rho_t)

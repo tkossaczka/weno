@@ -13,7 +13,7 @@ torch.set_default_dtype(torch.float64)
 params=None
 problem = Euler_system
 sp_st = 64
-init_cond = "Sod"
+init_cond = "Lax"
 problem_main = problem(space_steps=sp_st, init_cond = init_cond, time_steps=None, params = params, time_disc=None, init_mid=False, init_general=False)
 params = problem_main.get_params()
 gamma = params['gamma']
@@ -113,16 +113,16 @@ p_nt = (gamma - 1)*(E_nt-0.5*rho_nt*u_nt**2)
 # plt.figure(3)
 # plt.plot(x,u_t,x_ex,u_ex[:,-1].detach().numpy())
 
-plt.figure(4)
-plt.plot(x_ex,rho_ex[:,-1].detach().numpy())
-plt.figure(5)
-plt.plot(x_ex,p_ex[:,-1].detach().numpy())
-plt.figure(6)
-plt.plot(x_ex,u_ex[:,-1].detach().numpy())
+# plt.figure(4)
+# plt.plot(x_ex,rho_ex[:,-1].detach().numpy())
+# plt.figure(5)
+# plt.plot(x_ex,p_ex[:,-1].detach().numpy())
+# plt.figure(6)
+# plt.plot(x_ex,u_ex[:,-1].detach().numpy())
 
 plt.figure(1)
-plt.plot(x,rho_nt)
+plt.plot(x,rho_nt,x_ex,rho_ex[:,-1].detach().numpy())
 plt.figure(2)
-plt.plot(x,p_nt)
+plt.plot(x,p_nt,x_ex,p_ex[:,-1].detach().numpy())
 plt.figure(3)
-plt.plot(x,u_nt)
+plt.plot(x,u_nt,x_ex,u_ex[:,-1].detach().numpy())
