@@ -39,6 +39,13 @@ def exact_loss(u, u_ex):
     loss = error
     return loss
 
+def overflows_loss(u, u_ex):
+    u_max = torch.max(u_ex)
+    u_min = torch.min(u_ex)
+    overflows = torch.sum(torch.abs(torch.min(u, u_min)-u_min) + torch.max(u, u_max)-u_max )
+    loss = overflows # peeks_left + peeks_right
+    return loss
+
 def create_init_cond(df,x,row):
     m = x.shape[0]
     r0 = torch.zeros(m)
@@ -71,7 +78,7 @@ all_loss_test = []
 losses = []
 method = "char"
 time_disc = None
-for j in range(150):
+for j in range(70):
     #init_id = 0
     #print(j)
     # Forward path
@@ -89,6 +96,12 @@ for j in range(150):
     init_id = random.randint(0,time_st-2)
     print(init_id)
     p_ex_0, rho_ex_0, u_ex_0, _, _ = problem_main.exact(x, time[init_id])
+    # MACH test
+    # c = np.sqrt(gamma * p_ex_0 / rho_ex_0)
+    # MA = u_ex_0 / c
+    # if not all(i < 1 for i in MA):
+    #     print('mach error')
+    #     exit()
     q_0 = rho_ex_0 # rho
     q_1 = u_ex_0*rho_ex_0  #rho*u
     q_2 = p_ex_0/(gamma-1) +0.5*rho_ex_0*u_ex_0*2 # E
@@ -122,7 +135,8 @@ for j in range(150):
     #loss_2 = monotonicity_loss(p)
     loss_22 = exact_loss(p, p_ex_1)
     # loss_22 = exact_loss(p, p_ex)
-    loss =  loss_00 + loss_11 + loss_22 #+ loss_00 + loss_22 + loss_11
+    loss_3 = overflows_loss(u,u_ex_1)
+    loss =  loss_00 + loss_11 + loss_22 #+ 5*loss_3 #+ loss_00 + loss_22 + loss_11
     if np.isnan(loss.detach().numpy())== True:
         exit()
     loss.backward()  # Backward pass
@@ -133,7 +147,7 @@ for j in range(150):
     q_1_train = q_1_train.detach()
     q_2_train = q_2_train.detach()
     #lamb = lamb.detach()
-    base_path ="C:/Users/Tatiana/Desktop/Research/Research_ML_WENO/Euler_System_Test/Models/Model_51/"
+    base_path ="C:/Users/Tatiana/Desktop/Research/Research_ML_WENO/Euler_System_Test/Models/Model_58/"
     if not os.path.exists(base_path):
         os.mkdir(base_path)
     path = os.path.join(base_path, "{}.pt".format(j))
@@ -145,14 +159,29 @@ for j in range(150):
     q_0_test, q_1_test, q_2_test, lamb_test, nn, h = train_model.init_Euler(problem_test, vectorized=True, just_one_time_step=False)
     q_0_input, q_1_input, q_2_input = q_0_test, q_1_test, q_2_test
     with torch.no_grad():
-        for k in range(nn):
-            q_0_test, q_1_test, q_2_test, lamb_test = train_model.run_weno(problem_test, mweno = True, mapped = False, method="char", q_0=q_0_input, q_1=q_1_input, q_2=q_2_input, lamb=lamb_test, vectorized=True, trainable=True, k=k, dt=None)
+        t_update = 0
+        t = 0.9 * h / lamb_test
+        while t_update < T:
+            if (t_update + t) > T:
+                t = T - t_update
+            t_update = t_update + t
+            q_0_test, q_1_test, q_2_test, lamb_test = train_model.run_weno(problem_main, mweno=True, mapped=False, method="char", q_0=q_0_input, q_1=q_1_input, q_2=q_2_input,lamb=lamb_test, vectorized=True, trainable=True, k=0, dt=t)
+            t = 0.9 * h / lamb_test
             q_0_input = q_0_test.detach().numpy()
             q_1_input = q_1_test.detach().numpy()
             q_2_input = q_2_test.detach().numpy()
             q_0_input = torch.Tensor(q_0_input)
             q_1_input = torch.Tensor(q_1_input)
             q_2_input = torch.Tensor(q_2_input)
+    # with torch.no_grad():
+    #     for k in range(nn):
+    #         q_0_test, q_1_test, q_2_test, lamb_test = train_model.run_weno(problem_test, mweno = True, mapped = False, method="char", q_0=q_0_input, q_1=q_1_input, q_2=q_2_input, lamb=lamb_test, vectorized=True, trainable=True, k=k, dt=None)
+    #         q_0_input = q_0_test.detach().numpy()
+    #         q_1_input = q_1_test.detach().numpy()
+    #         q_2_input = q_2_test.detach().numpy()
+    #         q_0_input = torch.Tensor(q_0_input)
+    #         q_1_input = torch.Tensor(q_1_input)
+    #         q_2_input = torch.Tensor(q_2_input)
     rho_test = q_0_test
     u_test = q_1_test / rho_test
     E_test = q_2_test

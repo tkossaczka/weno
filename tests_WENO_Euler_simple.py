@@ -13,7 +13,7 @@ torch.set_default_dtype(torch.float64)
 params=None
 problem = Euler_system
 sp_st = 64
-init_cond = "Lax"
+init_cond = "Sod"
 problem_main = problem(space_steps=sp_st, init_cond = init_cond, time_steps=None, params = params, time_disc=None, init_mid=False, init_general=False)
 params = problem_main.get_params()
 gamma = params['gamma']
@@ -75,7 +75,7 @@ for k in range(0,t.shape[0]):
 # X, Y = np.meshgrid(x_ex, t, indexing="ij")
 # fig = plt.figure()
 # ax = fig.gca(projection='3d')
-# ax.plot_surface(X, Y, rho_ex.detach().numpy(), cmap=cm.viridis)
+# ax.plot_surface(X, Y, mach_ex.detach().numpy(), cmap=cm.viridis)
 
 # rho_t = q_0_t
 # u_t = q_1_t/rho_t

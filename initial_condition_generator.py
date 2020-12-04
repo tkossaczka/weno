@@ -7,17 +7,22 @@ def init_Euler(x):
     r0 = torch.zeros(m)
     u0 = torch.zeros(m)
     p0 = torch.zeros(m)
-    # sw = random.randint(0,2)
+    sw = random.randint(0,1)
     p = np.array([1.0, 0.1])
     u = np.array([0.0, 0.0])
     rho = np.array([1.0, 0.125])
-    p[0] = random.uniform(0.5,10) * p[0] + random.uniform(-0.05, 0.05)
-    p[1] = (1/random.uniform(5,10)) * p[0] #+ random.uniform(-0.05, 0.05)
-    rho[0] = p[0]
-    rho[1] = p[1] + random.uniform(-0.05, 0.05)
-    u[0] = random.uniform(0.0,1.0)
+    if sw==0:
+        p[0] = random.uniform(0.5,10) * p[0] + random.uniform(-0.05, 0.05)
+        p[1] = (1/random.uniform(5,10)) * p[0] #+ random.uniform(-0.05, 0.05)
+        rho[0] = p[0]
+        rho[1] = p[1] + random.uniform(-0.05, 0.05)
+        u[0] = random.uniform(0.0,1.0)
+    if sw==1:
+        rho[0] = random.uniform(1.0, 3.0) * rho[0]
+        rho[1] = (1 / 10) * rho[0]  + random.uniform(-0.05, 0.05)
+        u[0] = random.uniform(0.0,1.0)
     # if sw==0: # change rho
-    #     rho[0] = random.uniform(0.5,2.0)
+    #     rho[0] = random.uniform(1.0,2.0)
     #     rho[1] = rho[0]/10 + random.uniform(-0.05, 0.05)
     # elif sw==1: # change u
     #     u[0] = random.uniform(0.0,1.0)
