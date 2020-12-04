@@ -122,20 +122,23 @@ for j in range(70):
         q_2_train = q_2_train_out
         #print(k)
     p_ex_1, rho_ex_1, u_ex_1, _, _ = problem_main.exact(x, time[init_id+1])
+    q_0_ex = rho_ex_1
+    q_1_ex = u_ex_1*rho_ex_1
+    q_2_ex = p_ex_1/(gamma-1) + 0.5*rho_ex_1*u_ex_1**2
     # p_ex_1, rho_ex_1, u_ex_1 = p_ex_s[:,init_id+1], rho_ex_s[:,init_id+1], u_ex_s[:,init_id+1]
     # Train model:
     optimizer.zero_grad()  # Clear gradients
     # Calculate loss
     #loss_0 = monotonicity_loss(rho)
     loss_00 = exact_loss(rho, rho_ex_1)
-    # loss_00 = exact_loss(rho, rho_ex)
+    # loss_00 = exact_loss(q_0_train, q_0_ex)
     #loss_1 = monotonicity_loss_mid(u, x)
     loss_11 = exact_loss(u, u_ex_1)
-    # loss_11 = exact_loss(u, u_ex)
+    # loss_11 = exact_loss(q_1_train, q_1_ex)
     #loss_2 = monotonicity_loss(p)
     loss_22 = exact_loss(p, p_ex_1)
-    # loss_22 = exact_loss(p, p_ex)
-    loss_3 = overflows_loss(u,u_ex_1)
+    # loss_22 = exact_loss(q_2_train, q_2_ex)
+    #loss_3 = overflows_loss(u,u_ex_1)
     loss =  loss_00 + loss_11 + loss_22 #+ 5*loss_3 #+ loss_00 + loss_22 + loss_11
     if np.isnan(loss.detach().numpy())== True:
         exit()
@@ -147,7 +150,7 @@ for j in range(70):
     q_1_train = q_1_train.detach()
     q_2_train = q_2_train.detach()
     #lamb = lamb.detach()
-    base_path ="C:/Users/Tatiana/Desktop/Research/Research_ML_WENO/Euler_System_Test/Models/Model_58/"
+    base_path ="C:/Users/Tatiana/Desktop/Research/Research_ML_WENO/Euler_System_Test/Models/Model_61/"
     if not os.path.exists(base_path):
         os.mkdir(base_path)
     path = os.path.join(base_path, "{}.pt".format(j))
