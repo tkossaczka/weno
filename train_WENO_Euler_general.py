@@ -209,7 +209,7 @@ plt.figure(3)
 plt.plot(all_loss_test[:,:,2])
 
 #plt.plot(S, V_train.detach().numpy())
-#print("number of parameters:", sum(p.numel() for p in train_model.parameters()))
+# print("number of parameters:", sum(p.numel() for p in train_model.parameters()))
 # g=train_model.parameters()
 # g.__next__()
 
