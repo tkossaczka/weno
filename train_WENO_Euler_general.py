@@ -64,7 +64,7 @@ def create_init_cond(df,x,row):
     return q0, u0, a0
 
 #optimizer = optim.SGD(train_model.parameters(), lr=0.1)
-optimizer = optim.Adam(train_model.parameters(), lr=0.001)
+optimizer = optim.Adam(train_model.parameters(), lr=0.01)
 
 # rho_ex=torch.load("C:/Users/Tatiana/Desktop/Research/Research_ML_WENO/Euler_System_Test/Shock_entropy_exact/rho_ex")
 # u_ex=torch.load("C:/Users/Tatiana/Desktop/Research/Research_ML_WENO/Euler_System_Test/Shock_entropy_exact/u_ex")
@@ -104,7 +104,7 @@ for j in range(30):
     #     exit()
     q_0 = rho_ex_0 # rho
     q_1 = u_ex_0*rho_ex_0  #rho*u
-    q_2 = p_ex_0/(gamma-1) +0.5*rho_ex_0*u_ex_0*2 # E
+    q_2 = p_ex_0/(gamma-1) +0.5*rho_ex_0*u_ex_0**2 # E
     lamb = float(torch.max(torch.abs(u_ex_0 + (gamma*p_ex_0/rho_ex_0)**(1/2))))
     q_0_train = q_0
     q_1_train = q_1
@@ -122,6 +122,7 @@ for j in range(30):
         q_2_train = q_2_train_out
         #print(k)
     p_ex_1, rho_ex_1, u_ex_1, _, _ = problem_main.exact(x, time[init_id+1])
+    # p_ex_1, rho_ex_1, u_ex_1, _, _ = problem_main.exact(x, time[k+1])
     q_0_ex = rho_ex_1
     q_1_ex = u_ex_1*rho_ex_1
     q_2_ex = p_ex_1/(gamma-1) + 0.5*rho_ex_1*u_ex_1**2
