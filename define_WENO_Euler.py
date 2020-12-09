@@ -9,14 +9,14 @@ from define_WENO_Network import WENONetwork
 class WENONetwork_Euler(WENONetwork):
     def get_inner_nn_weno5(self):
         net = nn.Sequential(
-            nn.Conv1d(3, 20, kernel_size=5, stride=1, padding=2),
+            nn.Conv1d(6, 20, kernel_size=5, stride=1, padding=2),
             nn.ELU(),
             nn.Conv1d(20, 40, kernel_size=5, stride=1, padding=2),
             nn.ELU(),
-            nn.Conv1d(40, 80, kernel_size=1, stride=1, padding=0),
-            nn.ELU(),
-            nn.Conv1d(80, 40, kernel_size=1, stride=1, padding=0),
-            nn.ELU(),
+            # nn.Conv1d(40, 80, kernel_size=1, stride=1, padding=0),
+            # nn.ELU(),
+            # nn.Conv1d(80, 40, kernel_size=1, stride=1, padding=0),
+            # nn.ELU(),
             nn.Conv1d(40, 20, kernel_size=3, stride=1, padding=1),
             nn.ELU(),
             nn.Conv1d(20, 3, kernel_size=1, stride=1, padding=0),
@@ -36,6 +36,17 @@ class WENONetwork_Euler(WENONetwork):
         dif_right[0] = dif[0]
         dif_final = 0.5 * dif_left + 0.5 * dif_right
         return dif_final
+
+    def __get_average_diff2(self, uu):
+        dif = uu[1:] - uu[:-1]
+        dif_left = torch.zeros_like(uu)
+        dif_right = torch.zeros_like(uu)
+        dif_left[:-1] = dif
+        dif_left[-1] = dif[-1]
+        dif_right[1:] = dif
+        dif_right[0] = dif[0]
+        dif_final2 =  dif_left -2*uu + dif_right
+        return dif_final2
 
     def flux_func(self, problem, q):
         gamma = problem.params['gamma']
@@ -128,7 +139,33 @@ class WENONetwork_Euler(WENONetwork):
             if trainable:
                 dif = self.__get_average_diff(uu_n)  # TODO is this allright???
                 dif = self.prepare_dif(dif)
-                beta_multiplicators = self.inner_nn_weno5(dif)[0, :, :].T + self.weno5_mult_bias
+                dif2 = self.__get_average_diff2(uu_n)
+                dif2 = self.prepare_dif(dif2)
+                dif12 = torch.cat([dif, dif2], dim=1)
+                #dif12 = torch.stack([dif,dif2])
+                # beta_multiplicators = self.inner_nn_weno5(dif12)[0, :, :].T + self.weno5_mult_bias
+
+                beta_multiplicators = self.inner_nn_weno5(dif12)[0, :, :].T + self.weno5_mult_bias
+
+                # dif2 = self.__get_average_diff2(uu_n)
+                # # dif = self.prepare_dif(dif)
+                # # dif2 = self.prepare_dif(dif2)
+                # #rho_features = torch.stack([dif[:,0], dif2[:,0], (dif ** 2)[:,0], (dif2 ** 2)[:,0], (dif * dif2)[:,0]])
+                # #p_features = torch.stack([dif[:,1], dif2[:,1], (dif ** 2)[:,1], (dif2 ** 2)[:,1], (dif * dif2)[:,1]])
+                # #u_features = torch.stack([dif[:,2], dif2[:,2], (dif ** 2)[:,2], (dif2 ** 2)[:,2], (dif * dif2)[:,2]])
+                # #dif12 = torch.stack([rho_features,p_features,u_features])
+                # # dif12 = torch.stack([dif[:,0], dif2[:,0], (dif ** 2)[:,0], (dif2 ** 2)[:,0], (dif * dif2)[:,0],dif[:,1],
+                # #                      dif2[:,1], (dif ** 2)[:,1], (dif2 ** 2)[:,1], (dif * dif2)[:,1],dif[:,2], dif2[:,2], (dif ** 2)[:,2], (dif2 ** 2)[:,2], (dif * dif2)[:,2]]).T
+                # # dif12 = torch.stack(
+                # #     [dif[:, 0], dif2[:, 0], dif[:, 1],
+                # #      dif2[:, 1], dif[:, 2], dif2[:, 2]]).T
+                # dif12 = torch.stack(
+                #     [dif[:, 0],  dif[:, 1],
+                #       dif[:, 2]]).T
+                # dif12 = self.prepare_dif(dif12)
+                # # dif12 = torch.stack([dif.T, dif2.T, (dif**2).T, (dif2**2).T, (dif*dif2).T])
+                # #dif12 = dif12.reshape([5,3,7])
+                #beta_multiplicators = self.inner_nn_weno5(dif)[0, :, :].T+ self.weno5_mult_bias
                 # beta_multiplicators_left = beta_multiplicators[:-1]
                 # beta_multiplicators_right = beta_multiplicators[1:]
 
