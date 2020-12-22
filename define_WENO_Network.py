@@ -120,7 +120,7 @@ class WENONetwork(nn.Module):
             beta_range_square = (old_betas[2] - old_betas[0]) ** 2
             return [d / (e + beta) ** 2 * (beta_range_square + (e + beta) ** 2) for beta, d in zip(betas, ds)]
 
-        def get_omegas_weno(betas, ds):
+        def get_omegas_weno(betas, ds, old_betas):
             return [d / (e + beta) ** 2 for beta, d in zip(betas, ds)]
 
         omegas_func_dict = {0: get_omegas_weno, 1: get_omegas_mweno}

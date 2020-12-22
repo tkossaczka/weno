@@ -28,7 +28,7 @@ torch.set_default_dtype(torch.float64)
 params=None
 problem = Euler_system
 sp_st = 64 #*2*2*2 #*2*2*2
-init_cond = "Lax"
+init_cond = "Sod"
 time_disc = None
 problem_main = problem(space_steps=sp_st, init_cond = init_cond, time_steps=None, params = params, time_disc=time_disc, init_mid=False, init_general=True)
 params = problem_main.get_params()
@@ -135,16 +135,22 @@ E_ex = p_ex/(gamma-1)+0.5*rho_ex*u_ex**2
 
 error_rho_nt_max = np.max(np.abs(rho_nt - rho_ex.detach().numpy()))
 error_rho_t_max = np.max(np.abs(rho_t - rho_ex.detach().numpy()))
-error_rho_nt_mean = np.mean((rho_nt - rho_ex.detach().numpy()) ** 2)
-error_rho_t_mean = np.mean((rho_t - rho_ex.detach().numpy()) ** 2)
+error_rho_nt_mean = np.sqrt(1 / 128) * (np.sqrt(np.sum((rho_nt - rho_ex.detach().numpy()) ** 2)))
+error_rho_t_mean = np.sqrt(1 / 128) * (np.sqrt(np.sum((rho_t - rho_ex.detach().numpy()) ** 2)))
+error_rho_nt_l1 = (1 / 128) * (np.sum(np.abs(rho_nt - rho_ex.detach().numpy())))
+error_rho_t_l1 = (1 / 128) * (np.sum(np.abs(rho_t - rho_ex.detach().numpy())))
 error_u_nt_max = np.max(np.abs(u_nt - u_ex.detach().numpy()))
 error_u_t_max = np.max(np.abs(u_t - u_ex.detach().numpy()))
-error_u_nt_mean = np.mean((u_nt - u_ex.detach().numpy()) ** 2)
-error_u_t_mean = np.mean((u_t - u_ex.detach().numpy()) ** 2)
+error_u_nt_mean = np.sqrt(1 / 128) * (np.sqrt(np.sum((u_nt - u_ex.detach().numpy()) ** 2)))
+error_u_t_mean = np.sqrt(1 / 128) * (np.sqrt(np.sum((u_t - u_ex.detach().numpy()) ** 2)))
+error_u_nt_l1 = (1 / 128) * (np.sum(np.abs(u_nt - u_ex.detach().numpy())))
+error_u_t_l1 = (1 / 128) * (np.sum(np.abs(u_t - u_ex.detach().numpy())))
 error_p_nt_max = np.max(np.abs(p_nt - p_ex.detach().numpy()))
 error_p_t_max = np.max(np.abs(p_t - p_ex.detach().numpy()))
-error_p_nt_mean = np.mean((p_nt - p_ex.detach().numpy()) ** 2)
-error_p_t_mean = np.mean((p_t - p_ex.detach().numpy()) ** 2)
+error_p_nt_mean = np.sqrt(1 / 128) * (np.sqrt(np.sum((p_nt - p_ex.detach().numpy()) ** 2)))
+error_p_t_mean = np.sqrt(1 / 128) * (np.sqrt(np.sum((p_t - p_ex.detach().numpy()) ** 2)))
+error_p_nt_l1 = (1 / 128) * (np.sum(np.abs(p_nt - p_ex.detach().numpy())))
+error_p_t_l1 = (1 / 128) * (np.sum(np.abs(p_t - p_ex.detach().numpy())))
 
 # loss_rho_nt = monotonicity_loss(rho_nt)
 # loss_rho_t = monotonicity_loss(rho_t)
