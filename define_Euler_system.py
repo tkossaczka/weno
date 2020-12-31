@@ -76,7 +76,7 @@ class Euler_system():
                 r0, u0, p0, self.rho, self.u, self.p = init_Euler(x)
             else:
                 self.p = np.array([1.0, 0.1])
-                self.u = np.array([0.75, 0.0])
+                self.u = np.array([0.0, 0.0])
                 self.rho = np.array([1.0, 0.125])
                 x_mid = 0.5
                 r0[x <= x_mid] = self.rho[0]

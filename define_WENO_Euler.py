@@ -86,10 +86,10 @@ class WENONetwork_Euler(WENONetwork):
     def WENO5_char(self, q, R_left, R_right, flux, lamb, e, w5_minus, mweno=True, mapped=False, trainable=True):
         RHS = torch.zeros((q.shape[0]-6,3))
         for i in range(q.shape[0]-7):
-            q_l_p = torch.matmul(R_left[i+1,:,:],q[i+1:i + 8, :].T)
-            flux_l_p = torch.matmul(R_left[i+1,:,:],flux[i+1:i+8,:].T)
-            q_l_n = torch.matmul(R_left[i, :, :], q[i:i + 7, :].T)
-            flux_l_n = torch.matmul(R_left[i, :, :], flux[i:i + 7, :].T)
+            q_l_p = torch.matmul(R_left[i+1,:,:],q[1:, :].T)
+            flux_l_p = torch.matmul(R_left[i+1,:,:],flux[1:,:].T)
+            q_l_n = torch.matmul(R_left[i, :, :], q[0:-1, :].T)
+            flux_l_n = torch.matmul(R_left[i, :, :], flux[0:-1, :].T)
             if w5_minus is True:
                 uu_p = 0.5 * (flux_l_p - lamb * q_l_p)
                 uu_n = 0.5 * (flux_l_n - lamb * q_l_n)
@@ -103,13 +103,13 @@ class WENONetwork_Euler(WENONetwork):
 
             def get_fluxes(uu):
                 if w5_minus is True:
-                    flux0 = (11 * uu[3] - 7 * uu[4] + 2 * uu[5]) / 6
-                    flux1 = (2 * uu[2] + 5 * uu[3] - uu[4]) / 6
-                    flux2 = (-uu[1] + 5 * uu[2] + 2 * uu[3]) / 6
+                    flux0 = (11 * uu[i+3] - 7 * uu[i+4] + 2 * uu[i+5]) / 6
+                    flux1 = (2 * uu[i+2] + 5 * uu[i+3] - uu[i+4]) / 6
+                    flux2 = (-uu[i+1] + 5 * uu[i+2] + 2 * uu[i+3]) / 6
                 else:
-                    flux0 = (2 * uu[0] - 7 * uu[1] + 11 * uu[2]) / 6
-                    flux1 = (- uu[1] + 5 * uu[2] + 2* uu[3]) / 6
-                    flux2 = (2*uu[2] + 5 * uu[3] - uu[4]) / 6
+                    flux0 = (2 * uu[i] - 7 * uu[i+1] + 11 * uu[i+2]) / 6
+                    flux1 = (- uu[i+1] + 5 * uu[i+2] + 2* uu[i+3]) / 6
+                    flux2 = (2*uu[i+2] + 5 * uu[i+3] - uu[i+4]) / 6
                 return flux0, flux1, flux2
 
             fluxp0, fluxp1, fluxp2 = get_fluxes(uu_p_left)
@@ -117,17 +117,17 @@ class WENONetwork_Euler(WENONetwork):
 
             def get_betas(uu):
                 if w5_minus is True:
-                    beta0 = 13 / 12 * (uu[3] - 2 * uu[4] + uu[5]) ** 2 + 1 / 4 * (
-                                3 * uu[3] - 4 * uu[4] + uu[5]) ** 2
-                    beta1 = 13 / 12 * (uu[2] - 2 * uu[3] + uu[4]) ** 2 + 1 / 4 * (uu[2] - uu[4]) ** 2
-                    beta2 = 13 / 12 * (uu[1] - 2 * uu[2] + uu[3]) ** 2 + 1 / 4 * (
-                                uu[1] - 4 * uu[2] + 3 * uu[3]) ** 2
+                    beta0 = 13 / 12 * (uu[i+3] - 2 * uu[i+4] + uu[i+5]) ** 2 + 1 / 4 * (
+                                3 * uu[i+3] - 4 * uu[i+4] + uu[i+5]) ** 2
+                    beta1 = 13 / 12 * (uu[i+2] - 2 * uu[i+3] + uu[i+4]) ** 2 + 1 / 4 * (uu[i+2] - uu[i+4]) ** 2
+                    beta2 = 13 / 12 * (uu[i+1] - 2 * uu[i+2] + uu[i+3]) ** 2 + 1 / 4 * (
+                                uu[i+1] - 4 * uu[i+2] + 3 * uu[i+3]) ** 2
                 else:
-                    beta0 = 13 / 12 * (uu[0] - 2 * uu[1] + uu[2]) ** 2 + 1 / 4 * (
-                            uu[0] - 4 * uu[1] + 3*uu[2]) ** 2
-                    beta1 = 13 / 12 * (uu[1] - 2 * uu[2] + uu[3]) ** 2 + 1 / 4 * (uu[1] - uu[3]) ** 2
-                    beta2 = 13 / 12 * (uu[2] - 2 * uu[3] + uu[4]) ** 2 + 1 / 4 * (
-                            3*uu[2] - 4 * uu[3] + uu[4]) ** 2
+                    beta0 = 13 / 12 * (uu[i+0] - 2 * uu[i+1] + uu[i+2]) ** 2 + 1 / 4 * (
+                            uu[i+0] - 4 * uu[i+1] + 3*uu[i+2]) ** 2
+                    beta1 = 13 / 12 * (uu[i+1] - 2 * uu[i+2] + uu[i+3]) ** 2 + 1 / 4 * (uu[i+1] - uu[i+3]) ** 2
+                    beta2 = 13 / 12 * (uu[i+2] - 2 * uu[i+3] + uu[i+4]) ** 2 + 1 / 4 * (
+                            3*uu[i+2] - 4 * uu[i+3] + uu[i+4]) ** 2
                 return beta0, beta1, beta2
 
             betap0, betap1, betap2 = get_betas(uu_p_left)

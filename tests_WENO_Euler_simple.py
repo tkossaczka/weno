@@ -44,7 +44,7 @@ while t_update < T:
     if (t_update + t) > T:
         t=T-t_update
     t_update = t_update + t
-    q_0_nt, q_1_nt, q_2_nt, lamb_nt = train_model.run_weno(problem_main, mweno=True, mapped=False, method="char",q_0=q_0_nt, q_1=q_1_nt, q_2=q_2_nt, lamb=lamb_nt, vectorized=True, trainable=False, k=0, dt=t)
+    q_0_nt, q_1_nt, q_2_nt, lamb_nt = train_model.run_weno(problem_main, mweno=False, mapped=False, method="char",q_0=q_0_nt, q_1=q_1_nt, q_2=q_2_nt, lamb=lamb_nt, vectorized=True, trainable=False, k=0, dt=t)
     t = 0.9*h/lamb_nt
     time_numb = time_numb+1
 _,x,t = problem_main.transformation(q_0)
