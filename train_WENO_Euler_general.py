@@ -143,7 +143,7 @@ for j in range(30):
     loss_2 = overflows_loss(p, p_ex_1)
     # loss_22 = exact_loss(q_2_train, q_2_ex)
     #loss_3 = overflows_loss(u,u_ex_1)
-    loss =  loss_00 + loss_11 + loss_22 + loss_0 + loss_2 + loss_1
+    loss =  loss_00 + loss_11 + loss_22 #+ loss_0 + loss_2 + loss_1
     if np.isnan(loss.detach().numpy())== True:
         exit()
     loss.backward()  # Backward pass
@@ -154,7 +154,7 @@ for j in range(30):
     q_1_train = q_1_train.detach()
     q_2_train = q_2_train.detach()
     #lamb = lamb.detach()
-    base_path ="C:/Users/Tatiana/Desktop/Research/Research_ML_WENO/Euler_System_Test/Models/Model_63/"
+    base_path ="C:/Users/Tatiana/Desktop/Research/Research_ML_WENO/Euler_System_Test/Models/Model_64/"
     if not os.path.exists(base_path):
         os.mkdir(base_path)
     path = os.path.join(base_path, "{}.pt".format(j))
