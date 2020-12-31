@@ -23,14 +23,14 @@ def monotonicity_loss_mid(u, x):
     return loss
 
 train_model = WENONetwork_Euler()
-train_model = torch.load("C:/Users/Tatiana/Desktop/Research/Research_ML_WENO/Euler_System_Test/Models/Model_65/7.pt")  # 39/62 works good obtained with old IC, 44/46
+train_model = torch.load("C:/Users/Tatiana/Desktop/Research/Research_ML_WENO/Euler_System_Test/Models/Model_69/25.pt")  # 39/62 works good obtained with old IC, 44/46
 torch.set_default_dtype(torch.float64)
 params=None
 problem = Euler_system
 sp_st = 64 #*2*2*2 #*2*2*2
-init_cond = "Lax"
+init_cond = "Sod"
 time_disc = None
-problem_main = problem(space_steps=sp_st, init_cond = init_cond, time_steps=None, params = params, time_disc=time_disc, init_mid=False, init_general=True)
+problem_main = problem(space_steps=sp_st, init_cond = init_cond, time_steps=None, params = params, time_disc=time_disc, init_mid=False, init_general=False)
 params = problem_main.get_params()
 gamma = params['gamma']
 method = "char"
