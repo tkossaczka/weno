@@ -9,9 +9,9 @@ from define_WENO_Network import WENONetwork
 class WENONetwork_Euler(WENONetwork):
     def get_inner_nn_weno5(self):
         net = nn.Sequential(
-            nn.Conv1d(6, 10, kernel_size=5, stride=1, padding=2),
+            nn.Conv1d(6, 20, kernel_size=5, stride=1, padding=2),
             nn.ELU(),
-            nn.Conv1d(10, 10, kernel_size=5, stride=1, padding=2),
+            nn.Conv1d(20, 20, kernel_size=5, stride=1, padding=2),
             nn.ELU(),
             # nn.Conv1d(40, 80, kernel_size=1, stride=1, padding=0),
             # nn.ELU(),
@@ -19,7 +19,7 @@ class WENONetwork_Euler(WENONetwork):
             # nn.ELU(),
             # nn.Conv1d(40, 20, kernel_size=3, stride=1, padding=1),
             # nn.ELU(),
-            nn.Conv1d(10, 3, kernel_size=1, stride=1, padding=0),
+            nn.Conv1d(20, 3, kernel_size=1, stride=1, padding=0),
             nn.Sigmoid())
         return net
 
