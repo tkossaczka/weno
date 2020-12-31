@@ -154,7 +154,7 @@ for j in range(60):
     q_1_train = q_1_train.detach()
     q_2_train = q_2_train.detach()
     #lamb = lamb.detach()
-    base_path ="C:/Users/Tatiana/Desktop/Research/Research_ML_WENO/Euler_System_Test/Models/Model_70/"
+    base_path ="C:/Users/Tatiana/Desktop/Research/Research_ML_WENO/Euler_System_Test/Models/Model_73/"
     if not os.path.exists(base_path):
         os.mkdir(base_path)
     path = os.path.join(base_path, "{}.pt".format(j))
