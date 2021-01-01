@@ -150,6 +150,7 @@ class WENONetwork_Euler(WENONetwork):
                 else:
                     beta_multiplicators = self.inner_nn_weno5_plus(dif12)[0, :, :].T + self.weno5_mult_bias
 
+                beta_multiplicators = beta_multiplicators[i:i+7,:]
                 betap_corrected_list = []
                 betan_corrected_list = []
                 if w5_minus is True:
@@ -157,21 +158,21 @@ class WENONetwork_Euler(WENONetwork):
                     #mult_shifts_p = [2, 1, 0]
                     for k, beta in enumerate([betap0, betap1, betap2]):
                         shift = mult_shifts_p[k]  # k-1 #(3-k)-1
-                        betap_corrected_list.append(beta * beta_multiplicators[3+shift:-3+shift,:])
+                        betap_corrected_list.append(beta * beta_multiplicators[3+shift,:])
                     mult_shifts_n = [1, 0, -1]
                     for k, beta in enumerate([betan0, betan1, betan2]):
                         shift = mult_shifts_n[k]  # k #3-k
-                        betan_corrected_list.append(beta * beta_multiplicators[3+shift:-3+shift,:])
+                        betan_corrected_list.append(beta * beta_multiplicators[3+shift,:])
                 else:
                     mult_shifts_p = [-1, 0, 1]
                     for k, beta in enumerate([betap0, betap1, betap2]):
                         shift = mult_shifts_p[k]  # k-1 #(3-k)-1
-                        betap_corrected_list.append(beta * beta_multiplicators[3+shift:-3+shift,:])
+                        betap_corrected_list.append(beta * beta_multiplicators[3+shift,:])
                     mult_shifts_n = [-1, 0, 1]  # [-2, -1, 0]
                     #mult_shifts_n = [-2, -1, 0]
                     for k, beta in enumerate([betan0, betan1, betan2]):
                         shift = mult_shifts_n[k]  # k #3-k
-                        betan_corrected_list.append(beta * beta_multiplicators[3+shift:-3+shift,:])
+                        betan_corrected_list.append(beta * beta_multiplicators[3+shift,:])
                 [betap0, betap1, betap2] = betap_corrected_list
                 [betan0, betan1, betan2] = betan_corrected_list
 
@@ -226,7 +227,7 @@ class WENONetwork_Euler(WENONetwork):
             fluxn_r = torch.matmul(R_right[i, :, :], fluxn.T)
 
             if trainable:
-                RHS[i,:] = fluxp_r[:,0] - fluxn_r[:,0]
+                RHS[i,:] = fluxp_r - fluxn_r
             else:
                 RHS[i, :] = fluxp_r - fluxn_r
 
