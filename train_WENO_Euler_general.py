@@ -64,7 +64,7 @@ def create_init_cond(df,x,row):
     return q0, u0, a0
 
 #optimizer = optim.SGD(train_model.parameters(), lr=0.1)
-optimizer = optim.Adam(train_model.parameters(), lr=0.01)
+optimizer = optim.Adam(train_model.parameters(), lr=0.001)
 
 # rho_ex=torch.load("C:/Users/Tatiana/Desktop/Research/Research_ML_WENO/Euler_System_Test/Shock_entropy_exact/rho_ex")
 # u_ex=torch.load("C:/Users/Tatiana/Desktop/Research/Research_ML_WENO/Euler_System_Test/Shock_entropy_exact/u_ex")
@@ -78,9 +78,10 @@ all_loss_test = []
 losses = []
 method = "char"
 time_disc = None
-for j in range(60):
-    #init_id = 0
-    #print(j)
+for j in range(300):
+    time_numb = 0
+    # init_id = 0
+    print(j)
     # Forward path
     params = None
     sp_st = 64
@@ -92,10 +93,10 @@ for j in range(60):
     time_st = problem_main.time.shape[0]
     x = problem_main.x
     time = problem_main.time
-    q_0, q_1, q_2, lamb, nn, h = train_model.init_Euler(problem_main, vectorized=True, just_one_time_step=True)
-    init_id = random.randint(0,time_st-2)
-    print(init_id)
-    p_ex_0, rho_ex_0, u_ex_0, _, _ = problem_main.exact(x, time[init_id])
+    q_0, q_1, q_2, lamb, nn, h = train_model.init_Euler(problem_main, vectorized=True, just_one_time_step=False)
+    # init_id = random.randint(0,time_st-2)
+    # print(init_id)
+    # p_ex_0, rho_ex_0, u_ex_0, _, _ = problem_main.exact(x, time[init_id])
     # MACH test
     # c = np.sqrt(gamma * p_ex_0 / rho_ex_0)
     # MA = u_ex_0 / c
@@ -111,8 +112,15 @@ for j in range(60):
     q_2_train = q_2
     single_problem_losses = []
     loss_test = []
-    for k in range(nn):
-        q_0_train_out, q_1_train_out, q_2_train_out, lamb = train_model.forward(problem_main, method, q_0_train, q_1_train, q_2_train, lamb, k, dt=None, mweno=True, mapped=False)
+    t_update = 0
+    t = 0.9 * h / lamb
+    while t_update < T:
+        if (t_update + t) > T:
+            t = T - t_update
+        t_update = t_update + t
+        q_0_train_out, q_1_train_out, q_2_train_out, lamb = train_model.forward(problem_main, method, q_0_train, q_1_train, q_2_train, lamb, 0, dt=t, mweno=True, mapped=False)
+        p_ex_1, rho_ex_1, u_ex_1, _, _ = problem_main.exact(x, t_update)
+        t = 0.9 * h / lamb
         rho = q_0_train_out
         u = q_1_train_out / rho
         E = q_2_train_out
@@ -120,42 +128,43 @@ for j in range(60):
         q_0_train = q_0_train_out
         q_1_train = q_1_train_out
         q_2_train = q_2_train_out
-        #print(k)
-    p_ex_1, rho_ex_1, u_ex_1, _, _ = problem_main.exact(x, time[init_id+1])
-    # p_ex_1, rho_ex_1, u_ex_1, _, _ = problem_main.exact(x, time[k+1])
-    # q_0_ex = rho_ex_1
-    # q_1_ex = u_ex_1*rho_ex_1
-    # q_2_ex = p_ex_1/(gamma-1) + 0.5*rho_ex_1*u_ex_1**2
-    # p_ex_1, rho_ex_1, u_ex_1 = p_ex_s[:,init_id+1], rho_ex_s[:,init_id+1], u_ex_s[:,init_id+1]
-    # Train model:
-    optimizer.zero_grad()  # Clear gradients
-    # Calculate loss
-    #loss_0 = monotonicity_loss(rho)
-    loss_00 = exact_loss(rho, rho_ex_1)
-    # loss_0 = overflows_loss(rho, rho_ex_1)
-    # loss_00 = exact_loss(q_0_train, q_0_ex)
-    #loss_1 = monotonicity_loss_mid(u, x)
-    loss_11 = exact_loss(u, u_ex_1)
-    # loss_1 = overflows_loss(u, u_ex_1)
-    # loss_11 = exact_loss(q_1_train, q_1_ex)
-    #loss_2 = monotonicity_loss(p)
-    loss_22 = exact_loss(p, p_ex_1)
-    # loss_2 = overflows_loss(p, p_ex_1)
-    # loss_22 = exact_loss(q_2_train, q_2_ex)
-    #loss_3 = overflows_loss(u,u_ex_1)
-    loss =  loss_00 + loss_11 + loss_22 #+ loss_0 + loss_2 + loss_1
-    if np.isnan(loss.detach().numpy())== True:
-        exit()
-    loss.backward()  # Backward pass
-    optimizer.step()  # Optimize weights
-    print(j, k, loss)
-    single_problem_losses.append(loss.detach().numpy().max())
-    q_0_train = q_0_train.detach()
-    q_1_train = q_1_train.detach()
-    q_2_train = q_2_train.detach()
-    # init_id = init_id + 1
+        # print(k)
+        # p_ex_1, rho_ex_1, u_ex_1, _, _ = problem_main.exact(x, time[init_id + 1])
+        # p_ex_1, rho_ex_1, u_ex_1, _, _ = problem_main.exact(x, time[k+1])
+        # q_0_ex = rho_ex_1
+        # q_1_ex = u_ex_1*rho_ex_1
+        # q_2_ex = p_ex_1/(gamma-1) + 0.5*rho_ex_1*u_ex_1**2
+        # p_ex_1, rho_ex_1, u_ex_1 = p_ex_s[:,init_id+1], rho_ex_s[:,init_id+1], u_ex_s[:,init_id+1]
+        # Train model:
+        optimizer.zero_grad()  # Clear gradients
+        # Calculate loss
+        # loss_0 = monotonicity_loss(rho)
+        loss_00 = exact_loss(rho, rho_ex_1)
+        # loss_0 = overflows_loss(rho, rho_ex_1)
+        # loss_00 = exact_loss(q_0_train, q_0_ex)
+        # loss_1 = monotonicity_loss_mid(u, x)
+        loss_11 = exact_loss(u, u_ex_1)
+        # loss_1 = overflows_loss(u, u_ex_1)
+        # loss_11 = exact_loss(q_1_train, q_1_ex)
+        # loss_2 = monotonicity_loss(p)
+        loss_22 = exact_loss(p, p_ex_1)
+        # loss_2 = overflows_loss(p, p_ex_1)
+        # loss_22 = exact_loss(q_2_train, q_2_ex)
+        # loss_3 = overflows_loss(u,u_ex_1)
+        loss = loss_00 + loss_11 + loss_22  # + loss_3 #+ loss_0 + loss_2 + loss_1
+        # if np.isnan(loss.detach().numpy())== True:
+        #     exit()
+        loss.backward()  # Backward pass
+        optimizer.step()  # Optimize weights
+        print(j, time_numb, loss)
+        single_problem_losses.append(loss.detach().numpy().max())
+        q_0_train = q_0_train.detach()
+        q_1_train = q_1_train.detach()
+        q_2_train = q_2_train.detach()
+        time_numb = time_numb + 1
+        # init_id = init_id + 1
     #lamb = lamb.detach()
-    base_path ="C:/Users/Tatiana/Desktop/Research/Research_ML_WENO/Euler_System_Test/Models/Model_73/"
+    base_path ="C:/Users/Tatiana/Desktop/Research/Research_ML_WENO/Euler_System_Test/Models/Model_85/"
     if not os.path.exists(base_path):
         os.mkdir(base_path)
     path = os.path.join(base_path, "{}.pt".format(j))
@@ -195,8 +204,8 @@ for j in range(60):
     E_test = q_2_test
     p_test = (gamma - 1) * (E_test - 0.5 * rho_test * u_test ** 2)
     p_ex_test, rho_ex_test, u_ex_test, _, _ = problem_test.exact(x, T)
-    if np.isnan(exact_loss(rho_test, rho_ex_test).detach().numpy())==True:
-        exit()
+    # if np.isnan(exact_loss(rho_test, rho_ex_test).detach().numpy())==True:
+    #     exit()
     single_problem_loss_test.append(exact_loss(rho_test, rho_ex_test))
     single_problem_loss_test.append(exact_loss(p_test, p_ex_test))
     single_problem_loss_test.append(exact_loss(u_test, u_ex_test))

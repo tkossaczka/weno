@@ -23,7 +23,7 @@ def monotonicity_loss_mid(u, x):
     return loss
 
 train_model = WENONetwork_Euler()
-train_model = torch.load("C:/Users/Tatiana/Desktop/Research/Research_ML_WENO/Euler_System_Test/Models/Model_73/29.pt")  # 39/62 works good obtained with old IC, 44/46
+train_model = torch.load("C:/Users/Tatiana/Desktop/Research/Research_ML_WENO/Euler_System_Test/Models/Model_85/291.pt")  # 39/62 works good obtained with old IC, 44/46
 torch.set_default_dtype(torch.float64)
 params=None
 problem = Euler_system
@@ -47,7 +47,7 @@ while t_update < T:
     if (t_update + t) > T:
         t=T-t_update
     t_update = t_update + t
-    q_0_nt, q_1_nt, q_2_nt, lamb_nt = train_model.run_weno(problem_main, mweno=True, mapped=False, method="char",q_0=q_0_nt, q_1=q_1_nt, q_2=q_2_nt, lamb=lamb_nt, vectorized=True, trainable=False, k=0, dt=t)
+    q_0_nt, q_1_nt, q_2_nt, lamb_nt = train_model.run_weno(problem_main, mweno=False, mapped=False, method="char",q_0=q_0_nt, q_1=q_1_nt, q_2=q_2_nt, lamb=lamb_nt, vectorized=True, trainable=False, k=0, dt=t)
     t = 0.9*h/lamb_nt
     time_numb = time_numb+1
 
@@ -184,7 +184,7 @@ plt.plot(x,u_nt, x,u_t,x,u_ex.detach().numpy())
 # plt.plot(x,p_nt, x,p_t)
 # plt.figure(3)
 # plt.plot(x,u_nt, x,u_t)
-
+#
 # plt.figure(1)
 # plt.plot(x,rho_t)
 # plt.figure(2)

@@ -9,17 +9,17 @@ from define_WENO_Network import WENONetwork
 class WENONetwork_Euler(WENONetwork):
     def get_inner_nn_weno5(self):
         net = nn.Sequential(
-            nn.Conv1d(6, 20, kernel_size=5, stride=1, padding=2),
+            nn.Conv1d(6, 10, kernel_size=5, stride=1, padding=2),
             nn.ELU(),
-            nn.Conv1d(20, 20, kernel_size=5, stride=1, padding=2),
+            nn.Conv1d(10, 10, kernel_size=5, stride=1, padding=2),
             nn.ELU(),
-            # nn.Conv1d(40, 80, kernel_size=1, stride=1, padding=0),
+            # nn.Conv1d(20, 80, kernel_size=1, stride=1, padding=0),
             # nn.ELU(),
             # nn.Conv1d(80, 40, kernel_size=1, stride=1, padding=0),
             # nn.ELU(),
             # nn.Conv1d(40, 20, kernel_size=3, stride=1, padding=1),
             # nn.ELU(),
-            nn.Conv1d(20, 3, kernel_size=1, stride=1, padding=0),
+            nn.Conv1d(10, 3, kernel_size=1, stride=1, padding=0),
             nn.Sigmoid())
         return net
 
@@ -160,6 +160,7 @@ class WENONetwork_Euler(WENONetwork):
                         shift = mult_shifts_p[k]  # k-1 #(3-k)-1
                         betap_corrected_list.append(beta * beta_multiplicators[3+shift,:])
                     mult_shifts_n = [1, 0, -1]
+                    #mult_shifts_p = [2, 1, 0]
                     for k, beta in enumerate([betan0, betan1, betan2]):
                         shift = mult_shifts_n[k]  # k #3-k
                         betan_corrected_list.append(beta * beta_multiplicators[3+shift,:])
