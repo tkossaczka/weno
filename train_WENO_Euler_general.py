@@ -164,7 +164,7 @@ for j in range(300):
         time_numb = time_numb + 1
         # init_id = init_id + 1
     #lamb = lamb.detach()
-    base_path ="C:/Users/Tatiana/Desktop/Research/Research_ML_WENO/Euler_System_Test/Models/Model_85/"
+    base_path ="C:/Users/Tatiana/Desktop/Research/Research_ML_WENO/Euler_System_Test/Models/Model_89/"
     if not os.path.exists(base_path):
         os.mkdir(base_path)
     path = os.path.join(base_path, "{}.pt".format(j))
@@ -217,10 +217,22 @@ losses = np.array(losses)
 all_loss_test = np.array(all_loss_test)
 plt.figure(1)
 plt.plot(all_loss_test[:,:,0])
+plt.xlabel('number of training cycles')
+plt.ylabel(r'LOSS($\rho$)')
+# plt.savefig("Euler_loss_rho.pdf", bbox_inches='tight')
 plt.figure(2)
 plt.plot(all_loss_test[:,:,1])
+plt.xlabel('number of training cycles')
+plt.ylabel('LOSS(p)')
+# plt.savefig("Euler_loss_p.pdf", bbox_inches='tight')
 plt.figure(3)
 plt.plot(all_loss_test[:,:,2])
+plt.xlabel('number of training cycles')
+plt.ylabel('LOSS(u)')
+# plt.savefig("Euler_loss_u.pdf", bbox_inches='tight')
+
+
+# np.save("C:/Users/Tatiana/Desktop/Research/Research_ML_WENO/Euler_System_Test/Models/Model_87/all_loss_test.npy", all_loss_test)
 
 #plt.plot(S, V_train.detach().numpy())
 # print("number of parameters:", sum(p.numel() for p in train_model.parameters()))

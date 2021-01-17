@@ -76,11 +76,11 @@ class Euler_system():
                 r0, u0, p0, self.rho, self.u, self.p = init_Euler(x)
             else:
                 self.p = np.array([1.0, 0.1])
-                self.u = np.array([0.0, 0.0])
+                self.u = np.array([0.75, 0.0])
                 self.rho = np.array([1.0, 0.125])
-                # self.p = np.array([450.0, 45.0 ])
-                # self.u = np.array([20.0, -6.0])
-                # self.rho = np.array([6.0, 6.0])
+                # self.p = np.array([6.9174, 0.8071]) setting for compare model 72 and 483
+                # self.u = np.array([0.5529, 0.0])
+                # self.rho = np.array([6.9174, 0.8540])
                 x_mid = 0.5
                 r0[x <= x_mid] = self.rho[0]
                 r0[x > x_mid] = self.rho[1]
