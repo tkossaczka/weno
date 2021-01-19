@@ -137,7 +137,7 @@ class WENONetwork_Euler(WENONetwork):
             old_betas_n = [betan0, betan1, betan2]
 
             if trainable:
-                dif = self.__get_average_diff(uu_n)  # TODO is this allright???
+                dif = self.__get_average_diff(uu_n)
                 dif = self.prepare_dif(dif)
                 dif2 = self.__get_average_diff2(uu_n)
                 dif2 = self.prepare_dif(dif2)

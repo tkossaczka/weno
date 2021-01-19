@@ -48,7 +48,7 @@ def monotonicity_loss(u, problem_class, params, problem_main):
 #optimizer = optim.SGD(train_model.parameters(), lr=0.1)
 optimizer = optim.Adam(train_model.parameters())
 
-for k in range(800):
+for k in range(1000):
     # Forward path
     params = None
     #params = {'T': 0.4, 'e': 1e-13, 'L': 1, 'R': 1, 'C': 0.5}
@@ -77,4 +77,4 @@ print("number of parameters:", sum(p.numel() for p in train_model.parameters()))
 # g=train_model.parameters()
 # g.__next__()
 
-torch.save(train_model, "model4")
+torch.save(train_model, "model")

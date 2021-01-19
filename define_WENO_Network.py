@@ -14,47 +14,47 @@ class WENONetwork(nn.Module):
         super().__init__()
         self.inner_nn_weno5_plus = self.get_inner_nn_weno5()
         self.inner_nn_weno5_minus = self.get_inner_nn_weno5()
-        # self.inner_nn_weno6 = self.get_inner_nn_weno6()
+        self.inner_nn_weno6 = self.get_inner_nn_weno6()
         self.weno5_mult_bias, self.weno6_mult_bias = self.get_multiplicator_biases()
 
     def get_inner_nn_weno5(self):
         net = nn.Sequential(
-            nn.Conv1d(1, 40, kernel_size=5, stride=1, padding=2),
+            nn.Conv1d(2, 10, kernel_size=5, stride=1, padding=2),
             nn.ELU(),
-            nn.Conv1d(40, 40, kernel_size=5, stride=1, padding=2),
+            nn.Conv1d(10, 10, kernel_size=5, stride=1, padding=2),
             nn.ELU(),
             # nn.Conv1d(40, 80, kernel_size=1, stride=1, padding=0),
             # nn.ELU(),
             # nn.Conv1d(80, 40, kernel_size=1, stride=1, padding=0),
             # nn.ELU(),
-            # nn.Conv1d(20, 20, kernel_size=3, stride=1, padding=1),
+            # nn.Conv1d(40, 20, kernel_size=3, stride=1, padding=1),
             # nn.ELU(),
-            nn.Conv1d(40, 1, kernel_size=1, stride=1, padding=0),
+            nn.Conv1d(10, 1, kernel_size=1, stride=1, padding=0),
             nn.Sigmoid())
         return net
 
-    # def get_inner_nn_weno6(self):
-    #     net = nn.Sequential(
-    #         nn.Conv1d(1, 20, kernel_size=5, stride=1, padding=2),
-    #         nn.ELU(),
-    #         nn.Conv1d(20, 40, kernel_size=5, stride=1, padding=2),
-    #         nn.ELU(),
-    #         nn.Conv1d(40, 80, kernel_size=1, stride=1, padding=0),
-    #         nn.ELU(),
-    #         nn.Conv1d(80, 40, kernel_size=1, stride=1, padding=0),
-    #         nn.ELU(),
-    #         nn.Conv1d(40, 20, kernel_size=3, stride=1, padding=1),
-    #         nn.ELU(),
-    #         nn.Conv1d(20, 1, kernel_size=1, stride=1, padding=0),
-    #         nn.Sigmoid())
-    #     return net
+    def get_inner_nn_weno6(self):
+        net = nn.Sequential(
+            nn.Conv1d(2, 10, kernel_size=5, stride=1, padding=2),
+            nn.ELU(),
+            nn.Conv1d(10, 10, kernel_size=5, stride=1, padding=2),
+            nn.ELU(),
+            # nn.Conv1d(40, 80, kernel_size=1, stride=1, padding=0),
+            # nn.ELU(),
+            # nn.Conv1d(80, 40, kernel_size=1, stride=1, padding=0),
+            # nn.ELU(),
+            # nn.Conv1d(40, 20, kernel_size=3, stride=1, padding=1),
+            # nn.ELU(),
+            nn.Conv1d(10, 1, kernel_size=1, stride=1, padding=0),
+            nn.Sigmoid())
+        return net
 
     def get_multiplicator_biases(self):
         # first for weno 5, second for weno 6
         return 0.1, 0.1
 
     def prepare_dif(self, dif):
-        return dif[None, None, :]
+        return dif[None, :, :]
 
     def WENO5(self, uu, e, w5_minus, mweno=True, mapped=False, trainable=True):
         uu_left = uu[:-1]
@@ -97,25 +97,57 @@ class WENONetwork(nn.Module):
 
         if trainable:
             dif = self.__get_average_diff(uu)
-            dif = self.prepare_dif(dif)
-            beta_multiplicators = self.inner_nn_weno5(dif)[0, :, :].T + self.weno5_mult_bias
+            dif2 = self.__get_average_diff2(uu)
+            dif12 = torch.stack([dif, dif2 ])
+            dif12 = self.prepare_dif(dif12)
+
+            if w5_minus:
+                beta_multiplicators = self.inner_nn_weno5_minus(dif12)[0, 0, :] + self.weno5_mult_bias
+            else:
+                beta_multiplicators = self.inner_nn_weno5_plus(dif12)[0, 0, :] + self.weno5_mult_bias
+
+            # beta_multiplicators = self.inner_nn_weno5(dif)[0, :, :].T + self.weno5_mult_bias
             # beta_multiplicators_left = beta_multiplicators[:-1]
             # beta_multiplicators_right = beta_multiplicators[1:]
 
             betap_corrected_list = []
             betan_corrected_list = []
-            for k, beta in enumerate([betap0, betap1, betap2]):
-                shift = k -1
-                betap_corrected_list.append(beta * (beta_multiplicators[3+shift:-3+shift]))
-            for k, beta in enumerate([betan0, betan1, betan2]):
-                shift = k - 1
-                betan_corrected_list.append(beta * (beta_multiplicators[3+shift:-3+shift]))
+
+            if w5_minus is True:
+                mult_shifts_p = [1, 0, -1]  # [2, 1, 0]
+                # mult_shifts_p = [2, 1, 0]
+                for k, beta in enumerate([betap0, betap1, betap2]):
+                    shift = mult_shifts_p[k]  # k-1 #(3-k)-1
+                    betap_corrected_list.append(beta * beta_multiplicators[3+shift:-3+shift])
+                mult_shifts_n = [1, 0, -1]
+                # mult_shifts_p = [2, 1, 0]
+                for k, beta in enumerate([betan0, betan1, betan2]):
+                    shift = mult_shifts_n[k]  # k #3-k
+                    betan_corrected_list.append(beta * beta_multiplicators[3+shift:-3+shift])
+            else:
+                mult_shifts_p = [-1, 0, 1]
+                for k, beta in enumerate([betap0, betap1, betap2]):
+                    shift = mult_shifts_p[k]  # k-1 #(3-k)-1
+                    betap_corrected_list.append(beta * beta_multiplicators[3+shift:-3+shift])
+                mult_shifts_n = [-1, 0, 1]  # [-2, -1, 0]
+                # mult_shifts_n = [-2, -1, 0]
+                for k, beta in enumerate([betan0, betan1, betan2]):
+                    shift = mult_shifts_n[k]  # k #3-k
+                    betan_corrected_list.append(beta * beta_multiplicators[3+shift:-3+shift])
+
+            # for k, beta in enumerate([betap0, betap1, betap2]):
+            #     shift = k -1
+            #     betap_corrected_list.append(beta * (beta_multiplicators[3+shift:-3+shift]))
+            # for k, beta in enumerate([betan0, betan1, betan2]):
+            #     shift = k - 1
+            #     betan_corrected_list.append(beta * (beta_multiplicators[3+shift:-3+shift]))
+
             [betap0, betap1, betap2] = betap_corrected_list
             [betan0, betan1, betan2] = betan_corrected_list
 
-        d0 = 1 / 10;
-        d1 = 6 / 10;
-        d2 = 3 / 10;
+        d0 = 1 / 10
+        d1 = 6 / 10
+        d2 = 3 / 10
 
         def get_omegas_mweno(betas, ds, old_betas):
             beta_range_square = (old_betas[2] - old_betas[0]) ** 2
@@ -179,20 +211,38 @@ class WENONetwork(nn.Module):
         betap0, betap1, betap2 = get_betas(uu_right)
         betan0, betan1, betan2 = get_betas(uu_left)
 
+        old_betas_p = [betap0, betap1, betap2]
+        old_betas_n = [betan0, betan1, betan2]
+
         if trainable:
             dif = self.__get_average_diff(uu)
-            beta_multiplicators = self.inner_nn_weno6(dif[None, None, :])[0, 0, :] + self.weno6_mult_bias
+            dif2 = self.__get_average_diff2(uu)
+            dif12 = torch.stack([dif, dif2])
+            dif12 = self.prepare_dif(dif12)
+            beta_multiplicators = self.inner_nn_weno6(dif12)[0, 0, :] + self.weno6_mult_bias
             # beta_multiplicators_left = beta_multiplicators[:-1]
             # beta_multiplicators_right = beta_multiplicators[1:]
 
             betap_corrected_list = []
             betan_corrected_list = []
+
+            mult_shifts_p = [-1, 0, 1]
             for k, beta in enumerate([betap0, betap1, betap2]):
-                shift = k -1
-                betap_corrected_list.append(beta * (beta_multiplicators[3+shift:-3+shift]))
+                shift = mult_shifts_p[k]  # k-1 #(3-k)-1
+                betap_corrected_list.append(beta * beta_multiplicators[3+shift:-3+shift])
+            mult_shifts_n = [-1, 0, 1]  # [-2, -1, 0]
+            # mult_shifts_n = [-2, -1, 0]
             for k, beta in enumerate([betan0, betan1, betan2]):
-                shift = k - 1
-                betan_corrected_list.append(beta * (beta_multiplicators[3+shift:-3+shift]))
+                shift = mult_shifts_n[k]  # k #3-k
+                betan_corrected_list.append(beta * beta_multiplicators[3+shift:-3+shift])
+
+            # for k, beta in enumerate([betap0, betap1, betap2]):
+            #     shift = k -1
+            #     betap_corrected_list.append(beta * (beta_multiplicators[3+shift:-3+shift]))
+            # for k, beta in enumerate([betan0, betan1, betan2]):
+            #     shift = k - 1
+            #     betan_corrected_list.append(beta * (beta_multiplicators[3+shift:-3+shift]))
+
             [betap0, betap1, betap2] = betap_corrected_list
             [betan0, betan1, betan2] = betan_corrected_list
 
@@ -205,22 +255,22 @@ class WENONetwork(nn.Module):
         sigmap = 42 / 15
         sigman = 27 / 15
 
-        def get_omegas_mweno(betas, gamas):
-            beta_range_square = (betas[2] - betas[0]) ** 2
+        def get_omegas_mweno(betas, gamas, old_betas):
+            beta_range_square = (old_betas[2] - old_betas[0]) ** 2
             return [gama / (e + beta) ** 2 * (beta_range_square + (e + beta) ** 2) for beta, gama in zip(betas, gamas)]
 
-        def get_omegas_weno(betas, gamas):
+        def get_omegas_weno(betas, gamas, old_betas):
             return [gama / (e + beta) ** 2 for beta, gama in zip(betas, gamas)]
 
         omegas_func_dict = {0: get_omegas_weno, 1: get_omegas_mweno}
         [omegapp_0, omegapp_1, omegapp_2] = omegas_func_dict[int(mweno)]([betap0, betap1, betap2],
-                                                                         [gamap0, gamap1, gamap2])
+                                                                         [gamap0, gamap1, gamap2], old_betas_p)
         [omeganp_0, omeganp_1, omeganp_2] = omegas_func_dict[int(mweno)]([betap0, betap1, betap2],
-                                                                         [gaman0, gaman1, gaman2])
+                                                                         [gaman0, gaman1, gaman2], old_betas_n)
         [omegapn_0, omegapn_1, omegapn_2] = omegas_func_dict[int(mweno)]([betan0, betan1, betan2],
-                                                                         [gamap0, gamap1, gamap2])
+                                                                         [gamap0, gamap1, gamap2], old_betas_p)
         [omegann_0, omegann_1, omegann_2] = omegas_func_dict[int(mweno)]([betan0, betan1, betan2],
-                                                                         [gaman0, gaman1, gaman2])
+                                                                         [gaman0, gaman1, gaman2], old_betas_n)
 
         def normalize(tensor_list):
             sum_ = sum(tensor_list)  # note, that inbuilt sum applies __add__ iteratively therefore its overloaded-
@@ -269,6 +319,17 @@ class WENONetwork(nn.Module):
         dif_right[0] = dif[0]
         dif_final = 0.5 * dif_left + 0.5 * dif_right
         return dif_final
+
+    def __get_average_diff2(self, uu):
+        dif = uu[1:] - uu[:-1]
+        dif_left = torch.zeros_like(uu)
+        dif_right = torch.zeros_like(uu)
+        dif_left[:-1] = dif
+        dif_left[-1] = dif[-1]
+        dif_right[1:] = dif
+        dif_right[0] = dif[0]
+        dif_final2 = dif_left - 2 * uu + dif_right
+        return dif_final2
 
     def run_weno(self, problem, trainable, vectorized, just_one_time_step):
         mweno = True
@@ -414,7 +475,7 @@ class WENONetwork(nn.Module):
             fig = plt.figure()
             ax = fig.gca(projection='3d')
             ax.plot_surface(X, Y, V, cmap=cm.viridis)
-        return V, S, tt
+        return V, S, tt, u
 
     def compare_wenos(self, problem):
         u_trained = self.run_weno(problem, trainable=True, vectorized=False, just_one_time_step=True)

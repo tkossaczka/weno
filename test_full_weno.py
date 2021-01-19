@@ -21,22 +21,21 @@ problem = Digital_option
 #problem = Buckley_Leverett
 #problem = heat_equation
 #problem = PME
-my_problem = problem(space_steps=160, time_steps=None, params = params)
+my_problem = problem(space_steps=500, time_steps=None, params = params)
 params = my_problem.params
-#V_t, S_t, tt_t = train_model.full_WENO(my_problem, trainable=True, plot=True, vectorized=False)
-V_nt, S_nt, tt_nt = train_model.full_WENO(my_problem, trainable=False, plot=True, vectorized=False)
+V_t, S_t, tt_t, u_t = train_model.full_WENO(my_problem, trainable=True, plot=False, vectorized=False)
+V_nt, S_nt, tt_nt, u_nt = train_model.full_WENO(my_problem, trainable=False, plot=False, vectorized=False)
 
-plt.figure(2)
-u_exact, V_exact = my_problem.exact(first_step=False)
-plt.plot(S_nt,V_nt[:,-1],S_nt,V_exact)
-
-
-
-#u_exact = my_problem.exact()
 # plt.figure(2)
-# plt.plot(S_t,V_t[:,1]) #,S,u_exact)
-# V_last = V[:,-1]
-# error = my_problem.err(V_last)
+# u_exact, V_exact = my_problem.exact(first_step=False)
+# plt.plot(S_nt,V_nt[:,-1],S_nt,V_exact)
+
+u_exact, exact = my_problem.exact(first_step=False)
+plt.figure(2)
+plt.plot(S_nt,V_nt[:,-1],S_t,V_t[:,-1],S_t, exact)
+
+error_nt = my_problem.err(u_nt.detach().numpy()[:,-1],first_step=False)
+error_t = my_problem.err(u_t.detach().numpy()[:,-1],first_step=False)
 
 # plt.figure(3)
 # for k in range(0,len(V_nt[0])):
