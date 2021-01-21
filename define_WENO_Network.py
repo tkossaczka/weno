@@ -266,9 +266,9 @@ class WENONetwork(nn.Module):
         [omegapp_0, omegapp_1, omegapp_2] = omegas_func_dict[int(mweno)]([betap0, betap1, betap2],
                                                                          [gamap0, gamap1, gamap2], old_betas_p)
         [omeganp_0, omeganp_1, omeganp_2] = omegas_func_dict[int(mweno)]([betap0, betap1, betap2],
-                                                                         [gaman0, gaman1, gaman2], old_betas_n)
+                                                                         [gaman0, gaman1, gaman2], old_betas_p)   # TODO tuto bolo predtym _n a v tretom _p a fungovalo to (? alebo nie)
         [omegapn_0, omegapn_1, omegapn_2] = omegas_func_dict[int(mweno)]([betan0, betan1, betan2],
-                                                                         [gamap0, gamap1, gamap2], old_betas_p)
+                                                                         [gamap0, gamap1, gamap2], old_betas_n)
         [omegann_0, omegann_1, omegann_2] = omegas_func_dict[int(mweno)]([betan0, betan1, betan2],
                                                                          [gaman0, gaman1, gaman2], old_betas_n)
 
@@ -281,7 +281,7 @@ class WENONetwork(nn.Module):
         [omegapn0, omegapn1, omegapn2] = normalize([omegapn_0, omegapn_1, omegapn_2])
         [omegann0, omegann1, omegann2] = normalize([omegann_0, omegann_1, omegann_2])
 
-        omegaps = [omegapp0, omegapp1, omegapp2, omegapn0, omegapn1, omegapn2]
+        omegaps = [omegapp0, omegapp1, omegapp2, omegapn0, omegapn1, omegapn2]    # TODO toto si treba premysliet, dava to mensi error ked vymenim pn a np v tychto riadkoch
         omegans = [omeganp0, omeganp1, omeganp2, omegann0, omegann1, omegann2]
 
         [omegap0, omegap1, omegap2, omegan0, omegan1, omegan2] = [sigmap * omegap - sigman * omegan
