@@ -19,9 +19,9 @@ class WENONetwork(nn.Module):
 
     def get_inner_nn_weno5(self):
         net = nn.Sequential(
-            nn.Conv1d(2, 10, kernel_size=5, stride=1, padding=2),
+            nn.Conv1d(2, 5, kernel_size=5, stride=1, padding=2),
             nn.ELU(),
-            nn.Conv1d(10, 10, kernel_size=5, stride=1, padding=2),
+            nn.Conv1d(5, 5, kernel_size=5, stride=1, padding=2),
             nn.ELU(),
             # nn.Conv1d(40, 80, kernel_size=1, stride=1, padding=0),
             # nn.ELU(),
@@ -29,15 +29,15 @@ class WENONetwork(nn.Module):
             # nn.ELU(),
             # nn.Conv1d(40, 20, kernel_size=3, stride=1, padding=1),
             # nn.ELU(),
-            nn.Conv1d(10, 1, kernel_size=1, stride=1, padding=0),
+            nn.Conv1d(5, 1, kernel_size=1, stride=1, padding=0),
             nn.Sigmoid())
         return net
 
     def get_inner_nn_weno6(self):
         net = nn.Sequential(
-            nn.Conv1d(2, 10, kernel_size=5, stride=1, padding=2),
+            nn.Conv1d(2, 5, kernel_size=5, stride=1, padding=2),
             nn.ELU(),
-            nn.Conv1d(10, 10, kernel_size=5, stride=1, padding=2),
+            nn.Conv1d(5, 5, kernel_size=5, stride=1, padding=2),
             nn.ELU(),
             # nn.Conv1d(40, 80, kernel_size=1, stride=1, padding=0),
             # nn.ELU(),
@@ -45,7 +45,7 @@ class WENONetwork(nn.Module):
             # nn.ELU(),
             # nn.Conv1d(40, 20, kernel_size=3, stride=1, padding=1),
             # nn.ELU(),
-            nn.Conv1d(10, 1, kernel_size=1, stride=1, padding=0),
+            nn.Conv1d(5, 1, kernel_size=1, stride=1, padding=0),
             nn.Sigmoid())
         return net
 
@@ -266,7 +266,7 @@ class WENONetwork(nn.Module):
         [omegapp_0, omegapp_1, omegapp_2] = omegas_func_dict[int(mweno)]([betap0, betap1, betap2],
                                                                          [gamap0, gamap1, gamap2], old_betas_p)
         [omeganp_0, omeganp_1, omeganp_2] = omegas_func_dict[int(mweno)]([betap0, betap1, betap2],
-                                                                         [gaman0, gaman1, gaman2], old_betas_p)   # TODO tuto bolo predtym _n a v tretom _p a fungovalo to (? alebo nie)
+                                                                         [gaman0, gaman1, gaman2], old_betas_p)
         [omegapn_0, omegapn_1, omegapn_2] = omegas_func_dict[int(mweno)]([betan0, betan1, betan2],
                                                                          [gamap0, gamap1, gamap2], old_betas_n)
         [omegann_0, omegann_1, omegann_2] = omegas_func_dict[int(mweno)]([betan0, betan1, betan2],

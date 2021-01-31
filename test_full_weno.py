@@ -1,5 +1,6 @@
 import torch
 import matplotlib.pyplot as plt
+import numpy as np
 from define_problem_Digital import Digital_option
 from define_WENO_Network import WENONetwork
 from define_problem_heat_eq import heat_equation
@@ -10,7 +11,7 @@ from define_problem_Buckley_Leverett import Buckley_Leverett
 
 torch.set_default_dtype(torch.float64)
 
-train_model = torch.load("C:/Users/Tatiana/Desktop/Research/Research_ML_WENO/Digital_Option_Test/Models/Model_0")
+train_model = torch.load("C:/Users/Tatiana/Desktop/Research/Research_ML_WENO/Digital_Option_Test/Models/Model_9/4999.pt")
 
 params=None
 #params = {'T': 0.4, 'e': 1e-13, 'L': 1, 'R': 1, 'C': 0.2}
@@ -21,7 +22,7 @@ problem = Digital_option
 #problem = Buckley_Leverett
 #problem = heat_equation
 #problem = PME
-my_problem = problem(space_steps=160, time_steps=None, params = params)
+my_problem = problem(space_steps=320, time_steps=None, params = params)
 params = my_problem.params
 V_t, S_t, tt_t, u_t = train_model.full_WENO(my_problem, trainable=True, plot=False, vectorized=False)
 V_nt, S_nt, tt_nt, u_nt = train_model.full_WENO(my_problem, trainable=False, plot=False, vectorized=False)
@@ -32,10 +33,14 @@ V_nt, S_nt, tt_nt, u_nt = train_model.full_WENO(my_problem, trainable=False, plo
 
 u_exact, exact = my_problem.exact(first_step=False)
 plt.figure(2)
-plt.plot(S_nt,V_nt[:,-1],S_t,V_t[:,-1],S_t, exact)
+plt.plot(S_nt,V_nt[:,-1],'o',S_t,V_t[:,-1],'o',S_t, exact, 'o')
 
-error_nt = my_problem.err(u_nt.detach().numpy()[:,-1],first_step=False)
-error_t = my_problem.err(u_t.detach().numpy()[:,-1],first_step=False)
+error_nt_max = np.max(np.absolute(u_exact - u_nt.detach().numpy()[:,-1]))
+error_t_max = np.max(np.absolute(u_exact - u_t.detach().numpy()[:,-1]))
+
+error_nt_V_max = np.max(np.absolute(exact - V_nt[:,-1]))
+error_t_V_max = np.max(np.absolute(exact - V_t[:,-1]))
+
 
 # plt.figure(3)
 # for k in range(0,len(V_nt[0])):
