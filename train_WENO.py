@@ -36,7 +36,7 @@ optimizer = optim.Adam(train_model.parameters())
 params_test = {'sigma': 0.3, 'rate': 0.1, 'E': 50, 'T': 1, 'e': 1e-13, 'xl': -6, 'xr': 1.5}
 all_loss_test = []
 
-for k in range(5000):
+for k in range(1000):
     loss_test = []
     # Forward path
     params = None

@@ -11,7 +11,7 @@ from define_problem_Buckley_Leverett import Buckley_Leverett
 
 torch.set_default_dtype(torch.float64)
 
-train_model = torch.load("C:/Users/Tatiana/Desktop/Research/Research_ML_WENO/Digital_Option_Test/Models/Model_9/4999.pt")
+train_model = torch.load("C:/Users/Tatiana/Desktop/Research/Research_ML_WENO/Digital_Option_Test/Models/Model_10/4999.pt")
 
 params=None
 #params = {'T': 0.4, 'e': 1e-13, 'L': 1, 'R': 1, 'C': 0.2}
@@ -22,7 +22,7 @@ problem = Digital_option
 #problem = Buckley_Leverett
 #problem = heat_equation
 #problem = PME
-my_problem = problem(space_steps=320, time_steps=None, params = params)
+my_problem = problem(space_steps=160, time_steps=None, params = params)
 params = my_problem.params
 V_t, S_t, tt_t, u_t = train_model.full_WENO(my_problem, trainable=True, plot=False, vectorized=False)
 V_nt, S_nt, tt_nt, u_nt = train_model.full_WENO(my_problem, trainable=False, plot=False, vectorized=False)
