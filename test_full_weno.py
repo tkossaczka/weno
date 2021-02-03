@@ -11,7 +11,7 @@ from define_problem_Buckley_Leverett import Buckley_Leverett
 
 torch.set_default_dtype(torch.float64)
 
-train_model = torch.load("C:/Users/Tatiana/Desktop/Research/Research_ML_WENO/Digital_Option_Test/Models/Model_10/4999.pt")
+train_model = torch.load("C:/Users/Tatiana/Desktop/Research/Research_ML_WENO/Digital_Option_Test/Models/Model_10/3999.pt")
 
 params=None
 #params = {'T': 0.4, 'e': 1e-13, 'L': 1, 'R': 1, 'C': 0.2}

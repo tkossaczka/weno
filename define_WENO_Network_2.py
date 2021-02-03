@@ -185,3 +185,31 @@ class WENONetwork_2(WENONetwork):
         V_classic, S, tt = problem.transformation(u_classic)
         plt.plot(S, V_classic.detach().numpy(), S, V_trained.detach().numpy())
         plt.show()
+
+    def order_compute(self, iterations, initial_space_steps, initial_time_steps, params, problem_class, trainable):
+        problem = problem_class(space_steps=initial_space_steps, time_steps=initial_time_steps, params=params)
+        vecerr = np.zeros((iterations))[:, None]
+        order = np.zeros((iterations - 1))[:, None]
+        u_init, nn = self.init_run_weno(problem, vectorized=True, just_one_time_step=False)
+        u = u_init
+        for k in range(nn):
+            u = self.run_weno(problem,u,mweno=True, mapped=False, trainable=trainable, vectorized=True,k=k)
+        u_last = u
+        xmaxerr = problem.err(u_last) #, first_step=False)
+        vecerr[0] = xmaxerr
+        print(problem.space_steps, problem.time_steps)
+        for i in range(1, iterations):
+            if initial_time_steps is None:
+                spec_time_steps = None
+            else:
+                spec_time_steps = problem.time_steps*4
+            problem = problem_class(space_steps=problem.space_steps * 2, time_steps=spec_time_steps, params=params)
+            u, nn = self.init_run_weno(problem, vectorized=True, just_one_time_step=False)
+            for k in range(nn):
+                u = self.run_weno(problem,u,mweno=True, mapped=False, trainable=trainable, vectorized=True, k=k)
+            u_last = u
+            xmaxerr = problem.err(u_last) #, first_step=False)
+            vecerr[i] = xmaxerr
+            order[i - 1] = np.log(vecerr[i - 1] / vecerr[i]) / np.log(2)
+            print(problem.space_steps, problem.time_steps)
+        return vecerr, order

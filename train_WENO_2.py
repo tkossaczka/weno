@@ -37,7 +37,7 @@ optimizer = optim.Adam(train_model.parameters())
 params_test = {'sigma': 0.3, 'rate': 0.1, 'E': 50, 'T': 1, 'e': 1e-13, 'xl': -6, 'xr': 1.5}
 all_loss_test = []
 
-for j in range(7000):
+for j in range(4000):
     loss_test = []
     # Forward path
     params = None
@@ -54,8 +54,8 @@ for j in range(7000):
     tt = T - time
     S = E * np.exp(x)
     for k in range(nn):
-        exact = np.exp(-rate * (T - tt[k+1])) * norm.cdf((np.log(S / E) + (rate - (sigma ** 2) / 2) * (T - tt[k+1])) / (sigma * np.sqrt(T - tt[k+1])))
-        exact = torch.Tensor(exact)
+        #exact = np.exp(-rate * (T - tt[k+1])) * norm.cdf((np.log(S / E) + (rate - (sigma ** 2) / 2) * (T - tt[k+1])) / (sigma * np.sqrt(T - tt[k+1])))
+        #exact = torch.Tensor(exact)
         # Forward path
         u_train = train_model.forward(problem_main,u_train,k)
         V_train, _, _ = problem_main.transformation(u_train)
@@ -64,13 +64,13 @@ for j in range(7000):
         # Calculate loss
         params = problem_main.get_params()
         mon_loss = monotonicity_loss(V_train)
-        ex_loss = exact_loss(V_train,exact)
-        loss = mon_loss + ex_loss
+        #ex_loss = exact_loss(V_train,exact)
+        loss = mon_loss #+ ex_loss
         loss.backward()  # Backward pass
         optimizer.step()  # Optimize weights
         print(j, k, loss)
         u_train.detach_()
-    base_path ="C:/Users/Tatiana/Desktop/Research/Research_ML_WENO/Digital_Option_Test/Models/Model_15/"
+    base_path ="C:/Users/Tatiana/Desktop/Research/Research_ML_WENO/Digital_Option_Test/Models/Model_16/"
     if not os.path.exists(base_path):
         os.mkdir(base_path)
     path = os.path.join(base_path, "{}.pt".format(j))

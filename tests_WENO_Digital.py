@@ -18,7 +18,7 @@ from define_Euler_system import Euler_system
 torch.set_default_dtype(torch.float64)
 
 train_model = WENONetwork()
-train_model = torch.load("C:/Users/Tatiana/Desktop/Research/Research_ML_WENO/Digital_Option_Test/Models/Model_13/5999.pt")
+train_model = torch.load("C:/Users/Tatiana/Desktop/Research/Research_ML_WENO/Digital_Option_Test/Models/Model_16/3999.pt")
 
 params=None
 #params = {'sigma': 0.3, 'rate': 0.02, 'E': 50, 'T': 1, 'e': 1e-13, 'xl': -6, 'xr': 1.5, 'psi':20}
