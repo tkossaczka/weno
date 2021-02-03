@@ -37,15 +37,12 @@ optimizer = optim.Adam(train_model.parameters())
 params_test = {'sigma': 0.3, 'rate': 0.1, 'E': 50, 'T': 1, 'e': 1e-13, 'xl': -6, 'xr': 1.5}
 all_loss_test = []
 
-for j in range(500):
+for j in range(7000):
     loss_test = []
     # Forward path
     params = None
     problem_main = problem_class(space_steps=100, time_steps=None, params=params)
-    u_exact, exact = problem_main.exact(first_step=False)
-    u_exact = torch.Tensor(u_exact)
-    exact = torch.Tensor(exact)
-    u_init, nn = train_model.init_run_weno(problem_main, vectorized=True, just_one_time_step=False)
+    u_init, nn = train_model.init_run_weno(problem_main, vectorized=True, just_one_time_step=True)
     u_train = u_init
     # parameters needed for the computation of exact solution
     params_main = problem_main.params
@@ -73,7 +70,7 @@ for j in range(500):
         optimizer.step()  # Optimize weights
         print(j, k, loss)
         u_train.detach_()
-    base_path ="C:/Users/Tatiana/Desktop/Research/Research_ML_WENO/Digital_Option_Test/Models/Model_12/"
+    base_path ="C:/Users/Tatiana/Desktop/Research/Research_ML_WENO/Digital_Option_Test/Models/Model_15/"
     if not os.path.exists(base_path):
         os.mkdir(base_path)
     path = os.path.join(base_path, "{}.pt".format(j))

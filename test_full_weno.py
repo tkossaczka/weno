@@ -22,7 +22,7 @@ problem = Digital_option
 #problem = Buckley_Leverett
 #problem = heat_equation
 #problem = PME
-my_problem = problem(space_steps=160, time_steps=None, params = params)
+my_problem = problem(space_steps=100, time_steps=None, params = params)
 params = my_problem.params
 V_t, S_t, tt_t, u_t = train_model.full_WENO(my_problem, trainable=True, plot=False, vectorized=False)
 V_nt, S_nt, tt_nt, u_nt = train_model.full_WENO(my_problem, trainable=False, plot=False, vectorized=False)
@@ -37,6 +37,8 @@ plt.plot(S_nt,V_nt[:,-1],'o',S_t,V_t[:,-1],'o',S_t, exact, 'o')
 
 error_nt_max = np.max(np.absolute(u_exact - u_nt.detach().numpy()[:,-1]))
 error_t_max = np.max(np.absolute(u_exact - u_t.detach().numpy()[:,-1]))
+error_t_mean = np.sqrt(7.5 / 100) * (np.sqrt(np.sum((u_t.detach().numpy()[:,-1] - u_exact) ** 2)))
+error_nt_mean = np.sqrt(7.5 / 100) * (np.sqrt(np.sum((u_nt.detach().numpy()[:,-1] - u_exact) ** 2)))
 
 error_nt_V_max = np.max(np.absolute(exact - V_nt[:,-1]))
 error_t_V_max = np.max(np.absolute(exact - V_t[:,-1]))
