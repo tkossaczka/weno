@@ -1,5 +1,6 @@
 import numpy as np
 import torch
+import random
 
 class PME():
     def __init__(self, space_steps, time_steps=None, params=None, w5_minus=None):
@@ -22,10 +23,10 @@ class PME():
 
     def init_params(self):
         params = dict()
-        params["T"] = 3
+        params["T"] = 2
         params["e"] = 10 ** (-13)
         params["L"] = 6
-        params["power"] = 4
+        params["power"] = random.uniform(2,8)
         params["d"] = 1
         self.params = params
 
@@ -37,7 +38,7 @@ class PME():
         L= self.params["L"]
         m = self.space_steps
         h = 2 * L / m
-        n = np.ceil(10*(T-1)/(h**2)) #11.5 pre m=2,4; 20 pre m=6
+        n = np.ceil(17*(T-1)/(h**2)) #12 pre m=2,3,4,5; 17 pre m=8
         n = int(n)
         t = (T-1) / n
         x = np.linspace(-L, L, m + 1)
@@ -91,11 +92,11 @@ class PME():
 
     def funct_diffusion(self,u):
         power = self.params["power"]
-        u_diff = u ** power
+        u_diff = np.abs(u) ** power
         return u_diff
 
     def funct_convection(self, u):
-        return u
+        return np.abs(u)
 
     def funct_derivative(self,u):
         u_der =u**0
@@ -107,8 +108,8 @@ class PME():
         u = u**power
         return u
 
-    def exact(self):
-        T = self.params["T"]
+    def exact(self, t):
+        #T = self.params["T"]
         mm = self.params["power"]
         d = self.params["d"]
         alpha = d / ((mm - 1) * d + 2)
@@ -117,7 +118,7 @@ class PME():
         x, time = self.x, self.time
         #kk = 1/(mm+1)
         #u_ex = (1/T**kk) * (np.maximum(1-((kk*(mm-1))/(2*mm))*((np.abs(x)**2)/T**(2*kk)),0))**(1/(mm - 1))
-        u_ex = (T**(-alpha))*(np.maximum(1-kk*((np.abs(x))**2)*T**(-2*alpha/d), 0)) ** (1/(mm-1))
+        u_ex = (t**(-alpha))*(np.maximum(1-kk*((np.abs(x))**2)*t**(-2*alpha/d), 0)) ** (1/(mm-1))
         return u_ex
 
     def err(self, u_last):

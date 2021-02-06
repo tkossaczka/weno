@@ -4,20 +4,15 @@ import numpy as np
 from matplotlib import cm
 from mpl_toolkits.mplot3d import Axes3D
 from define_problem_Digital import Digital_option
-from define_WENO_Network import WENONetwork
+from define_WENO_Network_2 import WENONetwork_2
 from scipy.stats import norm
-from define_problem_heat_eq import heat_equation
 from define_problem_Call import Call_option
-from define_problem_transport_eq import transport_equation
-from define_problem_PME import PME
 from define_problem_Call_GS import Call_option_GS
 from define_problem_Digital_GS import Digital_option_GS
-from define_problem_Buckley_Leverett import Buckley_Leverett
-from define_Euler_system import Euler_system
 
 torch.set_default_dtype(torch.float64)
 
-train_model = WENONetwork()
+# train_model = WENONetwork_2()
 train_model = torch.load("C:/Users/Tatiana/Desktop/Research/Research_ML_WENO/Digital_Option_Test/Models/Model_17/7999.pt")
 
 params=None
