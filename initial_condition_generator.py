@@ -40,3 +40,13 @@ def init_Euler(x):
     p0[x > x_mid] = p[1]
 
     return r0, u0, p0, rho, u, p
+
+def init_PME(x):
+    sw = random.randint(0,1)
+    m = x.shape[0]
+    u0 = torch.zeros(m)
+    if sw==0: # same height
+        u0 = ((-3.7 < x)* (x < -0.7) + (0.7 < x)*(x <3.7)).astype(float)
+    if sw==1: # different height
+        u0 = ((-4 < x)* (x < -1) + 2*(0.0 < x)*(x <3)).astype(float)
+    return u0
