@@ -18,12 +18,15 @@ from define_Euler_system import Euler_system
 torch.set_default_dtype(torch.float64)
 
 train_model = WENONetwork()
-train_model = torch.load("C:/Users/Tatiana/Desktop/Research/Research_ML_WENO/Digital_Option_Test/Models/Model_16/3999.pt")
+train_model = torch.load("C:/Users/Tatiana/Desktop/Research/Research_ML_WENO/Digital_Option_Test/Models/Model_17/7999.pt")
 
 params=None
 #params = {'sigma': 0.3, 'rate': 0.02, 'E': 50, 'T': 1, 'e': 1e-13, 'xl': -6, 'xr': 1.5, 'psi':20}
 #params = {'sigma': 0.3, 'rate': 0.25, 'E': 50, 'T': 1, 'e': 1e-13, 'xl': -1.5, 'xr': 2, 'psi':30}
-params = {'sigma': 0.3, 'rate': 0.1, 'E': 50, 'T': 1, 'e': 1e-13, 'xl': -6, 'xr': 1.5}
+# params = {'sigma': 0.3, 'rate': 0.1, 'E': 50, 'T': 1, 'e': 1e-13, 'xl': -6, 'xr': 1.5}
+# params = {'sigma': 0.2, 'rate': 0.08, 'E': 50, 'T': 1, 'e': 1e-13, 'xl': -6, 'xr': 1.5}
+# params = {'sigma': 0.33405, 'rate': 0.266078, 'E': 50, 'T': 1, 'e': 1e-13, 'xl': -6, 'xr': 1.5}
+# params = {'sigma': 0.29235803798039667,'rate': 0.23532633811960602,'E': 50,'T': 0.5,'e': 1e-13,'xl': -6,'xr': 1.5} # 80 space steps
 
 problem= Digital_option
 
@@ -38,6 +41,7 @@ sigma = params_main['sigma']
 T = params_main['T']
 E = params_main['E']
 x, time = problem_main.x, problem_main.time
+h = problem_main.h
 tt = T - time
 S = E * np.exp(x)
 u_t = u_init
@@ -50,17 +54,41 @@ for k in range(nn):
     u_nt = train_model.run_weno(problem_main, u_nt, mweno=True, mapped=False, vectorized=True, trainable=False, k=k)
 V_nt, _, _ = problem_main.transformation(u_nt)
 
-u_nt = u_nt.detach().numpy()
-u_t = u_t.detach().numpy()
+
 V_ex = np.exp(-rate * (T - tt[nn])) * norm.cdf( (np.log(S / E) + (rate - (sigma ** 2) / 2) * (T - tt[nn])) / (sigma * np.sqrt(T - tt[nn])))
 u_ex = V_ex/E
 
-error_t_mean = np.sqrt(7.5 / 100) * (np.sqrt(np.sum((u_t - u_ex) ** 2)))
-error_nt_mean = np.sqrt(7.5 / 100) * (np.sqrt(np.sum((u_nt - u_ex) ** 2)))
-error_nt_max = np.max(np.absolute(u_ex - u_nt))
-error_t_max = np.max(np.absolute(u_ex - u_t))
+error_t_mean = np.sqrt(7.5 / 100) * (np.sqrt(np.sum((u_t.detach().numpy() - u_ex) ** 2)))
+error_nt_mean = np.sqrt(7.5 / 100) * (np.sqrt(np.sum((u_nt.detach().numpy() - u_ex) ** 2)))
+error_nt_max = np.max(np.absolute(u_ex - u_nt.detach().numpy()))
+error_t_max = np.max(np.absolute(u_ex - u_t.detach().numpy()))
 
+err_mat = np.zeros((4,1))
+err_mat[0,:] = np.array(error_nt_max)
+err_mat[1,:] = np.array(error_t_max)
+err_mat[2,:] = np.array(error_nt_mean)
+err_mat[3,:] = np.array(error_t_mean)
+
+train_model.compare_wenos(problem_main)
+
+plt.figure(2)
 plt.plot(S,V_nt,S,V_t,S, V_ex)
+
+# TEST GREEKS
+e = problem_main.params['e']
+der2_nt = train_model.WENO6(u_nt, e, mweno=True, mapped=False, trainable=False)
+der1_nt = train_model.WENO5(u_nt, e, w5_minus='Lax-Friedrichs', mweno=True, mapped=False, trainable=False)
+gamma_nt = E * (der2_nt / h**2 * (1 / S[3:-3]**2) - der1_nt / h * (1 / S[3:-3]**2))
+plt.figure(3)
+plt.plot(S[3:-3], gamma_nt)
+
+der2_t = train_model.WENO6(u_t, e, mweno=True, mapped=False, trainable=True)
+der1_t = train_model.WENO5(u_t, e, w5_minus='Lax-Friedrichs', mweno=True, mapped=False, trainable=True)
+der2_t = der2_t.detach().numpy()
+der1_t = der1_t.detach().numpy()
+gamma_t = E * (der2_t / h**2 * (1 / S[3:-3]**2) - der1_t / h * (1 / S[3:-3]**2))
+plt.plot(S[3:-3], gamma_t)
+
 
 # VV = V.detach().numpy()
 # X, Y = np.meshgrid(x, t, indexing="ij")

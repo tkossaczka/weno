@@ -34,10 +34,16 @@ def exact_loss(u, u_ex):
 #optimizer = optim.SGD(train_model.parameters(), lr=0.1)
 optimizer = optim.Adam(train_model.parameters())
 
-params_test = {'sigma': 0.3, 'rate': 0.1, 'E': 50, 'T': 1, 'e': 1e-13, 'xl': -6, 'xr': 1.5}
+def validation_problems(j):
+    params_vld = []
+    params_vld.append({'sigma': 0.3, 'rate': 0.1, 'E': 50, 'T': 1, 'e': 1e-13, 'xl': -6, 'xr': 1.5})
+    params_vld.append({'sigma': 0.25, 'rate': 0.1, 'E': 50, 'T': 1, 'e': 1e-13, 'xl': -6, 'xr': 1.5})
+    params_vld.append({'sigma': 0.2, 'rate': 0.08, 'E': 50, 'T': 1, 'e': 1e-13, 'xl': -6, 'xr': 1.5})
+    return params_vld[j]
+
 all_loss_test = []
 
-for j in range(4000):
+for j in range(8000):
     loss_test = []
     # Forward path
     params = None
@@ -70,23 +76,25 @@ for j in range(4000):
         optimizer.step()  # Optimize weights
         print(j, k, loss)
         u_train.detach_()
-    base_path ="C:/Users/Tatiana/Desktop/Research/Research_ML_WENO/Digital_Option_Test/Models/Model_16/"
+    base_path ="C:/Users/Tatiana/Desktop/Research/Research_ML_WENO/Digital_Option_Test/Models/Model_17/"
     if not os.path.exists(base_path):
         os.mkdir(base_path)
     path = os.path.join(base_path, "{}.pt".format(j))
     torch.save(train_model, path)
     # TEST IF LOSS IS DECREASING WITH THE NUMBER OF ITERATIONS INCREASING
-    single_problem_loss_test = []
-    problem_test = problem_class(space_steps=100, time_steps=None, params=params_test)
-    with torch.no_grad():
-        u_init, nn = train_model.init_run_weno(problem_test, vectorized=True, just_one_time_step=True)
-        u_test = u_init
-        for k in range(nn):
-            u_test = train_model.run_weno(problem_test, u_test, mweno=True, mapped=False, trainable=True, vectorized=True, k=k)
-        V_test, _, _ = problem_test.transformation(u_test)
-        for k in range(nn + 1):
-            single_problem_loss_test.append(monotonicity_loss(V_test))
-    loss_test.append(single_problem_loss_test)
+    for kk in range(3):
+        single_problem_loss_test = []
+        params_test = validation_problems(kk)
+        problem_test = problem_class(space_steps=100, time_steps=None, params=params_test)
+        with torch.no_grad():
+            u_init, nn = train_model.init_run_weno(problem_test, vectorized=True, just_one_time_step=True)
+            u_test = u_init
+            for k in range(nn):
+                u_test = train_model.run_weno(problem_test, u_test, mweno=True, mapped=False, trainable=True, vectorized=True, k=k)
+            V_test, _, _ = problem_test.transformation(u_test)
+            for k in range(nn + 1):
+                single_problem_loss_test.append(monotonicity_loss(V_test))
+        loss_test.append(single_problem_loss_test)
     all_loss_test.append(loss_test)
 
 #plt.plot(S, V_train.detach().numpy())
