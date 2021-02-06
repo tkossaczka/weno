@@ -12,20 +12,20 @@ from define_problem_PME import PME
 torch.set_default_dtype(torch.float64)
 
 train_model = WENONetwork_2()
-train_model = torch.load("C:/Users/Tatiana/Desktop/Research/Research_ML_WENO/Digital_Option_Test/Models/Model_17/7999.pt")
+# train_model = torch.load("C:/Users/Tatiana/Desktop/Research/Research_ML_WENO/Digital_Option_Test/Models/Model_17/7999.pt")
 
 params=None
 
 problem= PME
 
-problem_main = problem(space_steps=80, time_steps=None, params = params)
+problem_main = problem(type="boxes", space_steps=160, time_steps=None, params = params)
 params = problem_main.get_params()
 
 u_init, nn = train_model.init_run_weno(problem_main, vectorized=True, just_one_time_step=False)
 # parameters needed for the computation of exact solution
 params_main = problem_main.params
 T = params_main['T']
-u_ex = problem_main.exact(T)
+# u_ex = problem_main.exact(T)
 
 # u_t = u_init
 # with torch.no_grad():
@@ -50,7 +50,9 @@ V_nt, S, _ = problem_main.transformation(u_nt)
 # err_mat[3,:] = np.array(error_t_mean)
 
 # plt.figure(2)
-plt.plot(S,V_nt, S, u_ex)
+plt.plot(S,V_nt, 'o')
+
+# plt.plot(S,V_nt, S, u_ex)
 # plt.plot(S,V_nt, S, V_t, S, u_ex)
 
 # VV = V.detach().numpy()
