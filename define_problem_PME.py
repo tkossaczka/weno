@@ -24,10 +24,10 @@ class PME():
 
     def init_params(self):
         params = dict()
-        params["T"] = 0.3
+        params["T"] = 1.4
         params["e"] = 10 ** (-13)
-        params["L"] = 5.5
-        params["power"] = 5 #random.uniform(2,8)
+        params["L"] = 6
+        params["power"] = random.uniform(2,8)
         params["d"] = 1
         self.params = params
 
@@ -50,7 +50,7 @@ class PME():
             L = self.params["L"]
             m = self.space_steps
             h = 2 * L / m
-            n = np.ceil(40 * (T) / (h ** 2))  # 12 pre m=2,3,4,5; 17 pre m=8
+            n = np.ceil(20 * (T) / (h ** 2))  # 15 pre rovnaku vysku a m=2,3,4,5,6; 20 pre rovnaku vysku a m=7,8; 180 pre roznu vysku
             n = int(n)
             t = (T) / n
             x = np.linspace(-L, L, m + 1)
@@ -107,11 +107,11 @@ class PME():
 
     def funct_diffusion(self,u):
         power = self.params["power"]
-        u_diff = np.abs(u) ** power
+        u_diff = torch.abs(u) ** power
         return u_diff
 
     def funct_convection(self, u):
-        return np.abs(u)
+        return torch.abs(u)
 
     def funct_derivative(self,u):
         u_der =u**0
