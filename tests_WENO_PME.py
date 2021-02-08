@@ -12,7 +12,7 @@ from define_problem_PME import PME
 torch.set_default_dtype(torch.float64)
 
 train_model = WENONetwork_2()
-train_model = torch.load("C:/Users/Tatiana/Desktop/Research/Research_ML_WENO/PME_Test/Models/Model_6/9.pt")
+train_model = torch.load("C:/Users/Tatiana/Desktop/Research/Research_ML_WENO/PME_Test/Models/Model_7/29.pt")
 
 def validation_problems(j):
     params_vld = []
@@ -34,7 +34,7 @@ for j in range(rng):
     print(j)
     params = validation_problems(j)
     # params = {'T': 2, 'e': 1e-13, 'L': 6, 'power': 8, 'd': 1}
-    params = None
+    #params = None
     problem_main = problem(type=type, space_steps=40, time_steps=None, params = params)
     params = problem_main.get_params()
     u_init, nn = train_model.init_run_weno(problem_main, vectorized=True, just_one_time_step=False)
