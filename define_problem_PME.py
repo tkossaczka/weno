@@ -4,7 +4,7 @@ import random
 from initial_condition_generator import init_PME
 
 class PME():
-    def __init__(self, type, space_steps, time_steps=None, params=None, w5_minus="Lax-Friedrichs"):
+    def __init__(self, type, space_steps, time_steps=None, params=None, w5_minus="no"):
         """
         Atributes needed to be initialized to make WENO network functional
         space_steps, time_steps, initial_condition, boundary_condition, x, time, h, n
@@ -24,10 +24,10 @@ class PME():
 
     def init_params(self):
         params = dict()
-        params["T"] = 1.4
+        params["T"] = 2
         params["e"] = 10 ** (-13)
         params["L"] = 6
-        params["power"] = random.uniform(2,8)
+        params["power"] = random.uniform(2,5)
         params["d"] = 1
         self.params = params
 
@@ -40,7 +40,7 @@ class PME():
             L= self.params["L"]
             m = self.space_steps
             h = 2 * L / m
-            n = np.ceil(17*(T-1)/(h**2)) #12 pre m=2,3,4,5; 17 pre m=8
+            n = np.ceil(9*(T-1)/(h**2)) #9 pre m=2,3,4,5; 17 pre m=8
             n = int(n)
             t = (T-1) / n
             x = np.linspace(-L, L, m + 1)
@@ -50,7 +50,7 @@ class PME():
             L = self.params["L"]
             m = self.space_steps
             h = 2 * L / m
-            n = np.ceil(20 * (T) / (h ** 2))  # 15 pre rovnaku vysku a m=2,3,4,5,6; 20 pre rovnaku vysku a m=7,8; 180 pre roznu vysku
+            n = np.ceil(15 * (T) / (h ** 2))  # 15 pre rovnaku vysku a m=2,3,4,5,6; 20 pre rovnaku vysku a m=7,8; 180 pre roznu vysku
             n = int(n)
             t = (T) / n
             x = np.linspace(-L, L, m + 1)

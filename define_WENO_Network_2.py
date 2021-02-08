@@ -7,21 +7,21 @@ from torch import nn
 from define_WENO_Network import WENONetwork
 
 class WENONetwork_2(WENONetwork):
-    def get_inner_nn_weno5(self):
-        net = nn.Sequential(
-            nn.Conv1d(2, 5, kernel_size=5, stride=1, padding=2),
-            nn.ELU(),
-            nn.Conv1d(5, 5, kernel_size=5, stride=1, padding=2),
-            nn.ELU(),
-            # nn.Conv1d(40, 80, kernel_size=1, stride=1, padding=0),
-            # nn.ELU(),
-            # nn.Conv1d(80, 40, kernel_size=1, stride=1, padding=0),
-            # nn.ELU(),
-            # nn.Conv1d(40, 20, kernel_size=3, stride=1, padding=1),
-            # nn.ELU(),
-            nn.Conv1d(5, 1, kernel_size=1, stride=1, padding=0),
-            nn.Sigmoid())
-        return net
+    # def get_inner_nn_weno5(self):
+    #     net = nn.Sequential(
+    #         nn.Conv1d(2, 5, kernel_size=5, stride=1, padding=2),
+    #         nn.ELU(),
+    #         nn.Conv1d(5, 5, kernel_size=5, stride=1, padding=2),
+    #         nn.ELU(),
+    #         # nn.Conv1d(40, 80, kernel_size=1, stride=1, padding=0),
+    #         # nn.ELU(),
+    #         # nn.Conv1d(80, 40, kernel_size=1, stride=1, padding=0),
+    #         # nn.ELU(),
+    #         # nn.Conv1d(40, 20, kernel_size=3, stride=1, padding=1),
+    #         # nn.ELU(),
+    #         nn.Conv1d(5, 1, kernel_size=1, stride=1, padding=0),
+    #         nn.Sigmoid())
+    #     return net
 
     def get_inner_nn_weno6(self):
         net = nn.Sequential(
@@ -29,7 +29,7 @@ class WENONetwork_2(WENONetwork):
             nn.ELU(),
             nn.Conv1d(5, 5, kernel_size=5, stride=1, padding=2),
             nn.ELU(),
-            # nn.Conv1d(40, 80, kernel_size=1, stride=1, padding=0),
+            # nn.Conv1d(20, 10, kernel_size=1, stride=1, padding=0),
             # nn.ELU(),
             # nn.Conv1d(80, 40, kernel_size=1, stride=1, padding=0),
             # nn.ELU(),
@@ -89,6 +89,8 @@ class WENONetwork_2(WENONetwork):
             RHSc_n = self.WENO5(0.5*(uu_conv-max_der*uu), e, w5_minus=True, mweno=mweno, mapped=mapped, trainable=trainable)
             RHSc = RHSc_p + RHSc_n
             u1[3:-3] = uu[3:-3] + t * ((term_2 / h ** 2) * RHSd - (term_1 / h) * RHSc + term_0 * uu[3:-3])
+        elif w5_minus == 'no':
+            u1[3:-3] = uu[3:-3] + t * ((term_2 / h ** 2) * RHSd + term_0 * uu[3:-3])
         else:
             RHSc = self.WENO5(uu_conv, e, w5_minus=w5_minus, mweno=mweno, mapped=mapped, trainable=trainable)
             u1[3:-3] = uu[3:-3] + t * ((term_2 / h ** 2) * RHSd - (term_1 / h) * RHSc + term_0 * uu[3:-3])
@@ -111,6 +113,8 @@ class WENONetwork_2(WENONetwork):
             RHS1c_n = self.WENO5(0.5*(uu1_conv-max_der*u1), e, w5_minus=True, mweno=mweno, mapped=mapped, trainable=trainable)
             RHS1c = RHS1c_p + RHS1c_n
             u2[3:-3] = 0.75*uu[3:-3]+0.25*u1[3:-3]+0.25*t*((term_2/h ** 2)*RHS1d-(term_1/h)*RHS1c+term_0*u1[3:-3])
+        elif w5_minus == 'no':
+            u2[3:-3] = 0.75*uu[3:-3]+0.25*u1[3:-3]+0.25*t*((term_2/h ** 2)*RHS1d+term_0*u1[3:-3])
         else:
             RHS1c = self.WENO5(uu1_conv, e, w5_minus=w5_minus, mweno=mweno, mapped=mapped, trainable=trainable)
             u2[3:-3] = 0.75*uu[3:-3]+0.25*u1[3:-3]+0.25*t*((term_2/h ** 2)*RHS1d-(term_1/h)*RHS1c+term_0*u1[3:-3])
@@ -152,6 +156,17 @@ class WENONetwork_2(WENONetwork):
             else:
                 u[3:-3, k+1] = (1 / 3) * uu[3:-3] + (2 / 3) * u2[3:-3] + (2 / 3) * t * (
                         (term_2 / h ** 2) * RHS2d - (term_1 / h) * RHS2c + term_0 * u2[3:-3])
+                u[0:3, k+1] = u_bc_l[:, k+1]
+                u[-3:, k+1] = u_bc_r[:, k+1]
+        elif w5_minus == 'no':
+            if vectorized:
+                u_ret[3:-3] = (1 / 3) * uu[3:-3] + (2 / 3) * u2[3:-3] + (2 / 3) * t * (
+                        (term_2 / h ** 2) * RHS2d + term_0 * u2[3:-3])
+                u_ret[0:3] = u_bc_l[:, k+1]
+                u_ret[-3:] = u_bc_r[:, k+1]
+            else:
+                u[3:-3, k+1] = (1 / 3) * uu[3:-3] + (2 / 3) * u2[3:-3] + (2 / 3) * t * (
+                        (term_2 / h ** 2) * RHS2d + term_0 * u2[3:-3])
                 u[0:3, k+1] = u_bc_l[:, k+1]
                 u[-3:, k+1] = u_bc_r[:, k+1]
         else:

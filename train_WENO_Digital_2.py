@@ -92,8 +92,7 @@ for j in range(8000):
             for k in range(nn):
                 u_test = train_model.run_weno(problem_test, u_test, mweno=True, mapped=False, trainable=True, vectorized=True, k=k)
             V_test, _, _ = problem_test.transformation(u_test)
-            for k in range(nn + 1):
-                single_problem_loss_test.append(monotonicity_loss(V_test))
+            single_problem_loss_test.append(monotonicity_loss(V_test))
         loss_test.append(single_problem_loss_test)
     all_loss_test.append(loss_test)
 

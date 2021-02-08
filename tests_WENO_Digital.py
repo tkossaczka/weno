@@ -9,6 +9,7 @@ from scipy.stats import norm
 from define_problem_Call import Call_option
 from define_problem_Call_GS import Call_option_GS
 from define_problem_Digital_GS import Digital_option_GS
+from define_SFD2_Solver import SFD2_Solver
 
 torch.set_default_dtype(torch.float64)
 
@@ -25,7 +26,7 @@ params=None
 
 problem= Digital_option
 
-problem_main = problem(space_steps=100, time_steps=None, params = params)
+problem_main = problem(space_steps=160, time_steps=None, params = params)
 params = problem_main.get_params()
 
 u_init, nn = train_model.init_run_weno(problem_main, vectorized=True, just_one_time_step=False)
@@ -84,6 +85,20 @@ der1_t = der1_t.detach().numpy()
 gamma_t = E * (der2_t / h**2 * (1 / S[3:-3]**2) - der1_t / h * (1 / S[3:-3]**2))
 plt.plot(S[3:-3], gamma_t)
 
+# model = SFD2_Solver()
+# e = problem_main.params['e']
+# der2_nt = model.SFD2(u_nt)
+# der1_nt = model.SFD1(u_nt)
+# gamma_nt = E * (der2_nt / h**2 * (1 / S[1:-1] **2) - der1_nt / h * (1 / S[1:-1] **2))
+# plt.figure(3)
+# plt.plot(S[1:-1] , gamma_nt)
+#
+# der2_t = model.SFD2(u_t)
+# der1_t = model.SFD1(u_t)
+# der2_t = der2_t.detach().numpy()
+# der1_t = der1_t.detach().numpy()
+# gamma_t = E * (der2_t / h**2 * (1 / S[1:-1] **2) - der1_t / h * (1 / S[1:-1] **2))
+# plt.plot(S[1:-1] , gamma_t)
 
 # VV = V.detach().numpy()
 # X, Y = np.meshgrid(x, t, indexing="ij")
