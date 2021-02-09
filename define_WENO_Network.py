@@ -489,7 +489,6 @@ class WENONetwork(nn.Module):
         if hasattr(problem_class, 'exact'):
             print('nic netreba')
         else:
-            #u_exact,_,_ = self.full_WENO(problem, trainable=False, plot=False, vectorized=False)
             u_exact = self.run_weno(problem, trainable=trainable, vectorized=True , just_one_time_step=just_one_time_step)
         space_steps_exact = problem.space_steps
         time_steps_exact = problem.time_steps

@@ -23,8 +23,8 @@ def validation_problems(j):
     return params_vld[j]
 
 problem= PME
-type = "Barenblatt"
-rng = 4
+type = "boxes"
+rng = 1
 err_nt_max_vec = np.zeros(rng)
 err_nt_mean_vec = np.zeros(rng)
 err_t_max_vec = np.zeros(rng)
@@ -32,10 +32,10 @@ err_t_mean_vec = np.zeros(rng)
 
 for j in range(rng):
     print(j)
-    params = validation_problems(j)
+    # params = validation_problems(j)
     # params = {'T': 2, 'e': 1e-13, 'L': 6, 'power': 8, 'd': 1}
-    #params = None
-    problem_main = problem(type=type, space_steps=40, time_steps=None, params = params)
+    params = None
+    problem_main = problem(type=type, space_steps=64, time_steps=None, params = params)
     params = problem_main.get_params()
     u_init, nn = train_model.init_run_weno(problem_main, vectorized=True, just_one_time_step=False)
     u_t = u_init
@@ -80,10 +80,11 @@ if type == "Barenblatt":
 # plt.plot(S,V_nt, S, u_ex)
 # plt.plot(S,V_nt, S, V_t, S, u_ex)
 
-# VV = V.detach().numpy()
-# X, Y = np.meshgrid(x, t, indexing="ij")
+# t = problem_main.time
+# UU = uu
+# X, Y = np.meshgrid(S, t, indexing="ij")
 # fig = plt.figure()
 # ax = fig.gca(projection='3d')
-# ax.plot_surface(X, Y, VV, cmap=cm.viridis)
+# ax.plot_surface(X, Y, UU, cmap=cm.viridis)
 
 

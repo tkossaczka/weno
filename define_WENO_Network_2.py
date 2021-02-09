@@ -158,6 +158,7 @@ class WENONetwork_2(WENONetwork):
                         (term_2 / h ** 2) * RHS2d - (term_1 / h) * RHS2c + term_0 * u2[3:-3])
                 u[0:3, k+1] = u_bc_l[:, k+1]
                 u[-3:, k+1] = u_bc_r[:, k+1]
+                u_ret = u[:, k + 1]
         elif w5_minus == 'no':
             if vectorized:
                 u_ret[3:-3] = (1 / 3) * uu[3:-3] + (2 / 3) * u2[3:-3] + (2 / 3) * t * (
@@ -169,6 +170,7 @@ class WENONetwork_2(WENONetwork):
                         (term_2 / h ** 2) * RHS2d + term_0 * u2[3:-3])
                 u[0:3, k+1] = u_bc_l[:, k+1]
                 u[-3:, k+1] = u_bc_r[:, k+1]
+                u_ret = u[:, k + 1]
         else:
             RHS2c = self.WENO5(uu2_conv, e, w5_minus=w5_minus, mweno=mweno, mapped=mapped, trainable=trainable)
             if vectorized:
@@ -181,6 +183,7 @@ class WENONetwork_2(WENONetwork):
                         (term_2 / h ** 2) * RHS2d - (term_1 / h) * RHS2c + term_0 * u2[3:-3])
                 u[0:3, k+1] = u_bc_l[:, k+1]
                 u[-3:, k+1] = u_bc_r[:, k+1]
+                u_ret = u[:, k + 1]
         return u_ret
 
     def forward(self, problem, u_ret, k):
@@ -228,3 +231,20 @@ class WENONetwork_2(WENONetwork):
             order[i - 1] = np.log(vecerr[i - 1] / vecerr[i]) / np.log(2)
             print(problem.space_steps, problem.time_steps)
         return vecerr, order
+
+    def compute_exact(self,problem_class, problem, space_steps, time_steps, just_one_time_step, trainable):
+        if hasattr(problem_class, 'exact'):
+            print('nic netreba')
+        else:
+            u, nn = self.init_run_weno(problem, vectorized=False, just_one_time_step=just_one_time_step)
+            for k in range(nn):
+                u[:, k + 1] = self.run_weno(problem, u, mweno=True, mapped=False, vectorized=False, trainable=trainable, k=k)
+        u_exact = u
+        space_steps_exact = problem.space_steps
+        time_steps_exact = problem.time_steps
+        divider_space = space_steps_exact / space_steps
+        divider_time = time_steps_exact / time_steps
+        divider_space = int(divider_space)
+        divider_time = int(divider_time)
+        u_exact_adjusted = u_exact[0:space_steps_exact+1:divider_space,0:time_steps_exact+1:divider_time]
+        return u_exact, u_exact_adjusted
