@@ -41,12 +41,14 @@ def init_Euler(x):
 
     return r0, u0, p0, rho, u, p
 
-def init_PME(x):
+def init_PME(x, height = None):
     sw = 0 #random.randint(0,1)
     m = x.shape[0]
     u0 = torch.zeros(m)
     if sw==0: # same height
-        u0 = ((-3.7 < x)* (x < -0.7) + (0.7 < x)*(x <3.7)).astype(float)
-    if sw==1: # different height
+        if height == None:
+            height = random.uniform(0,1)
+        u0 = (height*(-3.7 < x)* (x < -0.7) + height*(0.7 < x)*(x <3.7)).astype(float)
+    elif sw==1: # different height
         u0 = ((-4 < x)* (x < -1) + 2*(0 < x)*(x <3)).astype(float)
-    return u0
+    return u0, height

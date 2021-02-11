@@ -27,7 +27,7 @@ class PME():
         params["T"] = 0.5
         params["e"] = 10 ** (-13)
         params["L"] = 6
-        params["power"] = random.uniform(2,5)
+        params["power"] = 4 #random.uniform(2,5)
         params["d"] = 1
         self.params = params
 
@@ -71,7 +71,7 @@ class PME():
                 u_init[k] = (np.maximum(1 - kk*np.abs(x[k])**2, 0)) ** (1 / (mm - 1))
                 #u_init[k] = (np.maximum(1-(kk*(mm-1))/(2*mm)*np.abs(x[k])**2,0))**(1/(mm-1))
         if type == "boxes":
-            u_init = init_PME(x)
+            u_init, self.height = init_PME(x)
         u_init = torch.Tensor(u_init)
         return u_init
 
