@@ -26,7 +26,7 @@ def exact_loss(u, u_ex):
     return loss
 
 #optimizer = optim.SGD(train_model.parameters(), lr=0.1)
-optimizer = optim.Adam(train_model.parameters(), lr=0.001)
+optimizer = optim.Adam(train_model.parameters(), lr=0.0001)
 
 def validation_problems(j):
     params_vld = []
@@ -67,7 +67,7 @@ for jj in range (4):
             optimizer.step()  # Optimize weights
             print(jj, j, k, loss)
             u_train.detach_()
-        base_path ="C:/Users/Tatiana/Desktop/Research/Research_ML_WENO/PME_Test/Models/Model_7/"
+        base_path ="C:/Users/Tatiana/Desktop/Research/Research_ML_WENO/PME_Test/Models/Model_8/"
         if not os.path.exists(base_path):
             os.mkdir(base_path)
         path = os.path.join(base_path, "{}.pt".format(j+10*jj))

@@ -13,7 +13,7 @@ from initial_condition_generator import init_PME
 torch.set_default_dtype(torch.float64)
 
 train_model = WENONetwork_2()
-train_model = torch.load("C:/Users/Tatiana/Desktop/Research/Research_ML_WENO/PME_Test/Models/Model_8/1.pt")
+train_model = torch.load("C:/Users/Tatiana/Desktop/Research/Research_ML_WENO/PME_Test/Models/Model_1/99.pt")
 
 def validation_problems(j):
     params_vld = []
@@ -38,14 +38,14 @@ u_ex_3 = torch.load("C:/Users/Tatiana/Desktop/Research/Research_ML_WENO/PME_Test
 u_exs = [u_ex_0, u_ex_1, u_ex_2, u_ex_3]
 
 problem= PME
-type = "boxes"
-rng = 1
+type = "Barenblatt"
+rng = 4
 err_nt_max_vec = np.zeros(rng)
 err_nt_mean_vec = np.zeros(rng)
 err_t_max_vec = np.zeros(rng)
 err_t_mean_vec = np.zeros(rng)
 
-for j in range(2,3):
+for j in range(rng):
     print(j)
     if type == "Barenblatt":
         params = validation_problems(j)
@@ -55,8 +55,8 @@ for j in range(2,3):
     # params = None
     problem_main = problem(type=type, space_steps=64, time_steps=None, params = params)
     params = problem_main.get_params()
-    problem_main.initial_condition, _ = init_PME(problem_main.x, height=1)
-    problem_main.initial_condition = torch.Tensor(problem_main.initial_condition)
+    # problem_main.initial_condition, _ = init_PME(problem_main.x, height=1)
+    # problem_main.initial_condition = torch.Tensor(problem_main.initial_condition)
     u_init, nn = train_model.init_run_weno(problem_main, vectorized=True, just_one_time_step=False)
     u_t = u_init
     with torch.no_grad():

@@ -49,7 +49,7 @@ if __name__ == "__main__":
     args = parser.parse_args()
     save_problem_and_solution(args.save_path, args.sample_number)
 
-# seq 12 17 | xargs -i{} -P6 python compute_exact_solution.py C:\Users\Tatiana\Desktop\Research\Research_ML_WENO\PME_Test\PME_Data_1024_2 {}
+# seq 0 60 | xargs -i{} -P6 python compute_exact_solution.py C:\Users\Tatiana\Desktop\Research\Research_ML_WENO\PME_Test\PME_Data_1024_3 {}
 
 
 # def validation_problems(j):

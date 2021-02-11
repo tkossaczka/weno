@@ -48,7 +48,7 @@ u_exs = [u_ex_0, u_ex_1, u_ex_2, u_ex_3]
 all_loss_test = []
 df=pd.read_csv("C:/Users/Tatiana/Desktop/Research/Research_ML_WENO/PME_Test/PME_Data_1024_2/parameters.txt")
 
-for j in range(18):
+for j in range(6):
     loss_test = []
     sample_id=j
     u_ex = np.load("C:/Users/Tatiana/Desktop/Research/Research_ML_WENO//PME_Test/PME_Data_1024_2/u_exact64_{}.npy".format(sample_id))

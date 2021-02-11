@@ -24,10 +24,10 @@ class PME():
 
     def init_params(self):
         params = dict()
-        params["T"] = 0.5
+        params["T"] = 2
         params["e"] = 10 ** (-13)
         params["L"] = 6
-        params["power"] = 4 #random.uniform(2,5)
+        params["power"] = random.uniform(2,5)
         params["d"] = 1
         self.params = params
 
@@ -123,18 +123,18 @@ class PME():
         u = u**power
         return u
 
-    # def exact(self, t, type):
-    #     #T = self.params["T"]
-    #     mm = self.params["power"]
-    #     d = self.params["d"]
-    #     alpha = d / ((mm - 1) * d + 2)
-    #     kk = (alpha * (mm - 1)) / (2 * mm * d)
-    #     n,_, _,_,_ = self.__compute_n_t_h_x_time(type)
-    #     x, time = self.x, self.time
-    #     #kk = 1/(mm+1)
-    #     #u_ex = (1/T**kk) * (np.maximum(1-((kk*(mm-1))/(2*mm))*((np.abs(x)**2)/T**(2*kk)),0))**(1/(mm - 1))
-    #     u_ex = (t**(-alpha))*(np.maximum(1-kk*((np.abs(x))**2)*t**(-2*alpha/d), 0)) ** (1/(mm-1))
-    #     return u_ex
+    def exact(self, t, type):
+        #T = self.params["T"]
+        mm = self.params["power"]
+        d = self.params["d"]
+        alpha = d / ((mm - 1) * d + 2)
+        kk = (alpha * (mm - 1)) / (2 * mm * d)
+        n,_, _,_,_ = self.__compute_n_t_h_x_time(type)
+        x, time = self.x, self.time
+        #kk = 1/(mm+1)
+        #u_ex = (1/T**kk) * (np.maximum(1-((kk*(mm-1))/(2*mm))*((np.abs(x)**2)/T**(2*kk)),0))**(1/(mm - 1))
+        u_ex = (t**(-alpha))*(np.maximum(1-kk*((np.abs(x))**2)*t**(-2*alpha/d), 0)) ** (1/(mm-1))
+        return u_ex
 
     def err(self, u_last):
         u_ex = self.exact()
