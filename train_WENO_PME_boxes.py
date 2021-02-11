@@ -51,7 +51,7 @@ df=pd.read_csv("C:/Users/Tatiana/Desktop/Research/Research_ML_WENO/PME_Test/PME_
 for j in range(18):
     loss_test = []
     sample_id=j
-    u_ex = np.load("C:/Users/Tatiana/Desktop/Research/Research_ML_WENO//PME_Test/PME_Data_1024/u_exact64_{}.npy".format(sample_id))
+    u_ex = np.load("C:/Users/Tatiana/Desktop/Research/Research_ML_WENO//PME_Test/PME_Data_1024_2/u_exact64_{}.npy".format(sample_id))
     u_ex = torch.Tensor(u_ex)
     # Forward path
     # power = float(df[df.sample_id==sample_id]["power"])
