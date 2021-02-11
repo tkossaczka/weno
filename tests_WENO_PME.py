@@ -12,7 +12,7 @@ from define_problem_PME import PME
 torch.set_default_dtype(torch.float64)
 
 train_model = WENONetwork_2()
-train_model = torch.load("C:/Users/Tatiana/Desktop/Research/Research_ML_WENO/PME_Test/Models/Model_8/8.pt")
+train_model = torch.load("C:/Users/Tatiana/Desktop/Research/Research_ML_WENO/PME_Test/Models/Model_8/19.pt")
 
 def validation_problems(j):
     params_vld = []

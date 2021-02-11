@@ -7,6 +7,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 from scipy.stats import norm
 import pandas as pd
+import random
 
 torch.set_default_dtype(torch.float64)
 
@@ -46,16 +47,21 @@ u_exs = [u_ex_0, u_ex_1, u_ex_2, u_ex_3]
 all_loss_test = []
 df=pd.read_csv("C:/Users/Tatiana/Desktop/Research/Research_ML_WENO/PME_Test/PME_Data_1024/parameters.txt")
 
-for j in range(20):
+for j in range(500):
     loss_test = []
-    sample_id=j
+    sample_id=random.randint(1,143)
     u_ex = np.load("C:/Users/Tatiana/Desktop/Research/Research_ML_WENO//PME_Test/PME_Data_1024/u_exact64_{}.npy".format(sample_id))
     u_ex = torch.Tensor(u_ex)
     # Forward path
     power = float(df[df.sample_id==sample_id]["power"])
     params = {'T': 0.5, 'e': 1e-13, 'L': 6, 'power': power, 'd': 1}
     problem_main = problem_class(type = "boxes", space_steps=64, time_steps=None, params=params)
-    u_init, nn = train_model.init_run_weno(problem_main, vectorized=True, just_one_time_step=False)
+    u_init, nn = train_model.init_run_weno(problem_main, vectorized=True, just_one_time_step=True)
+    # random time step chosen
+    time_st = problem_main.time_steps
+    init_id = random.randint(0,time_st-2)
+    print(init_id)
+    u_init = u_ex[:,init_id]
     u_train = u_init
     # parameters needed for the computation of exact solution
     # params_main = problem_main.params
@@ -69,7 +75,8 @@ for j in range(20):
         optimizer.zero_grad()  # Clear gradients
         # Calculate loss
         params = problem_main.get_params()
-        ex_loss = exact_loss(u_train,u_ex[:,k+1])
+        # ex_loss = exact_loss(u_train,u_ex[:,k+1])
+        ex_loss = exact_loss(u_train,u_ex[:,init_id+1])
         loss = ex_loss
         loss.backward()  # Backward pass
         optimizer.step()  # Optimize weights
