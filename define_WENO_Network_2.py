@@ -27,8 +27,10 @@ class WENONetwork_2(WENONetwork):
         net = nn.Sequential(
             nn.Conv1d(2, 5, kernel_size=5, stride=1, padding=2),
             nn.ELU(),
+            nn.MaxPool1d(kernel_size=5, stride=1, padding=2),
             nn.Conv1d(5, 5, kernel_size=5, stride=1, padding=2),
             nn.ELU(),
+            nn.MaxPool1d(kernel_size=5, stride=1, padding=2),
             # nn.Conv1d(20, 40, kernel_size=1, stride=1, padding=0),
             # nn.ELU(),
             # nn.Conv1d(80, 40, kernel_size=1, stride=1, padding=0),
@@ -36,7 +38,8 @@ class WENONetwork_2(WENONetwork):
             # nn.Conv1d(40, 20, kernel_size=3, stride=1, padding=1),
             # nn.ELU(),
             nn.Conv1d(5, 1, kernel_size=1, stride=1, padding=0),
-            nn.Sigmoid())
+            nn.Sigmoid(),
+            nn.MaxPool1d(kernel_size=1, stride=1, padding=0))
         return net
 
     def init_run_weno(self, problem, vectorized, just_one_time_step):

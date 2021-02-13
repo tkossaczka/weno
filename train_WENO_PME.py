@@ -38,7 +38,7 @@ def validation_problems(j):
 
 all_loss_test = []
 
-for j in range(200):
+for j in range(100):
     loss_test = []
     # Forward path
     params = None
@@ -66,7 +66,7 @@ for j in range(200):
         optimizer.step()  # Optimize weights
         print(j, k, loss)
         u_train.detach_()
-    base_path ="C:/Users/Tatiana/Desktop/Research/Research_ML_WENO/PME_Test/Models/Model_25/"
+    base_path ="C:/Users/Tatiana/Desktop/Research/Research_ML_WENO/PME_Test/Models/Model_26/"
     if not os.path.exists(base_path):
         os.mkdir(base_path)
     path = os.path.join(base_path, "{}.pt".format(j))
