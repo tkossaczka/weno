@@ -25,9 +25,9 @@ class WENONetwork_2(WENONetwork):
 
     def get_inner_nn_weno6(self):
         net = nn.Sequential(
-            nn.Conv1d(2, 10, kernel_size=5, stride=1, padding=2),
+            nn.Conv1d(2, 5, kernel_size=5, stride=1, padding=2),
             nn.ELU(),
-            nn.Conv1d(10, 10, kernel_size=5, stride=1, padding=2),
+            nn.Conv1d(5, 5, kernel_size=5, stride=1, padding=2),
             nn.ELU(),
             # nn.Conv1d(20, 40, kernel_size=1, stride=1, padding=0),
             # nn.ELU(),
@@ -35,7 +35,7 @@ class WENONetwork_2(WENONetwork):
             # nn.ELU(),
             # nn.Conv1d(40, 20, kernel_size=3, stride=1, padding=1),
             # nn.ELU(),
-            nn.Conv1d(10, 1, kernel_size=1, stride=1, padding=0),
+            nn.Conv1d(5, 1, kernel_size=1, stride=1, padding=0),
             nn.Sigmoid())
         return net
 

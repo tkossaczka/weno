@@ -24,10 +24,10 @@ class PME():
 
     def init_params(self):
         params = dict()
-        params["T"] = 2
+        params["T"] = 1.4 #2 #1.4
         params["e"] = 10 ** (-13)
         params["L"] = 6
-        params["power"] = random.uniform(2,5)
+        params["power"] = random.uniform(2,5) #random.uniform(2,5) #random.uniform(2,8)
         params["d"] = 1
         self.params = params
 
@@ -40,7 +40,7 @@ class PME():
             L= self.params["L"]
             m = self.space_steps
             h = 2 * L / m
-            n = np.ceil(12*(T-1)/(h**2)) #9 pre m=2,3,4,5; 17 pre m=8
+            n = np.ceil(10*(T-1)/(h**2)) #(10) 12 pre m=2,3,4,5; 17 pre m=8
             n = int(n)
             t = (T-1) / n
             x = np.linspace(-L, L, m + 1)
@@ -123,9 +123,9 @@ class PME():
         u = u**power
         return u
 
-    def exact(self, t, type):
+    def exact(self, t, power, type):
         #T = self.params["T"]
-        mm = self.params["power"]
+        mm = power
         d = self.params["d"]
         alpha = d / ((mm - 1) * d + 2)
         kk = (alpha * (mm - 1)) / (2 * mm * d)

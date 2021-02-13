@@ -13,7 +13,7 @@ from initial_condition_generator import init_PME
 torch.set_default_dtype(torch.float64)
 
 train_model = WENONetwork_2()
-train_model = torch.load("C:/Users/Tatiana/Desktop/Research/Research_ML_WENO/PME_Test/Models/Model_1/99.pt")
+train_model = torch.load("C:/Users/Tatiana/Desktop/Research/Research_ML_WENO/PME_Test/Models/Model_25/85.pt")
 
 def validation_problems(j):
     params_vld = []
@@ -71,9 +71,10 @@ for j in range(rng):
         # parameters needed for the computation of exact solution
         params_main = problem_main.params
         T = params_main['T']
+        power = params_main['power']
         L = params_main['L']
         sp_st = problem_main.space_steps
-        u_ex = problem_main.exact(T,type)
+        u_ex = problem_main.exact(T,power,type)
         error_t_mean = np.sqrt(2*L / sp_st) * (np.sqrt(np.sum((u_t.detach().numpy() - u_ex) ** 2)))
         error_nt_mean = np.sqrt(2*L / sp_st) * (np.sqrt(np.sum((u_nt.detach().numpy() - u_ex) ** 2)))
         error_nt_max = np.max(np.absolute(u_ex - u_nt.detach().numpy()))
