@@ -19,20 +19,23 @@ def exact_loss(u, u_ex):
 
 def validation_problems(j):
     params_vld = []
+    params_vld.append({'T': 2, 'e': 1e-13, 'L': 6, 'power': 2, 'd': 1})
+    params_vld.append({'T': 2, 'e': 1e-13, 'L': 6, 'power': 3, 'd': 1})
     params_vld.append({'T': 2, 'e': 1e-13, 'L': 6, 'power': 4, 'd': 1})
+    params_vld.append({'T': 2, 'e': 1e-13, 'L': 6, 'power': 5, 'd': 1})
     return params_vld[j]
 
 problem = PME
 all_loss_test = []
 
-for i in range(200):
+for i in range(100):
     print(i)
-    train_model = torch.load('C:/Users/Tatiana/Desktop/Research/Research_ML_WENO/PME_Test/Models/Model_24/{}.pt'.format(i))
+    train_model = torch.load('C:/Users/Tatiana/Desktop/Research/Research_ML_WENO/PME_Test/Models/Model_26/{}.pt'.format(i))
     loss_test = []
-    for kk in range(1):
+    for kk in range(4):
         single_problem_loss_test = []
         params_test = validation_problems(kk)
-        problem_test = problem(type = "Barenblatt", space_steps=80, time_steps=None, params=params_test)
+        problem_test = problem(type = "Barenblatt", space_steps=64, time_steps=None, params=params_test)
         T = problem_test.params['T']
         power = problem_test.params['power']
         u_init, nn = train_model.init_run_weno(problem_test, vectorized=True, just_one_time_step=False)

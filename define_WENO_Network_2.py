@@ -3,8 +3,23 @@ import matplotlib.pyplot as plt
 from mpl_toolkits.mplot3d import Axes3D
 from matplotlib import cm
 import torch
-from torch import nn
+import torch.nn as nn
+import torch.nn.functional as F
 from define_WENO_Network import WENONetwork
+
+class FancyNet(nn.Module):
+  def __init__(self):
+      super(FancyNet, self).__init__()
+      self.conv0 = nn.Conv1d(2, 8, kernel_size=5, stride=1, padding=2)
+      self.convs = [nn.Conv1d(8, 8, kernel_size=5, stride=1, padding=2) for k in range(4)]
+      self.conv_out = nn.Conv1d(8, 1, kernel_size=1, stride=1, padding=0)
+
+  def forward(self, x):
+    x = F.elu(self.conv0(x))
+    for k in range(4):
+      x = F.elu(self.convs[k](x)) + x
+    x = F.sigmoid(self.conv_out(x))
+    return x
 
 class WENONetwork_2(WENONetwork):
     # def get_inner_nn_weno5(self):
@@ -24,23 +39,17 @@ class WENONetwork_2(WENONetwork):
     #     return net
 
     def get_inner_nn_weno6(self):
-        net = nn.Sequential(
-            nn.Conv1d(2, 5, kernel_size=5, stride=1, padding=2),
-            nn.ELU(),
-            nn.MaxPool1d(kernel_size=5, stride=1, padding=2),
-            nn.Conv1d(5, 5, kernel_size=5, stride=1, padding=2),
-            nn.ELU(),
-            nn.MaxPool1d(kernel_size=5, stride=1, padding=2),
-            # nn.Conv1d(20, 40, kernel_size=1, stride=1, padding=0),
+        return FancyNet()
+
+            # nn.Conv1d(2, 5, kernel_size=5, stride=1, padding=2),
             # nn.ELU(),
-            # nn.Conv1d(80, 40, kernel_size=1, stride=1, padding=0),
+            # nn.MaxPool1d(kernel_size=5, stride=1, padding=2),
+            # nn.Conv1d(5, 5, kernel_size=5, stride=1, padding=2),
             # nn.ELU(),
-            # nn.Conv1d(40, 20, kernel_size=3, stride=1, padding=1),
-            # nn.ELU(),
-            nn.Conv1d(5, 1, kernel_size=1, stride=1, padding=0),
-            nn.Sigmoid(),
-            nn.MaxPool1d(kernel_size=1, stride=1, padding=0))
-        return net
+            # nn.MaxPool1d(kernel_size=5, stride=1, padding=2),
+            # nn.Conv1d(5, 1, kernel_size=1, stride=1, padding=0),
+            # nn.Sigmoid(),
+            # nn.MaxPool1d(kernel_size=1, stride=1, padding=0))
 
     def init_run_weno(self, problem, vectorized, just_one_time_step):
         m = problem.space_steps

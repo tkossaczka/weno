@@ -26,7 +26,7 @@ def exact_loss(u, u_ex):
     return loss
 
 #optimizer = optim.SGD(train_model.parameters(), lr=0.1)
-optimizer = optim.Adam(train_model.parameters(), lr=0.001)
+optimizer = optim.Adam(train_model.parameters(), lr=0.01)
 
 def validation_problems(j):
     params_vld = []
