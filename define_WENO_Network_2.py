@@ -18,7 +18,7 @@ class FancyNet(nn.Module):
     x = F.elu(self.conv0(x))
     for k in range(4):
       x = F.elu(self.convs[k](x)) + x
-    x = F.sigmoid(self.conv_out(x))
+    x = self.conv_out(x)
     return x
 
 class WENONetwork_2(WENONetwork):

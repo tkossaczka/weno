@@ -12,15 +12,15 @@ from initial_condition_generator import init_PME
 
 torch.set_default_dtype(torch.float64)
 
-train_model = WENONetwork_2()
-train_model = torch.load("C:/Users/Tatiana/Desktop/Research/Research_ML_WENO/PME_Test/Models/Model_26/75.pt")
+#train_model = WENONetwork_2()
+train_model = torch.load("C:/Users/Tatiana/Desktop/Research/Research_ML_WENO/PME_Test/Models/Model_27/399.pt")
 
 def validation_problems(j):
     params_vld = []
-    params_vld.append({'T': 2, 'e': 1e-13, 'L': 6, 'power': 2, 'd': 1})
-    params_vld.append({'T': 2, 'e': 1e-13, 'L': 6, 'power': 3, 'd': 1})
-    params_vld.append({'T': 2, 'e': 1e-13, 'L': 6, 'power': 4, 'd': 1})
-    params_vld.append({'T': 2, 'e': 1e-13, 'L': 6, 'power': 5, 'd': 1})
+    params_vld.append({'T': 1.4, 'e': 1e-13, 'L': 6, 'power': 2, 'd': 1})
+    params_vld.append({'T': 1.4, 'e': 1e-13, 'L': 6, 'power': 3, 'd': 1})
+    params_vld.append({'T': 1.4, 'e': 1e-13, 'L': 6, 'power': 4, 'd': 1})
+    params_vld.append({'T': 1.4, 'e': 1e-13, 'L': 6, 'power': 5, 'd': 1})
     return params_vld[j]
 
 def validation_problems_boxes(j):
@@ -52,9 +52,10 @@ for j in range(rng):
     else:
         params = validation_problems_boxes(j)
     # params = {'T': 2, 'e': 1e-13, 'L': 6, 'power': 8, 'd': 1}
-    # params = None
+    params = None
     problem_main = problem(type=type, space_steps=64, time_steps=None, params = params)
     params = problem_main.get_params()
+    print(params)
     # problem_main.initial_condition, _ = init_PME(problem_main.x, height=1)
     # problem_main.initial_condition = torch.Tensor(problem_main.initial_condition)
     u_init, nn = train_model.init_run_weno(problem_main, vectorized=True, just_one_time_step=False)
