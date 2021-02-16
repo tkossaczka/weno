@@ -48,7 +48,7 @@ current_problem_classes = [
 
 phandler = ProblemHandler(problem_classes = current_problem_classes,
                           max_num_open_problems=200)
-test_modulo=100
+test_modulo=50
 for j in range(400):
     loss_test = []
     # Forward path
@@ -67,7 +67,7 @@ for j in range(400):
     optimizer.step()  # Optimize weights
     u_new.detach_()
     phandler.update_problem(problem_id, u_new)
-    base_path = "C:/Users/Tatiana/Desktop/Research/Research_ML_WENO/PME_Test/Models/Model_29/"
+    base_path = "C:/Users/Tatiana/Desktop/Research/Research_ML_WENO/PME_Test/Models/Model_34/"
     if not os.path.exists(base_path):
         os.mkdir(base_path)
     path = os.path.join(base_path, "{}.pt".format(j))

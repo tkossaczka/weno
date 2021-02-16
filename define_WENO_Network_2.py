@@ -8,18 +8,19 @@ import torch.nn.functional as F
 from define_WENO_Network import WENONetwork
 
 class FancyNet(nn.Module):
-  def __init__(self):
-      super(FancyNet, self).__init__()
-      self.conv0 = nn.Conv1d(2, 8, kernel_size=5, stride=1, padding=2)
-      self.convs = [nn.Conv1d(8, 8, kernel_size=5, stride=1, padding=2) for k in range(4)]
-      self.conv_out = nn.Conv1d(8, 1, kernel_size=1, stride=1, padding=0)
+    def __init__(self):
+        self.num_inner_convs = 2
+        super(FancyNet, self).__init__()
+        self.conv0 = nn.Conv1d(2, 4, kernel_size=5, stride=1, padding=2)
+        self.convs = [nn.Conv1d(4, 4, kernel_size=5, stride=1, padding=2) for k in range(self.num_inner_convs)]
+        self.conv_out = nn.Conv1d(4, 1, kernel_size=1, stride=1, padding=0)
 
-  def forward(self, x):
-    x = F.elu(self.conv0(x))
-    for k in range(4):
-      x = F.elu(self.convs[k](x)) + x
-    x = self.conv_out(x)
-    return x
+    def forward(self, x):
+        x = F.elu(self.conv0(x))
+        for k in range(self.num_inner_convs):
+            x = F.elu(self.convs[k](x)) + x
+        x = self.conv_out(x)
+        return x
 
 class WENONetwork_2(WENONetwork):
     # def get_inner_nn_weno5(self):
@@ -40,16 +41,6 @@ class WENONetwork_2(WENONetwork):
 
     def get_inner_nn_weno6(self):
         return FancyNet()
-
-            # nn.Conv1d(2, 5, kernel_size=5, stride=1, padding=2),
-            # nn.ELU(),
-            # nn.MaxPool1d(kernel_size=5, stride=1, padding=2),
-            # nn.Conv1d(5, 5, kernel_size=5, stride=1, padding=2),
-            # nn.ELU(),
-            # nn.MaxPool1d(kernel_size=5, stride=1, padding=2),
-            # nn.Conv1d(5, 1, kernel_size=1, stride=1, padding=0),
-            # nn.Sigmoid(),
-            # nn.MaxPool1d(kernel_size=1, stride=1, padding=0))
 
     def init_run_weno(self, problem, vectorized, just_one_time_step):
         m = problem.space_steps
