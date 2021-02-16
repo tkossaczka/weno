@@ -4,21 +4,17 @@ import random
 from initial_condition_generator import init_PME
 
 class PME():
-    def __init__(self, type, space_steps, time_steps=None, params=None, w5_minus="no"):
-        """
-        Atributes needed to be initialized to make WENO network functional
-        space_steps, time_steps, initial_condition, boundary_condition, x, time, h, n
-        """
-
+    def __init__(self, example, space_steps, time_steps=None, params=None, w5_minus="no"):
         self.params = params
+        self.example = example
         if params is None:
             self.init_params()
         self.space_steps = space_steps
         self.time_steps = time_steps
-        n, self.t, self.h, self.x, self.time = self.__compute_n_t_h_x_time(type)
+        n, self.t, self.h, self.x, self.time = self.__compute_n_t_h_x_time()
         if time_steps is None:
             self.time_steps = n
-        self.initial_condition = self.__compute_initial_condition(type)
+        self.initial_condition = self.__compute_initial_condition()
         self.boundary_condition = self.__compute_boundary_condition()
         self.w5_minus = w5_minus
 
@@ -34,18 +30,19 @@ class PME():
     def get_params(self):
         return self.params
 
-    def __compute_n_t_h_x_time(self, type):
-        if type == "Barenblatt":
+    def __compute_n_t_h_x_time(self):
+        example = self.example
+        if example == "Barenblatt":
             T = self.params["T"]
             L= self.params["L"]
             m = self.space_steps
             h = 2 * L / m
-            n = np.ceil(10*(T-1)/(h**2)) #(10) 12 pre m=2,3,4,5; 17 pre m=8
+            n = np.ceil(10*(T-1)/(h**2)) #10 pre m=2,3,4,5; 17 pre m=8
             n = int(n)
             t = (T-1) / n
             x = np.linspace(-L, L, m + 1)
             time = np.linspace(1, T, n + 1)
-        if type == "boxes":
+        if example == "boxes":
             T = self.params["T"]
             L = self.params["L"]
             m = self.space_steps
@@ -57,9 +54,10 @@ class PME():
             time = np.linspace(0, T, n + 1)
         return n, t, h, x, time
 
-    def __compute_initial_condition(self,type):
+    def __compute_initial_condition(self):
         x = self.x
-        if type == "Barenblatt":
+        example = self.example
+        if example == "Barenblatt":
             mm = self.params["power"]
             d = self.params["d"]
             m = self.space_steps
@@ -70,7 +68,7 @@ class PME():
             for k in range(0, m + 1):
                 u_init[k] = (np.maximum(1 - kk*np.abs(x[k])**2, 0)) ** (1 / (mm - 1))
                 #u_init[k] = (np.maximum(1-(kk*(mm-1))/(2*mm)*np.abs(x[k])**2,0))**(1/(mm-1))
-        if type == "boxes":
+        if example == "boxes":
             u_init, self.height = init_PME(x)
         u_init = torch.Tensor(u_init)
         return u_init
@@ -123,13 +121,13 @@ class PME():
         u = u**power
         return u
 
-    def exact(self, t, power, type):
+    def exact(self, t):
         #T = self.params["T"]
-        mm = power
+        mm = self.params['power']
         d = self.params["d"]
         alpha = d / ((mm - 1) * d + 2)
         kk = (alpha * (mm - 1)) / (2 * mm * d)
-        n,_, _,_,_ = self.__compute_n_t_h_x_time(type)
+        n,_, _,_,_ = self.__compute_n_t_h_x_time()
         x, time = self.x, self.time
         #kk = 1/(mm+1)
         #u_ex = (1/T**kk) * (np.maximum(1-((kk*(mm-1))/(2*mm))*((np.abs(x)**2)/T**(2*kk)),0))**(1/(mm - 1))
@@ -143,12 +141,12 @@ class PME():
         xmaxerr = np.max(xerr)
         return xmaxerr
 
-    def whole_exact(self, type):
+    def whole_exact(self):
         mm = self.params["power"]
         d = self.params["d"]
         alpha = d / ((mm - 1) * d + 2)
         kk = (alpha * (mm - 1)) / (2 * mm * d)
-        n, _, _, _, _ = self.__compute_n_t_h_x_time(type)
+        n, _, _, _, _ = self.__compute_n_t_h_x_time()
         x, time = self.x, self.time
         m = self.space_steps
         # kk = 1/(mm+1)

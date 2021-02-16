@@ -43,7 +43,7 @@ def validation_problems(j):
 all_loss_test = []
 
 current_problem_classes = [
-  (PME, {"type": "Barenblatt", "space_steps": 64, "time_steps": None, "params": None}),
+  (PME, {"example": "Barenblatt", "space_steps": 64, "time_steps": None, "params": None}),
 ]
 
 phandler = ProblemHandler(problem_classes = current_problem_classes,
@@ -59,7 +59,7 @@ for j in range(400):
     step = problem_specs["step"]
     u_last = problem_specs["last_solution"]
     u_new = train_model.forward(problem,u_last,step)
-    u_exact = problem.exact(problem.time[step+1], problem.params['power'], "Barenblatt") # FIXME: remove last 2 args
+    u_exact = problem.exact(problem.time[step+1])
     u_exact = torch.Tensor(u_exact)
     optimizer.zero_grad()
     loss = exact_loss(u_new,u_exact)
@@ -67,7 +67,7 @@ for j in range(400):
     optimizer.step()  # Optimize weights
     u_new.detach_()
     phandler.update_problem(problem_id, u_new)
-    base_path = "C:/Users/Tatiana/Desktop/Research/Research_ML_WENO/PME_Test/Models/Model_27/"
+    base_path = "C:/Users/Tatiana/Desktop/Research/Research_ML_WENO/PME_Test/Models/Model_29/"
     if not os.path.exists(base_path):
         os.mkdir(base_path)
     path = os.path.join(base_path, "{}.pt".format(j))
@@ -78,7 +78,7 @@ for j in range(400):
       for kk in range(4):
         single_problem_loss_test = []
         params_test = validation_problems(kk)
-        problem_test = problem_class(type = "Barenblatt", space_steps=64, time_steps=None, params=params_test)
+        problem_test = problem_class(example = "Barenblatt", space_steps=64, time_steps=None, params=params_test)
         T_test = problem_test.params['T']
         power_test = problem_test.params['power']
         with torch.no_grad():
@@ -86,7 +86,7 @@ for j in range(400):
           u_test = u_init
           for k in range(tt):
             u_test = train_model.run_weno(problem_test, u_test, mweno=True, mapped=False, trainable=True, vectorized=True, k=k)
-          u_exact_test = problem_test.exact(T_test, power_test, "Barenblatt")
+          u_exact_test = problem_test.exact(T_test)
           u_exact_test = torch.Tensor(u_exact_test)
           single_problem_loss_test.append(exact_loss(u_test,u_exact_test))
         loss_test.append(single_problem_loss_test)

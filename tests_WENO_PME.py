@@ -13,14 +13,14 @@ from initial_condition_generator import init_PME
 torch.set_default_dtype(torch.float64)
 
 #train_model = WENONetwork_2()
-train_model = torch.load("C:/Users/Tatiana/Desktop/Research/Research_ML_WENO/PME_Test/Models/Model_27/399.pt")
+train_model = torch.load("C:/Users/Tatiana/Desktop/Research/Research_ML_WENO/PME_Test/Models/Model_29/199.pt")
 
 def validation_problems(j):
     params_vld = []
-    params_vld.append({'T': 1.4, 'e': 1e-13, 'L': 6, 'power': 2, 'd': 1})
-    params_vld.append({'T': 1.4, 'e': 1e-13, 'L': 6, 'power': 3, 'd': 1})
-    params_vld.append({'T': 1.4, 'e': 1e-13, 'L': 6, 'power': 4, 'd': 1})
-    params_vld.append({'T': 1.4, 'e': 1e-13, 'L': 6, 'power': 5, 'd': 1})
+    params_vld.append({'T': 2, 'e': 1e-13, 'L': 6, 'power': 2, 'd': 1})
+    params_vld.append({'T': 2, 'e': 1e-13, 'L': 6, 'power': 3, 'd': 1})
+    params_vld.append({'T': 2, 'e': 1e-13, 'L': 6, 'power': 4, 'd': 1})
+    params_vld.append({'T': 2, 'e': 1e-13, 'L': 6, 'power': 5, 'd': 1})
     return params_vld[j]
 
 def validation_problems_boxes(j):
@@ -38,7 +38,7 @@ u_ex_3 = torch.load("C:/Users/Tatiana/Desktop/Research/Research_ML_WENO/PME_Test
 u_exs = [u_ex_0, u_ex_1, u_ex_2, u_ex_3]
 
 problem= PME
-type = "Barenblatt"
+example = "Barenblatt"
 rng = 4
 err_nt_max_vec = np.zeros(rng)
 err_nt_mean_vec = np.zeros(rng)
@@ -47,13 +47,13 @@ err_t_mean_vec = np.zeros(rng)
 
 for j in range(rng):
     print(j)
-    if type == "Barenblatt":
+    if example == "Barenblatt":
         params = validation_problems(j)
     else:
         params = validation_problems_boxes(j)
     # params = {'T': 2, 'e': 1e-13, 'L': 6, 'power': 8, 'd': 1}
-    params = None
-    problem_main = problem(type=type, space_steps=64, time_steps=None, params = params)
+    # params = None
+    problem_main = problem(example=example, space_steps=64, time_steps=None, params = params)
     params = problem_main.get_params()
     print(params)
     # problem_main.initial_condition, _ = init_PME(problem_main.x, height=1)
@@ -68,14 +68,13 @@ for j in range(rng):
     for k in range(nn):
         u_nt = train_model.run_weno(problem_main, u_nt, mweno=True, mapped=False, vectorized=True, trainable=False, k=k)
     V_nt, S, _ = problem_main.transformation(u_nt)
-    if type == "Barenblatt":
+    if example == "Barenblatt":
         # parameters needed for the computation of exact solution
         params_main = problem_main.params
         T = params_main['T']
-        power = params_main['power']
         L = params_main['L']
         sp_st = problem_main.space_steps
-        u_ex = problem_main.exact(T,power,type)
+        u_ex = problem_main.exact(T)
         error_t_mean = np.sqrt(2*L / sp_st) * (np.sqrt(np.sum((u_t.detach().numpy() - u_ex) ** 2)))
         error_nt_mean = np.sqrt(2*L / sp_st) * (np.sqrt(np.sum((u_nt.detach().numpy() - u_ex) ** 2)))
         error_nt_max = np.max(np.absolute(u_ex - u_nt.detach().numpy()))
@@ -108,6 +107,8 @@ err_mat[1,:] = err_t_max_vec
 err_mat[2,:] = err_nt_mean_vec
 err_mat[3,:] = err_t_mean_vec
 
+ratio_max = err_mat[0,:]/err_mat[1,:]
+ratio_l2 = err_mat[2,:]/err_mat[3,:]
 
 # plt.figure(2)
 # plt.plot(S,V_nt, 'o')
