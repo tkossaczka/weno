@@ -1,7 +1,9 @@
 from define_WENO_Network_2 import WENONetwork_2
+from utils.problem_handler import ProblemHandler
 import torch
 from torch import optim
 from define_problem_PME import PME
+from define_problem_PME_boxes import PME_boxes
 from initial_condition_generator import init_PME
 import os, sys
 import numpy as np
@@ -16,7 +18,7 @@ torch.set_default_dtype(torch.float64)
 train_model = WENONetwork_2()
 
 # DROP PROBLEM FOR TRAINING
-problem_class = PME
+problem_class = PME_boxes
 
 def monotonicity_loss(u):
     monotonicity = torch.sum(torch.max(u[:-1]-u[1:], torch.Tensor([0.0])))
@@ -29,7 +31,8 @@ def exact_loss(u, u_ex):
     return loss
 
 #optimizer = optim.SGD(train_model.parameters(), lr=0.1)
-optimizer = optim.Adam(train_model.parameters(), lr=0.001)
+#optimizer = optim.Adam(train_model.parameters(), lr=0.001)
+optimizer = optim.Adam(train_model.parameters(), lr=0.1, weight_decay=0.0001)
 
 def validation_problems(j):
     params_vld = []
@@ -46,67 +49,58 @@ u_ex_3 = torch.load("C:/Users/Tatiana/Desktop/Research/Research_ML_WENO/PME_Test
 u_exs = [u_ex_0, u_ex_1, u_ex_2, u_ex_3]
 
 all_loss_test = []
-df=pd.read_csv("C:/Users/Tatiana/Desktop/Research/Research_ML_WENO/PME_Test/PME_Data_1024_2/parameters.txt")
+# df=pd.read_csv("C:/Users/Tatiana/Desktop/Research/Research_ML_WENO/PME_Test/PME_Data_1024/parameters.txt")
 
-for j in range(6):
+current_problem_classes = [(PME_boxes, {"sample_id": 1, "example": "boxes", "space_steps": 64, "time_steps": None, "params": 0})]
+
+phandler = ProblemHandler(problem_classes = current_problem_classes, max_num_open_problems=200)
+test_modulo=50
+
+for j in range(800):
     loss_test = []
-    sample_id=j
-    u_ex = np.load("C:/Users/Tatiana/Desktop/Research/Research_ML_WENO//PME_Test/PME_Data_1024_2/u_exact64_{}.npy".format(sample_id))
-    u_ex = torch.Tensor(u_ex)
-    # Forward path
-    # power = float(df[df.sample_id==sample_id]["power"])
-    # params = {'T': 0.5, 'e': 1e-13, 'L': 6, 'power': power, 'd': 1}
-    params = None
-    height = float(df[df.sample_id==sample_id]["height"])
-    problem_main = problem_class(type = "boxes", space_steps=64, time_steps=None, params=params)
-    problem_main.initial_condition, _ = init_PME(problem_main.x, height)
-    problem_main.initial_condition = torch.Tensor(problem_main.initial_condition)
-    u_init, nn = train_model.init_run_weno(problem_main, vectorized=True, just_one_time_step=False)
-    u_train = u_init
-    params = problem_main.params
-    # parameters needed for the computation of exact solution
-    # params_main = problem_main.params
-    # T = params_main['T']
-    # x, time = problem_main.x, problem_main.time
-    print(sample_id, height, params)
-    for k in range(nn):
-        # Forward path
-        u_train = train_model.forward(problem_main,u_train,k)
-        # Train model:
-        optimizer.zero_grad()  # Clear gradients
-        # Calculate loss
-        params = problem_main.get_params()
-        ex_loss = exact_loss(u_train,u_ex[:,k+1])
-        loss = ex_loss
-        loss.backward()  # Backward pass
-        optimizer.step()  # Optimize weights
-        print(j, k, loss)
-        u_train.detach_()
-    base_path ="C:/Users/Tatiana/Desktop/Research/Research_ML_WENO/PME_Test/Models/Model_8/"
+    problem_specs, problem_id = phandler.get_random_problem(0.1)
+    problem = problem_specs["problem"]
+    step = problem_specs["step"]
+    u_last = problem_specs["last_solution"]
+    u_new = train_model.forward(problem, u_last, step)
+    u_exact = problem.exact(step + 1)
+    u_exact = torch.Tensor(u_exact)
+    optimizer.zero_grad()
+    loss = exact_loss(u_new, u_exact)
+    loss.backward()  # Backward pass
+    optimizer.step()  # Optimize weights
+    u_new.detach_()
+    phandler.update_problem(problem_id, u_new)
+    base_path = "C:/Users/Tatiana/Desktop/Research/Research_ML_WENO/PME_Test/Models/Model_37/"
     if not os.path.exists(base_path):
         os.mkdir(base_path)
     path = os.path.join(base_path, "{}.pt".format(j))
     torch.save(train_model, path)
     # TEST IF LOSS IS DECREASING WITH THE NUMBER OF ITERATIONS INCREASING
-    for kk in range(2,3):  # power = 4
-        single_problem_loss_test = []
-        params_test = validation_problems(kk)
-        height_ex = 1
-        problem_test = problem_class(type = "boxes", space_steps=64, time_steps=None, params=params_test)
-        problem_test.initial_condition, _ = init_PME(problem_test.x, height_ex)
-        problem_test.initial_condition = torch.Tensor(problem_test.initial_condition)
-        with torch.no_grad():
-            u_init, nn = train_model.init_run_weno(problem_test, vectorized=True, just_one_time_step=False)
-            u_test = u_init
-            for k in range(nn):
-                u_test = train_model.run_weno(problem_test, u_test, mweno=True, mapped=False, trainable=True, vectorized=True, k=k)
-            single_problem_loss_test.append(exact_loss(u_test,u_exs[kk][:, -1]))
-        loss_test.append(single_problem_loss_test)
-    all_loss_test.append(loss_test)
+    if not (j%test_modulo):
+        print("TESTING ON VALIDATION PROBLEMS")
+        for kk in range(4):
+            single_problem_loss_test = []
+            params_test = validation_problems(kk)
+            problem_test = problem_class(sample_id = None, example = "boxes", space_steps=64, time_steps=None, params=params_test)
+            with torch.no_grad():
+                u_init, nn = train_model.init_run_weno(problem_test, vectorized=True, just_one_time_step=False)
+                u_test = u_init
+                for k in range(nn):
+                    u_test = train_model.run_weno(problem_test, u_test, mweno=True, mapped=False, trainable=True, vectorized=True, k=k)
+                single_problem_loss_test.append(exact_loss(u_test,u_exs[kk][:, -1]))
+            loss_test.append(single_problem_loss_test)
+        print(loss_test)
+        all_loss_test.append(loss_test)
 
 # print("number of parameters:", sum(p.numel() for p in train_model.parameters()))
 # g=train_model.parameters()
 # g.__next__()
 
 all_loss_test = np.array(all_loss_test)
-plt.plot(all_loss_test[:,:,0])
+# plt.plot(all_loss_test[:,:,0])
+
+norm_losses=all_loss_test[:,:,0]/all_loss_test[:,:,0].max(axis=0)[None, :]
+print("trained:", all_loss_test[:,:,0].min(axis=0))
+plt.plot(norm_losses)
+plt.show()

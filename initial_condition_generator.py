@@ -47,7 +47,7 @@ def init_PME(x, height = None):
     u0 = torch.zeros(m)
     if sw==0: # same height
         if height == None:
-            height = random.uniform(0.5,1.5)
+            height = 1 #random.uniform(0.5,1.5)
         u0 = (height*(-3.7 < x)* (x < -0.7) + height*(0.7 < x)*(x <3.7)).astype(float)
     elif sw==1: # different height
         u0 = ((-4 < x)* (x < -1) + 2*(0 < x)*(x <3)).astype(float)

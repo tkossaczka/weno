@@ -15,7 +15,7 @@ class PME():
         if time_steps is None:
             self.time_steps = n
         self.initial_condition = self.__compute_initial_condition()
-        self.boundary_condition = self.__compute_boundary_condition()
+        self.boundary_condition = self.compute_boundary_condition()
         self.w5_minus = w5_minus
 
     def init_params(self):
@@ -37,21 +37,21 @@ class PME():
             L= self.params["L"]
             m = self.space_steps
             h = 2 * L / m
-            n = np.ceil(10*(T-1)/(h**2)) #10 pre m=2,3,4,5; 17 pre m=8
+            n = np.ceil(17*(T-1)/(h**2)) #10 pre m=2,3,4,5; 17 pre m=8
             n = int(n)
             t = (T-1) / n
             x = np.linspace(-L, L, m + 1)
             time = np.linspace(1, T, n + 1)
-        if example == "boxes":
-            T = self.params["T"]
-            L = self.params["L"]
-            m = self.space_steps
-            h = 2 * L / m
-            n = np.ceil(15 * (T) / (h ** 2))  # 15 pre rovnaku vysku a m=2,3,4,5,6; 20 pre rovnaku vysku a m=7,8; 180 pre roznu vysku
-            n = int(n)
-            t = (T) / n
-            x = np.linspace(-L, L, m + 1)
-            time = np.linspace(0, T, n + 1)
+        # if example == "boxes":
+        #     T = self.params["T"]
+        #     L = self.params["L"]
+        #     m = self.space_steps
+        #     h = 2 * L / m
+        #     n = np.ceil(15 * (T) / (h ** 2))  # 15 pre rovnaku vysku a m=2,3,4,5,6; 20 pre rovnaku vysku a m=7,8; 180 pre roznu vysku
+        #     n = int(n)
+        #     t = (T) / n
+        #     x = np.linspace(-L, L, m + 1)
+        #     time = np.linspace(0, T, n + 1)
         return n, t, h, x, time
 
     def __compute_initial_condition(self):
@@ -68,12 +68,12 @@ class PME():
             for k in range(0, m + 1):
                 u_init[k] = (np.maximum(1 - kk*np.abs(x[k])**2, 0)) ** (1 / (mm - 1))
                 #u_init[k] = (np.maximum(1-(kk*(mm-1))/(2*mm)*np.abs(x[k])**2,0))**(1/(mm-1))
-        if example == "boxes":
-            u_init, self.height = init_PME(x)
+        # if example == "boxes":
+        #     u_init, self.height = init_PME(x)
         u_init = torch.Tensor(u_init)
         return u_init
 
-    def __compute_boundary_condition(self):
+    def compute_boundary_condition(self):
         n = self.time_steps
 
         u_bc_l = torch.zeros((3, n+1))
@@ -114,7 +114,6 @@ class PME():
     def funct_derivative(self,u):
         u_der =u**0
         return u_der
-
 
     def funct(self, u):
         power = self.params["power"]

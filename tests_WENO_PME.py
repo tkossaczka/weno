@@ -8,12 +8,13 @@ from define_WENO_Network_2 import WENONetwork_2
 from scipy.stats import norm
 from define_problem_heat_eq import heat_equation
 from define_problem_PME import PME
+from define_problem_PME_boxes import PME_boxes
 from initial_condition_generator import init_PME
 
 torch.set_default_dtype(torch.float64)
 
 #train_model = WENONetwork_2()
-train_model = torch.load("C:/Users/Tatiana/Desktop/Research/Research_ML_WENO/PME_Test/Models/Model_34/199.pt")
+train_model = torch.load("C:/Users/Tatiana/Desktop/Research/Research_ML_WENO/PME_Test/Models/Model_37/199.pt")
 
 def validation_problems(j):
     params_vld = []
@@ -37,8 +38,8 @@ u_ex_2 = torch.load("C:/Users/Tatiana/Desktop/Research/Research_ML_WENO/PME_Test
 u_ex_3 = torch.load("C:/Users/Tatiana/Desktop/Research/Research_ML_WENO/PME_Test/PME_Data_1024/Basic_test_set/u_ex64_3")
 u_exs = [u_ex_0, u_ex_1, u_ex_2, u_ex_3]
 
-problem= PME
-example = "Barenblatt"
+problem= PME_boxes
+example = "boxes"
 rng = 4
 err_nt_max_vec = np.zeros(rng)
 err_nt_mean_vec = np.zeros(rng)
@@ -49,11 +50,13 @@ for j in range(rng):
     print(j)
     if example == "Barenblatt":
         params = validation_problems(j)
+        problem_main = problem(example=example, space_steps=64, time_steps=None, params=params)
     else:
         params = validation_problems_boxes(j)
+        problem_main = problem(sample_id = None, example=example, space_steps=64, time_steps=None, params=params)
     # params = {'T': 2, 'e': 1e-13, 'L': 6, 'power': 8, 'd': 1}
     # params = None
-    problem_main = problem(example=example, space_steps=64, time_steps=None, params = params)
+    #  problem_main = problem(example=example, space_steps=64, time_steps=None, params = params)
     params = problem_main.get_params()
     print(params)
     # problem_main.initial_condition, _ = init_PME(problem_main.x, height=1)

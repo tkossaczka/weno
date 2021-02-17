@@ -11,9 +11,9 @@ class FancyNet(nn.Module):
     def __init__(self):
         self.num_inner_convs = 2
         super(FancyNet, self).__init__()
-        self.conv0 = nn.Conv1d(2, 4, kernel_size=5, stride=1, padding=2)
-        self.convs = [nn.Conv1d(4, 4, kernel_size=5, stride=1, padding=2) for k in range(self.num_inner_convs)]
-        self.conv_out = nn.Conv1d(4, 1, kernel_size=1, stride=1, padding=0)
+        self.conv0 = nn.Conv1d(2, 5, kernel_size=5, stride=1, padding=2)
+        self.convs = [nn.Conv1d(5, 5, kernel_size=5, stride=1, padding=2) for k in range(self.num_inner_convs)]
+        self.conv_out = nn.Conv1d(5, 1, kernel_size=1, stride=1, padding=0)
 
     def forward(self, x):
         x = F.elu(self.conv0(x))
