@@ -14,7 +14,7 @@ from initial_condition_generator import init_PME
 torch.set_default_dtype(torch.float64)
 
 #train_model = WENONetwork_2()
-train_model = torch.load("C:/Users/Tatiana/Desktop/Research/Research_ML_WENO/PME_Test/Models/Model_37/199.pt")
+train_model = torch.load("C:/Users/Tatiana/Desktop/Research/Research_ML_WENO/PME_Test/Models/Model_39/109.pt")
 
 def validation_problems(j):
     params_vld = []
@@ -72,7 +72,6 @@ for j in range(rng):
         u_nt = train_model.run_weno(problem_main, u_nt, mweno=True, mapped=False, vectorized=True, trainable=False, k=k)
     V_nt, S, _ = problem_main.transformation(u_nt)
     if example == "Barenblatt":
-        # parameters needed for the computation of exact solution
         params_main = problem_main.params
         T = params_main['T']
         L = params_main['L']

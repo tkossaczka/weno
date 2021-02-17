@@ -3,7 +3,7 @@ import torch
 from scipy.stats import norm
 
 class heat_equation():
-    def __init__(self, space_steps, time_steps=None, params=None, w5_minus=None):
+    def __init__(self, space_steps, time_steps=None, params=None, w5_minus='no'):
         """
         Atributes needed to be initialized to make WENO network functional
         space_steps, time_steps, initial_condition, boundary_condition, x, time, h, n
