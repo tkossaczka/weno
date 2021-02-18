@@ -22,13 +22,13 @@ def monotonicity_loss(u):
 
 def exact_loss(u, u_ex):
     error = train_model.compute_error(u, u_ex)
-    # loss = 10e4*error
-    loss = error
+    loss = 10e1*error
+    # loss = error
     return loss
 
 #optimizer = optim.SGD(train_model.parameters(), lr=0.1)
 # optimizer = optim.Adam(train_model.parameters(), lr=0.1)
-optimizer = optim.Adam(train_model.parameters(), lr=0.1, weight_decay=0.0001)
+optimizer = optim.Adam(train_model.parameters(), lr=0.01, weight_decay=0.001)
 
 def validation_problems(j):
     params_vld = []
@@ -54,15 +54,15 @@ u_exs = [u_ex_0, u_ex_1, u_ex_2, u_ex_3]
 
 all_loss_test = []
 
-problem_class = PME
-current_problem_classes = [(PME, {"example": "Barenblatt", "space_steps": 64, "time_steps": None, "params": None})]
-example = "Barenblatt"
-# problem_class = PME_boxes
-# current_problem_classes = [(PME_boxes, {"sample_id": 1, "example": "boxes", "space_steps": 64, "time_steps": None, "params": 0})]
-# example = "boxes"
+# problem_class = PME
+# current_problem_classes = [(PME, {"example": "Barenblatt", "space_steps": 64, "time_steps": None, "params": None})]
+# example = "Barenblatt"
+problem_class = PME_boxes
+current_problem_classes = [(PME_boxes, {"sample_id": 1, "example": "boxes", "space_steps": 64, "time_steps": None, "params": 0})]
+example = "boxes"
 
 phandler = ProblemHandler(problem_classes = current_problem_classes, max_num_open_problems=200)
-test_modulo=100
+test_modulo=10
 for j in range(800):
     loss_test = []
     problem_specs, problem_id = phandler.get_random_problem(0.1)
@@ -82,7 +82,7 @@ for j in range(800):
     optimizer.step()  # Optimize weights
     u_new.detach_()
     phandler.update_problem(problem_id, u_new)
-    base_path = "C:/Users/Tatiana/Desktop/Research/Research_ML_WENO/PME_Test/Models/Model_39/"
+    base_path = "C:/Users/Tatiana/Desktop/Research/Research_ML_WENO/PME_Test/Models/Model_41/"
     if not os.path.exists(base_path):
         os.mkdir(base_path)
     path = os.path.join(base_path, "{}.pt".format(j))
