@@ -11,7 +11,7 @@ class PME_boxes(PME):
             self.params = params
             self.sample_id = sample_id
         else:
-            self.sample_id = random.randint(0,143)
+            self.sample_id = random.randint(0,135)
             self.df = pd.read_csv("C:/Users/Tatiana/Desktop/Research/Research_ML_WENO/PME_Test/PME_Data_1024/parameters.txt")
             self.u_ex = np.load("C:/Users/Tatiana/Desktop/Research/Research_ML_WENO/PME_Test/PME_Data_1024/u_exact64_{}.npy".format(self.sample_id))
             self.u_ex = torch.Tensor(self.u_ex)

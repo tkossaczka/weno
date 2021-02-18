@@ -42,16 +42,6 @@ class PME():
             t = (T-1) / n
             x = np.linspace(-L, L, m + 1)
             time = np.linspace(1, T, n + 1)
-        # if example == "boxes":
-        #     T = self.params["T"]
-        #     L = self.params["L"]
-        #     m = self.space_steps
-        #     h = 2 * L / m
-        #     n = np.ceil(15 * (T) / (h ** 2))  # 15 pre rovnaku vysku a m=2,3,4,5,6; 20 pre rovnaku vysku a m=7,8; 180 pre roznu vysku
-        #     n = int(n)
-        #     t = (T) / n
-        #     x = np.linspace(-L, L, m + 1)
-        #     time = np.linspace(0, T, n + 1)
         return n, t, h, x, time
 
     def __compute_initial_condition(self):
@@ -68,8 +58,6 @@ class PME():
             for k in range(0, m + 1):
                 u_init[k] = (np.maximum(1 - kk*np.abs(x[k])**2, 0)) ** (1 / (mm - 1))
                 #u_init[k] = (np.maximum(1-(kk*(mm-1))/(2*mm)*np.abs(x[k])**2,0))**(1/(mm-1))
-        # if example == "boxes":
-        #     u_init, self.height = init_PME(x)
         u_init = torch.Tensor(u_init)
         return u_init
 

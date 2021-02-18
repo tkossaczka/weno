@@ -1,6 +1,7 @@
 import torch
 import matplotlib.pyplot as plt
 import numpy as np
+import pandas as pd
 from matplotlib import cm
 from mpl_toolkits.mplot3d import Axes3D
 from define_problem_Digital import Digital_option
@@ -24,25 +25,41 @@ def validation_problems(j):
     params_vld.append({'T': 2, 'e': 1e-13, 'L': 6, 'power': 5, 'd': 1})
     return params_vld[j]
 
-def validation_problems_boxes(j):
-    params_vld = []
-    params_vld.append({'T': 0.5, 'e': 1e-13, 'L': 6, 'power': 2, 'd': 1})
-    params_vld.append({'T': 0.5, 'e': 1e-13, 'L': 6, 'power': 3, 'd': 1})
-    params_vld.append({'T': 0.5, 'e': 1e-13, 'L': 6, 'power': 4, 'd': 1})
-    params_vld.append({'T': 0.5, 'e': 1e-13, 'L': 6, 'power': 5, 'd': 1})
-    return params_vld[j]
+# def validation_problems_boxes(j):
+#     params_vld = []
+#     params_vld.append({'T': 0.5, 'e': 1e-13, 'L': 6, 'power': 2, 'd': 1})
+#     params_vld.append({'T': 0.5, 'e': 1e-13, 'L': 6, 'power': 3, 'd': 1})
+#     params_vld.append({'T': 0.5, 'e': 1e-13, 'L': 6, 'power': 4, 'd': 1})
+#     params_vld.append({'T': 0.5, 'e': 1e-13, 'L': 6, 'power': 5, 'd': 1})
+#     return params_vld[j]
+# u_ex_0 = torch.load("C:/Users/Tatiana/Desktop/Research/Research_ML_WENO/PME_Test/PME_Data_1024/Basic_test_set/u_ex64_0")
+# u_ex_1 = torch.load("C:/Users/Tatiana/Desktop/Research/Research_ML_WENO/PME_Test/PME_Data_1024/Basic_test_set/u_ex64_1")
+# u_ex_2 = torch.load("C:/Users/Tatiana/Desktop/Research/Research_ML_WENO/PME_Test/PME_Data_1024/Basic_test_set/u_ex64_2")
+# u_ex_3 = torch.load("C:/Users/Tatiana/Desktop/Research/Research_ML_WENO/PME_Test/PME_Data_1024/Basic_test_set/u_ex64_3")
+# u_exs = [u_ex_0, u_ex_1, u_ex_2, u_ex_3]
 
-u_ex_0 = torch.load("C:/Users/Tatiana/Desktop/Research/Research_ML_WENO/PME_Test/PME_Data_1024/Basic_test_set/u_ex64_0")
-u_ex_1 = torch.load("C:/Users/Tatiana/Desktop/Research/Research_ML_WENO/PME_Test/PME_Data_1024/Basic_test_set/u_ex64_1")
-u_ex_2 = torch.load("C:/Users/Tatiana/Desktop/Research/Research_ML_WENO/PME_Test/PME_Data_1024/Basic_test_set/u_ex64_2")
-u_ex_3 = torch.load("C:/Users/Tatiana/Desktop/Research/Research_ML_WENO/PME_Test/PME_Data_1024/Basic_test_set/u_ex64_3")
-u_exs = [u_ex_0, u_ex_1, u_ex_2, u_ex_3]
+df=pd.read_csv("C:/Users/Tatiana/Desktop/Research/Research_ML_WENO/PME_Test/PME_Data_1024/Test_set/parameters.txt")
+def validation_problems_boxes(j):
+    power = float(df[df.sample_id==j]["power"])
+    params_vld = []
+    params_vld.append({'T': 0.5, 'e': 1e-13, 'L': 6, 'power': power, 'd': 1})
+    params_vld.append({'T': 0.5, 'e': 1e-13, 'L': 6, 'power': power, 'd': 1})
+    params_vld.append({'T': 0.5, 'e': 1e-13, 'L': 6, 'power': power, 'd': 1})
+    params_vld.append({'T': 0.5, 'e': 1e-13, 'L': 6, 'power': power, 'd': 1})
+    params_vld.append({'T': 0.5, 'e': 1e-13, 'L': 6, 'power': power, 'd': 1})
+    params_vld.append({'T': 0.5, 'e': 1e-13, 'L': 6, 'power': power, 'd': 1})
+    params_vld.append({'T': 0.5, 'e': 1e-13, 'L': 6, 'power': power, 'd': 1})
+    params_vld.append({'T': 0.5, 'e': 1e-13, 'L': 6, 'power': power, 'd': 1})
+    return params_vld[j]
+u_exs = []
+for j in range(8):
+    u_exs.append(torch.Tensor(np.load("C:/Users/Tatiana/Desktop/Research/Research_ML_WENO/PME_Test/PME_Data_1024/Test_set/u_exact64_{}.npy".format(j))))
 
 problem= PME_boxes
 example = "boxes"
 # problem= PME
 # example = "Barenblatt"
-rng = 4
+rng = 8
 err_nt_max_vec = np.zeros(rng)
 err_nt_mean_vec = np.zeros(rng)
 err_t_max_vec = np.zeros(rng)
@@ -57,8 +74,7 @@ for j in range(rng):
         params = validation_problems_boxes(j)
         problem_main = problem(sample_id = None, example=example, space_steps=64, time_steps=None, params=params)
     # params = {'T': 2, 'e': 1e-13, 'L': 6, 'power': 8, 'd': 1}
-    # params = None
-    #  problem_main = problem(example=example, space_steps=64, time_steps=None, params = params)
+    # problem_main = problem(example=example, space_steps=64, time_steps=None, params = params)
     params = problem_main.get_params()
     print(params)
     # problem_main.initial_condition, _ = init_PME(problem_main.x, height=1)
