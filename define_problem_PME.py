@@ -23,7 +23,7 @@ class PME():
         params["T"] = 1.4 #2 #1.4
         params["e"] = 10 ** (-13)
         params["L"] = 6
-        params["power"] = random.uniform(2,5) #random.uniform(2,5) #random.uniform(2,8)
+        params["power"] = random.uniform(2,8) #random.uniform(2,5) #random.uniform(2,8)
         params["d"] = 1
         self.params = params
 
@@ -37,7 +37,7 @@ class PME():
             L= self.params["L"]
             m = self.space_steps
             h = 2 * L / m
-            n = np.ceil(10*(T-1)/(h**2)) #10 pre m=2,3,4,5; 17 pre m=8
+            n = np.ceil(17*(T-1)/(h**2)) #10 pre m=2,3,4,5; 17 pre m=8
             n = int(n)
             t = (T-1) / n
             x = np.linspace(-L, L, m + 1)
