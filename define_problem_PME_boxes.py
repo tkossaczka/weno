@@ -19,7 +19,7 @@ class PME_boxes(PME):
             self.params = {'T': 0.5, 'e': 1e-13, 'L': 6, 'power': power, 'd': 1}
         # self.params = params
         self.example = example
-        if params is None:
+        if self.params is None:
             self.init_params()
         self.space_steps = space_steps
         self.time_steps = time_steps

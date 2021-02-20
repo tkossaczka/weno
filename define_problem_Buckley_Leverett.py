@@ -1,13 +1,24 @@
 import numpy as np
 import torch
 import random
+import pandas as pd
 import matplotlib.pyplot as plt
 
 class Buckley_Leverett():
-    def __init__(self, example, space_steps, time_steps=None, params=None):
-        self.params = params
+    def __init__(self, sample_id, example, space_steps, time_steps=None, params=None):
+        if sample_id == None:
+            self.params = params
+            self.sample_id = sample_id
+        else:
+            self.sample_id = random.randint(0,5)
+            self.df = pd.read_csv("C:/Users/Tatiana/Desktop/Research/Research_ML_WENO/Buckley_Leverett_CD_Test/Buckley_Leverett_CD_Data_1024/parameters.txt")
+            self.u_ex = np.load("C:/Users/Tatiana/Desktop/Research/Research_ML_WENO/Buckley_Leverett_CD_Test/Buckley_Leverett_CD_Data_1024/u_exact64_{}.npy".format(self.sample_id))
+            self.u_ex = torch.Tensor(self.u_ex)
+            C = float(self.df[self.df.sample_id == self.sample_id]["C"])
+            G = float(self.df[self.df.sample_id == self.sample_id]["G"])
+            self.params = {'T': 0.1, 'e': 1e-13, 'L': 0, 'R': 1, 'C': C, 'G': G}
         self.example = example
-        if params is None:
+        if self.params is None:
             self.init_params()
         self.space_steps = space_steps
         self.time_steps = time_steps
