@@ -6,7 +6,7 @@ from define_problem_PME import PME
 import pandas as pd
 
 class PME_boxes(PME):
-    def __init__(self, sample_id, example, space_steps, time_steps=None, params=None, w5_minus="no"):
+    def __init__(self, sample_id, example, space_steps, time_steps=None, params=None):
         if sample_id == None:
             self.params = params
             self.sample_id = sample_id
@@ -28,7 +28,7 @@ class PME_boxes(PME):
             self.time_steps = n
         self.initial_condition = self.__compute_initial_condition()
         self.boundary_condition = self.compute_boundary_condition()
-        self.w5_minus = w5_minus
+        self.w5_minus = "no"
 
     def init_params(self):
         params = dict()

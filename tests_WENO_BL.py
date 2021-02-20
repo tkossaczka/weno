@@ -13,7 +13,7 @@ torch.set_default_dtype(torch.float64)
 train_model = WENONetwork_2()
 problem= Buckley_Leverett
 
-problem_main = problem(space_steps=60, time_steps=None, params=None)
+problem_main = problem(example = "gravity", space_steps=64, time_steps=None, params=None)
 print(problem_main.params)
 
 u_init, nn = train_model.init_run_weno(problem_main, vectorized=True, just_one_time_step=False)

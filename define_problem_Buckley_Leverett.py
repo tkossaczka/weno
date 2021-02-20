@@ -4,8 +4,9 @@ import random
 import matplotlib.pyplot as plt
 
 class Buckley_Leverett():
-    def __init__(self, space_steps, time_steps=None, params=None, w5_minus='Lax-Friedrichs'):
+    def __init__(self, example, space_steps, time_steps=None, params=None):
         self.params = params
+        self.example = example
         if params is None:
             self.init_params()
         self.space_steps = space_steps
@@ -15,7 +16,8 @@ class Buckley_Leverett():
             self.time_steps = n
         self.initial_condition = self.__compute_initial_condition()
         self.boundary_condition = self.__compute_boundary_condition()
-        self.w5_minus = w5_minus
+        self.w5_minus = 'Lax-Friedrichs'
+
 
     def init_params(self):
         params = dict()
@@ -44,6 +46,7 @@ class Buckley_Leverett():
     def __compute_initial_condition(self):
         m = self.space_steps
         x = self.x
+        example = self.example
         u_init = np.zeros(m+1)
         # for k in range(0, m + 1):
         #     if x[k] >= 1-1/np.sqrt(2) and x[k] <= 1:
@@ -57,33 +60,40 @@ class Buckley_Leverett():
         #         u_init[k] = -1
         #     else:
         #         u_init[k] = 0
-        for k in range(0, m + 1):
-            if x[k] >= 0 and x[k] < 1-1/np.sqrt(2):
-                u_init[k] = 0
-            else:
-                u_init[k] = 1
+        if example == "gravity":
+            for k in range(0, m + 1):
+                if x[k] >= 0 and x[k] < 1-1/np.sqrt(2):
+                    u_init[k] = 0
+                else:
+                    u_init[k] = 1
         u_init = torch.Tensor(u_init)
         return u_init
 
     def __compute_boundary_condition(self):
         n = self.time_steps
+        example = self.example
 
         u_bc_l = torch.zeros((3, n+1))
         # u_bc_r = torch.zeros((3, n + 1))
-        u_bc_r = torch.ones((3, n + 1))
+        if example == "gravity":
+            u_bc_r = torch.ones((3, n + 1))
 
         u1_bc_l = torch.zeros((3, n+1))
         # u1_bc_r = torch.zeros((3, n + 1))
-        u1_bc_r = torch.ones((3, n+1))
+        if example == "gravity":
+            u1_bc_r = torch.ones((3, n+1))
 
         u2_bc_l = torch.zeros((3, n+1))
         # u2_bc_r = torch.zeros((3, n + 1))
-        u2_bc_r = torch.ones((3, n+1))
+        if example == "gravity":
+            u2_bc_r = torch.ones((3, n+1))
 
         return u_bc_l, u_bc_r, u1_bc_l, u1_bc_r, u2_bc_l, u2_bc_r
 
     def der_2(self):
-        term_2 = 0.01
+        example = self. example
+        if example == "gravity":
+            term_2 = 0.01
         return term_2
 
     def der_1(self):
@@ -100,10 +110,12 @@ class Buckley_Leverett():
 
     def funct_diffusion(self,u):
         m = self.space_steps
+        example = self.example
         ep = 0.00000001
         u_diff = torch.zeros(m+1)
         # u = u.detach().numpy()
-        u_diff =  (2*u**2 - (4/3)*u**3)  #*((u >= 0-ep) & (u<=1+ep))
+        if example == "gravity":
+            u_diff =  (2*u**2 - (4/3)*u**3)  #*((u >= 0-ep) & (u<=1+ep))
         # u_diff = (u) * ((torch.abs(u) > 0.25))
         #u_diff = (u) * ((np.abs(u) > 0.25))
         # for k in range(0, m + 1):
@@ -121,10 +133,12 @@ class Buckley_Leverett():
     def funct_convection(self, u):
         C = self.params["C"]
         G = self.params["G"]
+        example = self.example
         # u_conv = (u**2)/(u**2+C*(1-u)**2)
         #u_conv = (4*u**2)/(4*u**2+(1-u)**2)
         # u_conv = (u**2)*(1-G*(1-u)**2)/(u**2+(1-u)**2)
-        u_conv = (u ** 2) * (1 - G * (1 - u) ** 2) / (u ** 2 + C*(1 - u) ** 2)
+        if example == "gravity":
+            u_conv = (u ** 2) * (1 - G * (1 - u) ** 2) / (u ** 2 + C*(1 - u) ** 2)
         #u_conv = (u ** 2)  / (u ** 2 + (1 - u) ** 2)
         # u_conv = u**2
         return u_conv
@@ -132,10 +146,12 @@ class Buckley_Leverett():
     def funct_derivative(self,u):
         C = self.params["C"]
         G = self.params["G"]
+        example = self.example
         # u_der = 2*C*u*(1-u)/(u**2+C*(1-u)**2)**2
         # u_der =  8*u*(1-u)/(5*u**2-2*u+1)**2
         # u_der = (-20*u**5+50*u**4-60*u**3+38*u**2-8*u) / (2 * u ** 2 - 2 * u + 1) ** 2
-        u_der = - ( (2*C+2)*G*u**5 + (-8*C-2)*G*u**4 + 12*C*G*u**3 + (2*C-8*C*G)*u**2 + (2*C*G-2*C)*u )/( (u**2+C*(1-u)**2)**2 )
+        if example == "gravity":
+            u_der = - ( (2*C+2)*G*u**5 + (-8*C-2)*G*u**4 + 12*C*G*u**3 + (2*C-8*C*G)*u**2 + (2*C*G-2*C)*u )/( (u**2+C*(1-u)**2)**2 )
         #u_der = 2 * u * (1 - u) / (2 * u ** 2 - 2 * u + 1) ** 2
         # u_der = 2*u
         return u_der
