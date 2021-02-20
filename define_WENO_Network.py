@@ -281,7 +281,7 @@ class WENONetwork(nn.Module):
         [omegapn0, omegapn1, omegapn2] = normalize([omegapn_0, omegapn_1, omegapn_2])
         [omegann0, omegann1, omegann2] = normalize([omegann_0, omegann_1, omegann_2])
 
-        omegaps = [omegapp0, omegapp1, omegapp2, omegapn0, omegapn1, omegapn2]    # TODO toto si treba premysliet, dava to mensi error ked vymenim pn a np v tychto riadkoch
+        omegaps = [omegapp0, omegapp1, omegapp2, omegapn0, omegapn1, omegapn2]
         omegans = [omeganp0, omeganp1, omeganp2, omegann0, omegann1, omegann2]
 
         [omegap0, omegap1, omegap2, omegan0, omegan1, omegan2] = [sigmap * omegap - sigman * omegan

@@ -69,6 +69,7 @@ class WENONetwork_2(WENONetwork):
         term_const = problem.der_const()
         u_bc_l, u_bc_r, u1_bc_l, u1_bc_r, u2_bc_l, u2_bc_r = problem.boundary_condition
         w5_minus = problem.w5_minus
+        eps = 0.0000000001
 
         if vectorized:
             uu = u
@@ -100,6 +101,7 @@ class WENONetwork_2(WENONetwork):
 
         u1[0:3] = u1_bc_l[:,k]
         u1[-3:] = u1_bc_r[:,k]
+        # u1[torch.abs(u1) < eps] = 0
 
         uu1_conv = problem.funct_convection(u1)
         uu1_diff = problem.funct_diffusion(u1)
@@ -124,6 +126,7 @@ class WENONetwork_2(WENONetwork):
 
         u2[0:3] = u2_bc_l[:,k]
         u2[-3:] = u2_bc_r[:,k]
+        # u2[torch.abs(u2) < eps] = 0
 
         uu2_conv = problem.funct_convection(u2)
         uu2_diff = problem.funct_diffusion(u2)
@@ -187,6 +190,9 @@ class WENONetwork_2(WENONetwork):
                 u[0:3, k+1] = u_bc_l[:, k+1]
                 u[-3:, k+1] = u_bc_r[:, k+1]
                 u_ret = u[:, k + 1]
+
+        # u_ret[torch.abs(u_ret) < eps] = 0
+
         return u_ret
 
     def forward(self, problem, u_ret, k):
