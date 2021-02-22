@@ -54,9 +54,12 @@ class Buckley_Leverett():
         L= self.params["L"]
         R= self.params["R"]
         m = self.space_steps
+        example = self.example
         h = (np.abs(L) + np.abs(R)) / m
-        n = np.ceil(0.1*T / (h ** 2))
-        #n=2000
+        if example == "gravity":
+            n = np.ceil(0.1*T / (h ** 2))
+        if example == "degenerate":
+            n=100
         n = int(n)
         t = T / n
         x = np.linspace(L, R, m + 1)
