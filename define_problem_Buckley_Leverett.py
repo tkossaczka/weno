@@ -37,7 +37,7 @@ class Buckley_Leverett():
         params["L"] = 0 #-2 # 0
         params["R"] = 1 #2 #1
         params["C"] = random.uniform(0.1, 0.95)
-        params["G"] = random.uniform(0,5)
+        params["G"] = random.uniform(0,6)
         self.params = params
 
     def __compute_n_t_h_x_time(self):
@@ -47,7 +47,7 @@ class Buckley_Leverett():
         m = self.space_steps
         h = (np.abs(L) + np.abs(R)) / m
         n = np.ceil(0.1*T / (h ** 2))
-        # n=1000
+        #n=2000
         n = int(n)
         t = T / n
         x = np.linspace(L, R, m + 1)
@@ -60,17 +60,18 @@ class Buckley_Leverett():
         example = self.example
         u_init = np.zeros(m+1)
         # for k in range(0, m + 1):
-        #     if x[k] >= 1-1/np.sqrt(2) and x[k] <= 1:
-        #         u_init[k] = 1
-        #     else:
-        #         u_init[k] = 0
-        # for k in range(0, m + 1):
-        #     if x[k] > -1/np.sqrt(2)-0.4 and x[k] < -1/np.sqrt(2)+0.4:
-        #         u_init[k] = 1
-        #     elif x[k] > 1/np.sqrt(2)-0.4 and x[k] < 1/np.sqrt(2)+0.4:
-        #         u_init[k] = -1
-        #     else:
-        #         u_init[k] = 0
+            # if x[k] >= 1-1/np.sqrt(2) and x[k] <= 1:
+            #     u_init[k] = 1
+            # else:
+            #     u_init[k] = 0
+        if example == "degenerate":
+            for k in range(0, m + 1):
+                if x[k] > -1/np.sqrt(2)-0.4 and x[k] < -1/np.sqrt(2)+0.4:
+                    u_init[k] = 1
+                elif x[k] > 1/np.sqrt(2)-0.4 and x[k] < 1/np.sqrt(2)+0.4:
+                    u_init[k] = -1
+                else:
+                    u_init[k] = 0
         if example == "gravity":
             for k in range(0, m + 1):
                 if x[k] >= 0 and x[k] < 1-1/np.sqrt(2):
@@ -85,17 +86,20 @@ class Buckley_Leverett():
         example = self.example
 
         u_bc_l = torch.zeros((3, n+1))
-        # u_bc_r = torch.zeros((3, n + 1))
+        if example == "degenerate":
+            u_bc_r = torch.zeros((3, n + 1))
         if example == "gravity":
             u_bc_r = torch.ones((3, n + 1))
 
         u1_bc_l = torch.zeros((3, n+1))
-        # u1_bc_r = torch.zeros((3, n + 1))
+        if example == "degenerate":
+            u1_bc_r = torch.zeros((3, n + 1))
         if example == "gravity":
             u1_bc_r = torch.ones((3, n+1))
 
         u2_bc_l = torch.zeros((3, n+1))
-        # u2_bc_r = torch.zeros((3, n + 1))
+        if example == "degenerate":
+            u2_bc_r = torch.zeros((3, n + 1))
         if example == "gravity":
             u2_bc_r = torch.ones((3, n+1))
 
@@ -103,6 +107,8 @@ class Buckley_Leverett():
 
     def der_2(self):
         example = self. example
+        if example == "degenerate":
+            term_2 = 0.1
         if example == "gravity":
             term_2 = 0.01
         return term_2
@@ -124,16 +130,18 @@ class Buckley_Leverett():
         example = self.example
         ep = 0.00000001
         u_diff = torch.zeros(m+1)
-        # u = u.detach().numpy()
         if example == "gravity":
-            u_diff =  (2*u**2 - (4/3)*u**3)  #*((u >= 0-ep) & (u<=1+ep))
+            u_diff =  (2*u**2 - (4/3)*u**3)  #*((u >= 0) & (u<=1))
         # u_diff = (u) * ((torch.abs(u) > 0.25))
-        #u_diff = (u) * ((np.abs(u) > 0.25))
-        # for k in range(0, m + 1):
-        #     if u[k] >= -0.25  and u[k] <= 0.25 :
-        #         u_diff[k] = 0
-        #     else:
-        #         u_diff[k] = u[k]
+        # u_diff = (u) * ((np.abs(u) > 0.25))
+        if example == "degenerate":
+            for k in range(0, m + 1):
+                if (0 > u[k] >= -0.25):
+                    u_diff[k] = -0.25
+                elif (0 < u[k] <= 0.25):
+                    u_diff[k] = 0.25
+                else:
+                    u_diff[k] = u[k]
         # for k in range(0, m + 1):
         #     if u[k] < -0.25  or u[k] > 0.25 :
         #         u_diff[k] = u[k]
@@ -151,7 +159,8 @@ class Buckley_Leverett():
         if example == "gravity":
             u_conv = (u ** 2) * (1 - G * (1 - u) ** 2) / (u ** 2 + C*(1 - u) ** 2)
         #u_conv = (u ** 2)  / (u ** 2 + (1 - u) ** 2)
-        # u_conv = u**2
+        if example == "degenerate":
+            u_conv = u**2
         return u_conv
 
     def funct_derivative(self,u):
@@ -164,14 +173,15 @@ class Buckley_Leverett():
         if example == "gravity":
             u_der = - ( (2*C+2)*G*u**5 + (-8*C-2)*G*u**4 + 12*C*G*u**3 + (2*C-8*C*G)*u**2 + (2*C*G-2*C)*u )/( (u**2+C*(1-u)**2)**2 )
         #u_der = 2 * u * (1 - u) / (2 * u ** 2 - 2 * u + 1) ** 2
-        # u_der = 2*u
+        if example == "degenerate":
+            u_der = 2*u
         return u_der
 
 
+    # def exact(self, k):
+    #     u_ex = self.u_ex[:,k]
+    #     return u_ex
 
-    # def exact(self):
-    #
-    #     return
     #
     # def err(self, u_last):
     #     u_ex = self.exact()

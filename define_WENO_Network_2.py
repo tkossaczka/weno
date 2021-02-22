@@ -42,6 +42,9 @@ class WENONetwork_2(WENONetwork):
     def get_inner_nn_weno6(self):
         return FancyNet()
 
+    def get_inner_nn_weno5(self):
+        return FancyNet()
+
     def init_run_weno(self, problem, vectorized, just_one_time_step):
         m = problem.space_steps
         n, t, h = problem.time_steps, problem.t, problem.h
