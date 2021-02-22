@@ -52,6 +52,10 @@ def validation_problems_boxes(j):
 def validation_problems_BL(j):
     params_vld = []
     params_vld.append({'T': 0.1, 'e': 1e-13, 'L': 0, 'R': 1, 'C': 1, 'G': 5})
+    params_vld.append({'T': 0.1, 'e': 1e-13, 'L': 0, 'R': 1, 'C': 1, 'G': 0})
+    params_vld.append({'T': 0.1, 'e': 1e-13, 'L': 0, 'R': 1, 'C': 0.5, 'G': 2})
+    params_vld.append({'T': 0.1, 'e': 1e-13, 'L': 0, 'R': 1, 'C': 0.5, 'G': 1})
+    params_vld.append({'T': 0.1, 'e': 1e-13, 'L': 0, 'R': 1, 'C': 0.25, 'G': 4})
     return params_vld[j]
 
 all_loss_test = []
@@ -73,7 +77,11 @@ problem_class = Buckley_Leverett
 current_problem_classes = [(Buckley_Leverett, {"sample_id": 1, "example": "gravity", "space_steps": 64, "time_steps": None, "params": 0})]
 example = "gravity"
 u_ex_0 = torch.load("C:/Users/Tatiana/Desktop/Research/Research_ML_WENO/Buckley_Leverett_CD_Test/Buckley_Leverett_CD_Data_1024/Basic_test_set/u_ex64_0")
-u_exs = [u_ex_0]
+u_ex_1 = torch.load("C:/Users/Tatiana/Desktop/Research/Research_ML_WENO/Buckley_Leverett_CD_Test/Buckley_Leverett_CD_Data_1024/Basic_test_set/u_ex64_1")
+u_ex_2 = torch.load("C:/Users/Tatiana/Desktop/Research/Research_ML_WENO/Buckley_Leverett_CD_Test/Buckley_Leverett_CD_Data_1024/Basic_test_set/u_ex64_2")
+u_ex_3 = torch.load("C:/Users/Tatiana/Desktop/Research/Research_ML_WENO/Buckley_Leverett_CD_Test/Buckley_Leverett_CD_Data_1024/Basic_test_set/u_ex64_3")
+u_ex_4 = torch.load("C:/Users/Tatiana/Desktop/Research/Research_ML_WENO/Buckley_Leverett_CD_Test/Buckley_Leverett_CD_Data_1024/Basic_test_set/u_ex64_4")
+u_exs = [u_ex_0, u_ex_1, u_ex_2, u_ex_3, u_ex_4]
 
 phandler = ProblemHandler(problem_classes = current_problem_classes, max_num_open_problems=200)
 test_modulo=20
@@ -104,7 +112,7 @@ for j in range(100):
     # TEST IF LOSS IS DECREASING WITH THE NUMBER OF ITERATIONS INCREASING
     if not (j%test_modulo):
       print("TESTING ON VALIDATION PROBLEMS")
-      for kk in range(1):
+      for kk in range(5):
         single_problem_loss_test = []
         if example == "Barenblatt":
             params_test = validation_problems(kk)

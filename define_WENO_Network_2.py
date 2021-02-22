@@ -23,27 +23,28 @@ class FancyNet(nn.Module):
         return x
 
 class WENONetwork_2(WENONetwork):
-    # def get_inner_nn_weno5(self):
-    #     net = nn.Sequential(
-    #         nn.Conv1d(2, 5, kernel_size=5, stride=1, padding=2),
-    #         nn.ELU(),
-    #         nn.Conv1d(5, 5, kernel_size=5, stride=1, padding=2),
-    #         nn.ELU(),
-    #         # nn.Conv1d(40, 80, kernel_size=1, stride=1, padding=0),
-    #         # nn.ELU(),
-    #         # nn.Conv1d(80, 40, kernel_size=1, stride=1, padding=0),
-    #         # nn.ELU(),
-    #         # nn.Conv1d(40, 20, kernel_size=3, stride=1, padding=1),
-    #         # nn.ELU(),
-    #         nn.Conv1d(5, 1, kernel_size=1, stride=1, padding=0),
-    #         nn.Sigmoid())
-    #     return net
-
-    def get_inner_nn_weno6(self):
-        return FancyNet()
-
     def get_inner_nn_weno5(self):
-        return FancyNet()
+        net = nn.Sequential(
+            nn.Conv1d(2, 10, kernel_size=5, stride=1, padding=2),
+            nn.ELU(),
+            nn.Conv1d(10, 10, kernel_size=5, stride=1, padding=2),
+            nn.ELU(),
+            # nn.Conv1d(40, 80, kernel_size=1, stride=1, padding=0),
+            # nn.ELU(),
+            # nn.Conv1d(80, 40, kernel_size=1, stride=1, padding=0),
+            # nn.ELU(),
+            # nn.Conv1d(40, 20, kernel_size=3, stride=1, padding=1),
+            # nn.ELU(),
+            nn.Conv1d(10, 1, kernel_size=1, stride=1, padding=0),
+            nn.Sigmoid()
+            )
+        return net
+
+    # def get_inner_nn_weno6(self):
+    #     return FancyNet()
+    #
+    # def get_inner_nn_weno5(self):
+    #     return FancyNet()
 
     def init_run_weno(self, problem, vectorized, just_one_time_step):
         m = problem.space_steps
@@ -72,7 +73,6 @@ class WENONetwork_2(WENONetwork):
         term_const = problem.der_const()
         u_bc_l, u_bc_r, u1_bc_l, u1_bc_r, u2_bc_l, u2_bc_r = problem.boundary_condition
         w5_minus = problem.w5_minus
-        eps = 0.0000000001
 
         if vectorized:
             uu = u
@@ -104,7 +104,6 @@ class WENONetwork_2(WENONetwork):
 
         u1[0:3] = u1_bc_l[:,k]
         u1[-3:] = u1_bc_r[:,k]
-        # u1[torch.abs(u1) < eps] = 0
 
         uu1_conv = problem.funct_convection(u1)
         uu1_diff = problem.funct_diffusion(u1)
@@ -129,7 +128,6 @@ class WENONetwork_2(WENONetwork):
 
         u2[0:3] = u2_bc_l[:,k]
         u2[-3:] = u2_bc_r[:,k]
-        # u2[torch.abs(u2) < eps] = 0
 
         uu2_conv = problem.funct_convection(u2)
         uu2_diff = problem.funct_diffusion(u2)
@@ -193,8 +191,6 @@ class WENONetwork_2(WENONetwork):
                 u[0:3, k+1] = u_bc_l[:, k+1]
                 u[-3:, k+1] = u_bc_r[:, k+1]
                 u_ret = u[:, k + 1]
-
-        # u_ret[torch.abs(u_ret) < eps] = 0
 
         return u_ret
 
