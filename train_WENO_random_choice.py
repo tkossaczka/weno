@@ -30,7 +30,7 @@ def exact_loss(u, u_ex):
 
 #optimizer = optim.SGD(train_model.parameters(), lr=0.1)
 # optimizer = optim.Adam(train_model.parameters(), lr=0.1)
-optimizer = optim.Adam(train_model.parameters(), lr=0.001, weight_decay=0.0001)
+optimizer = optim.Adam(train_model.parameters(), lr=0.0001) #, weight_decay=0.0001)
 # optimizer = optim.Adam(train_model.parameters(), lr=0.01, weight_decay=0.001)
 
 def validation_problems(j):
@@ -84,8 +84,8 @@ u_ex_4 = torch.load("C:/Users/Tatiana/Desktop/Research/Research_ML_WENO/Buckley_
 u_exs = [u_ex_0, u_ex_1, u_ex_2, u_ex_3, u_ex_4]
 
 phandler = ProblemHandler(problem_classes = current_problem_classes, max_num_open_problems=200)
-test_modulo=20
-for j in range(100):
+test_modulo=1
+for j in range(1000):
     loss_test = []
     problem_specs, problem_id = phandler.get_random_problem(0.1)
     problem = problem_specs["problem"]
@@ -104,7 +104,7 @@ for j in range(100):
     optimizer.step()  # Optimize weights
     u_new.detach_()
     phandler.update_problem(problem_id, u_new)
-    base_path = "C:/Users/Tatiana/Desktop/Research/Research_ML_WENO/Buckley_Leverett_CD_Test/Models/Model_0/"
+    base_path = "C:/Users/Tatiana/Desktop/Research/Research_ML_WENO/Buckley_Leverett_CD_Test/Models/Model_8/"
     if not os.path.exists(base_path):
         os.mkdir(base_path)
     path = os.path.join(base_path, "{}.pt".format(j))
@@ -152,6 +152,6 @@ print("trained:", all_loss_test[:,:,0].min(axis=0))
 plt.plot(norm_losses)
 plt.show()
 
-# plt.figure(2)
-# plt.plot(all_loss_test[:,:,0])
-# np.save("C:/Users/Tatiana/Desktop/Research/Research_ML_WENO/PME_Test/Models/Model_0/all_loss_test.npy",all_loss_test)
+plt.figure(2)
+plt.plot(all_loss_test[:,:,0])
+# np.save("C:/Users/Tatiana/Desktop/Research/Research_ML_WENO/Buckley_Leverett_CD_Test/Models/Model_8/all_loss_test.npy",all_loss_test)

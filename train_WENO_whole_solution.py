@@ -113,7 +113,7 @@ for j in range(100,250):
     if problem_class == Digital_option:
         base_path ="C:/Users/Tatiana/Desktop/Research/Research_ML_WENO/Digital_Option_Test/Models/Model_17/"
     elif problem_class == Buckley_Leverett:
-        base_path = "C:/Users/Tatiana/Desktop/Research/Research_ML_WENO/Buckley_Leverett_CD_Test/Models/Model_1/"
+        base_path = "C:/Users/Tatiana/Desktop/Research/Research_ML_WENO/Buckley_Leverett_CD_Test/Models/Model_5/"
     if not os.path.exists(base_path):
         os.mkdir(base_path)
     path = os.path.join(base_path, "{}.pt".format(save_id))
@@ -136,7 +136,11 @@ for j in range(100,250):
             for k in range(nn):
                 u_test = train_model.run_weno(problem_test, u_test, mweno=True, mapped=False, trainable=True, vectorized=True, k=k)
             V_test, _, _ = problem_test.transformation(u_test)
-            single_problem_loss_test.append(monotonicity_loss(V_test))
+            if problem_class == Digital_option:
+                single_problem_loss_test.append(monotonicity_loss(V_test))
+            elif problem_class == Buckley_Leverett:
+                u_ex = u_exs[kk][:, -1]
+                single_problem_loss_test.append(exact_loss(V_test,u_ex))
         loss_test.append(single_problem_loss_test)
     all_loss_test.append(loss_test)
     save_id = save_id + 1
