@@ -66,8 +66,9 @@ if problem_class == Buckley_Leverett:
     rng = 5
 
 all_loss_test = []
+save_id = 0
 
-for j in range(100):
+for j in range(100,250):
     loss_test = []
     # Forward path
     if problem_class == Digital_option:
@@ -112,10 +113,10 @@ for j in range(100):
     if problem_class == Digital_option:
         base_path ="C:/Users/Tatiana/Desktop/Research/Research_ML_WENO/Digital_Option_Test/Models/Model_17/"
     elif problem_class == Buckley_Leverett:
-        base_path = "C:/Users/Tatiana/Desktop/Research/Research_ML_WENO/Buckley_Leverett_CD_Test/Models/Model_0/"
+        base_path = "C:/Users/Tatiana/Desktop/Research/Research_ML_WENO/Buckley_Leverett_CD_Test/Models/Model_1/"
     if not os.path.exists(base_path):
         os.mkdir(base_path)
-    path = os.path.join(base_path, "{}.pt".format(j))
+    path = os.path.join(base_path, "{}.pt".format(save_id))
     torch.save(train_model, path)
     # TEST IF LOSS IS DECREASING WITH THE NUMBER OF ITERATIONS INCREASING
     for kk in range(rng):
@@ -138,6 +139,7 @@ for j in range(100):
             single_problem_loss_test.append(monotonicity_loss(V_test))
         loss_test.append(single_problem_loss_test)
     all_loss_test.append(loss_test)
+    save_id = save_id + 1
 
 #plt.plot(S, V_train.detach().numpy())
 # print("number of parameters:", sum(p.numel() for p in train_model.parameters()))
