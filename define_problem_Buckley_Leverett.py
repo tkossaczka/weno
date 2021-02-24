@@ -129,22 +129,12 @@ class Buckley_Leverett():
         example = self.example
         u_diff = torch.zeros(m+1)
         if example == "gravity":
-            for k in range(0, m + 1):
-                if u[k] < 0:
-                    u_diff[k] = 0
-                elif u[k] > 1:
-                    u_diff[k] = 2/3
-                else:
-                    u_diff[k] = (2*u[k]**2 - (4/3)*u[k]**3)
-            # u_diff =  (2*u**2 - (4/3)*u**3)  #*((u >= 0) & (u<=1))
+            u_diff = (2*u**2 - (4/3)*u**3)
+            u_diff[u < 0] = 0
+            u_diff[u > 1] = 2/3
         if example == "degenerate":
-            for k in range(0, m + 1):
-                if u[k] < -0.25:
-                    u_diff[k] = u[k] + 0.25
-                elif u[k] > 0.25:
-                    u_diff[k] = u[k] - 0.25
-                else:
-                    u_diff[k] = 0
+            u_diff[u < -0.25] = u[u < -0.25] + 0.25
+            u_diff[u > 0.25] = u[u > 0.25] - 0.25
         return u_diff
 
     def funct_convection(self, u):
@@ -175,9 +165,9 @@ class Buckley_Leverett():
             u_der = 2*u
         return u_der
 
-    def exact(self, k):
-        u_ex = self.u_ex[:,k]
-        return u_ex
+    # def exact(self, k):
+    #     u_ex = self.u_ex[:,k]
+    #     return u_ex
 
     # def err(self, u_last):
     #     u_ex = self.exact()

@@ -91,7 +91,7 @@ all_loss_test = []
 problem_class = Buckley_Leverett
 current_problem_classes = [(Buckley_Leverett, {"sample_id": 1, "example": "gravity", "space_steps": 64, "time_steps": None, "params": 0})]
 example = "gravity"
-folder = 3
+folder = 1
 u_ex_0 = torch.load("C:/Users/Tatiana/Desktop/Research/Research_ML_WENO/Buckley_Leverett_CD_Test/Buckley_Leverett_CD_Data_1024/Basic_test_set_{}/u_ex64_0".format(folder))
 u_ex_1 = torch.load("C:/Users/Tatiana/Desktop/Research/Research_ML_WENO/Buckley_Leverett_CD_Test/Buckley_Leverett_CD_Data_1024/Basic_test_set_{}/u_ex64_1".format(folder))
 u_ex_2 = torch.load("C:/Users/Tatiana/Desktop/Research/Research_ML_WENO/Buckley_Leverett_CD_Test/Buckley_Leverett_CD_Data_1024/Basic_test_set_{}/u_ex64_2".format(folder))
@@ -120,7 +120,7 @@ for j in range(1000):
     optimizer.step()  # Optimize weights
     u_new.detach_()
     phandler.update_problem(problem_id, u_new)
-    base_path = "C:/Users/Tatiana/Desktop/Research/Research_ML_WENO/Buckley_Leverett_CD_Test/Models/Model_12/"
+    base_path = "C:/Users/Tatiana/Desktop/Research/Research_ML_WENO/Buckley_Leverett_CD_Test/Models/Model_13/"
     if not os.path.exists(base_path):
         os.mkdir(base_path)
     path = os.path.join(base_path, "{}.pt".format(j))
@@ -137,7 +137,7 @@ for j in range(1000):
             params_test = validation_problems_boxes(kk)
             problem_test = problem_class(sample_id = None, example = "boxes", space_steps=64, time_steps=None, params=params_test)
         elif example == "gravity":
-            params_test = validation_problems_BL_3(kk)
+            params_test = validation_problems_BL(kk)
             problem_test = problem_class(sample_id=None, example="gravity", space_steps=64, time_steps=None, params=params_test)
         with torch.no_grad():
           u_init, tt = train_model.init_run_weno(problem_test, vectorized=True, just_one_time_step=False)

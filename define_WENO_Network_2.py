@@ -8,8 +8,10 @@ import torch.nn.functional as F
 from define_WENO_Network import WENONetwork
 
 class FancyNet(nn.Module):
+
+    ## STRUCTURE FOR BUCKLEY-LEVERETT
     def __init__(self):
-        self.num_inner_convs = 5
+        self.num_inner_convs = 1
         super(FancyNet, self).__init__()
         self.conv0 = nn.Conv1d(2, 10, kernel_size=5, stride=1, padding=2)
         self.convs = [nn.Conv1d(10, 10, kernel_size=5, stride=1, padding=2) for k in range(self.num_inner_convs)]
@@ -19,8 +21,23 @@ class FancyNet(nn.Module):
         x = F.elu(self.conv0(x))
         for k in range(self.num_inner_convs):
             x = F.elu(self.convs[k](x)) #+ x
-        x = F.sigmoid(self.conv_out(x))
+        x = torch.sigmoid(self.conv_out(x))
         return x
+
+    ## STTUCTURE FOR PME
+    # def __init__(self):
+    #     self.num_inner_convs = 2
+    #     super(FancyNet, self).__init__()
+    #     self.conv0 = nn.Conv1d(2, 5, kernel_size=5, stride=1, padding=2)
+    #     self.convs = [nn.Conv1d(5, 5, kernel_size=5, stride=1, padding=2) for k in range(self.num_inner_convs)]
+    #     self.conv_out = nn.Conv1d(5, 1, kernel_size=1, stride=1, padding=0)
+    #
+    # def forward(self, x):
+    #     x = F.elu(self.conv0(x))
+    #     for k in range(self.num_inner_convs):
+    #         x = F.elu(self.convs[k](x)) + x
+    #     x = self.conv_out(x)
+    #     return x
 
 class WENONetwork_2(WENONetwork):
 

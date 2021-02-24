@@ -12,7 +12,7 @@ torch.set_default_dtype(torch.float64)
 
 train_model = WENONetwork_2()
 problem= Buckley_Leverett
-example = "gravity"
+example = "degenerate"
 
 if example == "degenerate":
     train_model = torch.load("C:/Users/Tatiana/Desktop/Research/Research_ML_WENO/Buckley_Leverett_CD_Test/Models/Model_8/660.pt")
