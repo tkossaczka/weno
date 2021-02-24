@@ -194,8 +194,8 @@ class WENONetwork_2(WENONetwork):
 
         return u_ret
 
-    def forward(self, problem, u_ret, k):
-        u = self.run_weno(problem,u_ret,mweno=True,mapped=False,vectorized=True,trainable=True,k=k)
+    def forward(self, problem, u_ret, k, mweno, mapped):
+        u = self.run_weno(problem,u_ret,mweno=mweno,mapped=mapped,vectorized=True,trainable=True,k=k)
         # V,_,_ = problem.transformation(u)
         return u
 

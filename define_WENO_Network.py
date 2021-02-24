@@ -57,7 +57,7 @@ class WENONetwork(nn.Module):
     def prepare_dif(self, dif):
         return dif[None, :, :]
 
-    def WENO5(self, uu, e, w5_minus, mweno=True, mapped=False, trainable=True):
+    def WENO5(self, uu, e, w5_minus, mweno, mapped, trainable=True):
         uu_left = uu[:-1]
         uu_right = uu[1:]
 
@@ -187,7 +187,7 @@ class WENONetwork(nn.Module):
 
         return RHS
 
-    def WENO6(self, uu, e, mweno=True, mapped=False, trainable=True):
+    def WENO6(self, uu, e, mweno, mapped, trainable=True):
         uu_left = uu[:-1]
         uu_right = uu[1:]
 
