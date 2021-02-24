@@ -29,7 +29,10 @@ class Buckley_Leverett():
         if time_steps is None:
             self.time_steps = n
         self.initial_condition = self.__compute_initial_condition()
-        self.boundary_condition = self.__compute_boundary_condition()
+        if example == "gravity" or example == "degenerate":
+            self.boundary_condition = self.__compute_boundary_condition()
+        elif example == "gravity_2d":
+            self.boundary_condition_2d = self.__compute_boundary_condition_2d()
         self.w5_minus = 'Lax-Friedrichs'
 
 
@@ -46,6 +49,14 @@ class Buckley_Leverett():
             params["R"] = 1  # 2 #1
             params["C"] = random.uniform(0.1, 0.95)
             params["G"] = random.uniform(0, 6)
+        if example == "gravity_2d":
+            params["T"] = 0.5  # 0.5 #0.2
+            params["L"] = -1.5  # -2 # 0
+            params["R"] = 1.5  # 2 #1
+            params["C1"] = 1
+            params["G1"] = 0
+            params["C2"] = 1
+            params["G2"] = 5
         params["e"] = 10 ** (-13)
         self.params = params
 
@@ -60,6 +71,8 @@ class Buckley_Leverett():
             n = np.ceil(0.1*T / (h ** 2))
         if example == "degenerate":
             n = np.ceil(0.4*T / (h ** 2))
+        if example == "gravity_2d":
+            n = np.ceil(1*T / (h ** 2))
         n = int(n)
         t = T / n
         x = np.linspace(L, R, m + 1)
@@ -85,6 +98,13 @@ class Buckley_Leverett():
                     u_init[k] = 0
                 else:
                     u_init[k] = 1
+        if example == "gravity_2d":
+            u_init = np.zeros((m + 1, m+1))
+            y = self.x
+            for k in range(m+1):
+                for j in range(m+1):
+                    if x[k]**2 + y[j]**2 < 0.5:
+                        u_init[j,k] = 1
         u_init = torch.Tensor(u_init)
         return u_init
 
@@ -104,11 +124,22 @@ class Buckley_Leverett():
             u2_bc_r = torch.ones((3, n+1))
         return u_bc_l, u_bc_r, u1_bc_l, u1_bc_r, u2_bc_l, u2_bc_r
 
+    def __compute_boundary_condition_2d(self):
+        m = self.space_steps
+        example = self.example
+        u_bc_l = torch.zeros((3, m+1))
+        u1_bc_l = torch.zeros((3, m+1))
+        u2_bc_l = torch.zeros((3, m+1))
+        u_bc_r = torch.zeros((3, m + 1))
+        u1_bc_r = torch.zeros((3, m+1))
+        u2_bc_r = torch.zeros((3, m+1))
+        return u_bc_l, u_bc_r, u1_bc_l, u1_bc_r, u2_bc_l, u2_bc_r
+
     def der_2(self):
         example = self. example
         if example == "degenerate":
             term_2 = 0.1
-        if example == "gravity":
+        if example == "gravity" or example == "gravity_2d":
             term_2 = 0.01
         return term_2
 
@@ -135,6 +166,8 @@ class Buckley_Leverett():
         if example == "degenerate":
             u_diff[u < -0.25] = u[u < -0.25] + 0.25
             u_diff[u > 0.25] = u[u > 0.25] - 0.25
+        if example == "gravity_2d":
+            u_diff = u
         return u_diff
 
     def funct_convection(self, u):
@@ -163,6 +196,30 @@ class Buckley_Leverett():
             u_der = - ( (2*C+2)*G*u**5 + (-8*C-2)*G*u**4 + 12*C*G*u**3 + (2*C-8*C*G)*u**2 + (2*C*G-2*C)*u )/( (u**2+C*(1-u)**2)**2 )
         if example == "degenerate":
             u_der = 2*u
+        return u_der
+
+    def funct_convection_x(self, u):
+        C = self.params["C1"]
+        G = self.params["G1"]
+        u_conv = (u ** 2) * (1 - G * (1 - u) ** 2) / (u ** 2 + C*(1 - u) ** 2)
+        return u_conv
+
+    def funct_derivative_x(self,u):
+        C = self.params["C1"]
+        G = self.params["G1"]
+        u_der = - ( (2*C+2)*G*u**5 + (-8*C-2)*G*u**4 + 12*C*G*u**3 + (2*C-8*C*G)*u**2 + (2*C*G-2*C)*u )/( (u**2+C*(1-u)**2)**2 )
+        return u_der
+
+    def funct_convection_y(self, u):
+        C = self.params["C2"]
+        G = self.params["G2"]
+        u_conv = (u ** 2) * (1 - G * (1 - u) ** 2) / (u ** 2 + C*(1 - u) ** 2)
+        return u_conv
+
+    def funct_derivative_y(self,u):
+        C = self.params["C2"]
+        G = self.params["G2"]
+        u_der = - ( (2*C+2)*G*u**5 + (-8*C-2)*G*u**4 + 12*C*G*u**3 + (2*C-8*C*G)*u**2 + (2*C*G-2*C)*u )/( (u**2+C*(1-u)**2)**2 )
         return u_der
 
     def exact(self, k):
