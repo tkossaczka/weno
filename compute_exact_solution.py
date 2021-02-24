@@ -109,3 +109,9 @@ if __name__ == "__main__":
 # u_ex, u_ex64 = train_model.compute_exact(Buckley_Leverett, problem_ex_test, 64, 41, just_one_time_step=False, trainable=False)
 # torch.save(u_ex, "C:/Users/Tatiana/Desktop/Research/Research_ML_WENO/Buckley_Leverett_CD_Test/Buckley_Leverett_CD_Data_1024/Basic_test_set_2/u_ex_4")
 # torch.save(u_ex64, "C:/Users/Tatiana/Desktop/Research/Research_ML_WENO/Buckley_Leverett_CD_Test/Buckley_Leverett_CD_Data_1024/Basic_test_set_2/u_ex64_4")
+
+# params = {'T': 0.5, 'L': -2, 'R': 2, 'e': 1e-13}
+# problem_ex_test = problem(sample_id=None, example= "degenerate", space_steps=64 * 2 * 2 * 2 * 2 , time_steps=None, params=params)
+# u_ex, u_ex64 = train_model.compute_exact(Buckley_Leverett, problem_ex_test, 64, 52, just_one_time_step=False, trainable=False)
+# torch.save(u_ex, "C:/Users/Tatiana/Desktop/Research/Research_ML_WENO/Buckley_Leverett_CD_Test/Buckley_Leverett_CD_Data_1024/Basic_test_set_1/u_ex_5")
+# torch.save(u_ex64, "C:/Users/Tatiana/Desktop/Research/Research_ML_WENO/Buckley_Leverett_CD_Test/Buckley_Leverett_CD_Data_1024/Basic_test_set_1/u_ex64_5")

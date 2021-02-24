@@ -9,36 +9,20 @@ from define_WENO_Network import WENONetwork
 
 class FancyNet(nn.Module):
     def __init__(self):
-        self.num_inner_convs = 2
+        self.num_inner_convs = 1
         super(FancyNet, self).__init__()
-        self.conv0 = nn.Conv1d(2, 5, kernel_size=5, stride=1, padding=2)
-        self.convs = [nn.Conv1d(5, 5, kernel_size=5, stride=1, padding=2) for k in range(self.num_inner_convs)]
-        self.conv_out = nn.Conv1d(5, 1, kernel_size=1, stride=1, padding=0)
+        self.conv0 = nn.Conv1d(2, 10, kernel_size=5, stride=1, padding=2)
+        self.convs = [nn.Conv1d(10, 10, kernel_size=5, stride=1, padding=2) for k in range(self.num_inner_convs)]
+        self.conv_out = nn.Conv1d(10, 1, kernel_size=1, stride=1, padding=0)
 
     def forward(self, x):
         x = F.elu(self.conv0(x))
         for k in range(self.num_inner_convs):
             x = F.elu(self.convs[k](x)) + x
-        x = self.conv_out(x)
+        x = (self.conv_out(x))
         return x
 
 class WENONetwork_2(WENONetwork):
-    def get_inner_nn_weno5(self):
-        net = nn.Sequential(
-            nn.Conv1d(2, 10, kernel_size=5, stride=1, padding=2),
-            nn.ELU(),
-            nn.Conv1d(10, 10, kernel_size=5, stride=1, padding=2),
-            nn.ELU(),
-            # nn.Conv1d(40, 80, kernel_size=1, stride=1, padding=0),
-            # nn.ELU(),
-            # nn.Conv1d(80, 40, kernel_size=1, stride=1, padding=0),
-            # nn.ELU(),
-            # nn.Conv1d(40, 20, kernel_size=3, stride=1, padding=1),
-            # nn.ELU(),
-            nn.Conv1d(10, 1, kernel_size=1, stride=1, padding=0),
-            nn.Sigmoid()
-            )
-        return net
 
     # def get_inner_nn_weno6(self):
     #     return FancyNet()

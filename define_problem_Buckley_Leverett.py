@@ -59,7 +59,7 @@ class Buckley_Leverett():
         if example == "gravity":
             n = np.ceil(0.1*T / (h ** 2))
         if example == "degenerate":
-            n=100
+            n = np.ceil(0.4*T / (h ** 2))
         n = int(n)
         t = T / n
         x = np.linspace(L, R, m + 1)
@@ -132,12 +132,12 @@ class Buckley_Leverett():
             u_diff =  (2*u**2 - (4/3)*u**3)  #*((u >= 0) & (u<=1))
         if example == "degenerate":
             for k in range(0, m + 1):
-                if (0 > u[k] >= -0.25):
-                    u_diff[k] = -0.25
-                elif (0 < u[k] <= 0.25):
-                    u_diff[k] = 0.25
+                if u[k] < -0.25:
+                    u_diff[k] = u[k] + 0.25
+                elif u[k] > 0.25:
+                    u_diff[k] = u[k] - 0.25
                 else:
-                    u_diff[k] = u[k]
+                    u_diff[k] = 0
         return u_diff
 
     def funct_convection(self, u):
@@ -168,9 +168,9 @@ class Buckley_Leverett():
             u_der = 2*u
         return u_der
 
-    def exact(self, k):
-        u_ex = self.u_ex[:,k]
-        return u_ex
+    # def exact(self, k):
+    #     u_ex = self.u_ex[:,k]
+    #     return u_ex
 
     # def err(self, u_last):
     #     u_ex = self.exact()
