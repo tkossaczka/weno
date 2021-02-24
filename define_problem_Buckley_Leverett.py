@@ -165,9 +165,9 @@ class Buckley_Leverett():
             u_der = 2*u
         return u_der
 
-    # def exact(self, k):
-    #     u_ex = self.u_ex[:,k]
-    #     return u_ex
+    def exact(self, k):
+        u_ex = self.u_ex[:,k]
+        return u_ex
 
     # def err(self, u_last):
     #     u_ex = self.exact()
