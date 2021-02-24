@@ -57,7 +57,6 @@ def validation_problems_BL(j):
     params_vld.append({'T': 0.1, 'e': 1e-13, 'L': 0, 'R': 1, 'C': 0.5, 'G': 1})
     params_vld.append({'T': 0.1, 'e': 1e-13, 'L': 0, 'R': 1, 'C': 0.25, 'G': 4})
     return params_vld[j]
-
 def validation_problems_BL_2(j):
     params_vld = []
     params_vld.append({'T': 0.1, 'e': 1e-13, 'L': 0, 'R': 1, 'C': 1, 'G': 3})
@@ -66,7 +65,14 @@ def validation_problems_BL_2(j):
     params_vld.append({'T': 0.1, 'e': 1e-13, 'L': 0, 'R': 1, 'C': 0.3, 'G': 3})
     params_vld.append({'T': 0.1, 'e': 1e-13, 'L': 0, 'R': 1, 'C': 0.25, 'G': 1})
     return params_vld[j]
-
+def validation_problems_BL_3(j):
+    params_vld = []
+    params_vld.append({'T': 0.2, 'e': 1e-13, 'L': 0, 'R': 1, 'C': 1, 'G': 5})
+    params_vld.append({'T': 0.2, 'e': 1e-13, 'L': 0, 'R': 1, 'C': 1, 'G': 0})
+    params_vld.append({'T': 0.2, 'e': 1e-13, 'L': 0, 'R': 1, 'C': 0.5, 'G': 2})
+    params_vld.append({'T': 0.2, 'e': 1e-13, 'L': 0, 'R': 1, 'C': 0.5, 'G': 1})
+    params_vld.append({'T': 0.2, 'e': 1e-13, 'L': 0, 'R': 1, 'C': 0.25, 'G': 4})
+    return params_vld[j]
 all_loss_test = []
 
 # problem_class = PME
@@ -85,7 +91,7 @@ all_loss_test = []
 problem_class = Buckley_Leverett
 current_problem_classes = [(Buckley_Leverett, {"sample_id": 1, "example": "gravity", "space_steps": 64, "time_steps": None, "params": 0})]
 example = "gravity"
-folder = 1
+folder = 3
 u_ex_0 = torch.load("C:/Users/Tatiana/Desktop/Research/Research_ML_WENO/Buckley_Leverett_CD_Test/Buckley_Leverett_CD_Data_1024/Basic_test_set_{}/u_ex64_0".format(folder))
 u_ex_1 = torch.load("C:/Users/Tatiana/Desktop/Research/Research_ML_WENO/Buckley_Leverett_CD_Test/Buckley_Leverett_CD_Data_1024/Basic_test_set_{}/u_ex64_1".format(folder))
 u_ex_2 = torch.load("C:/Users/Tatiana/Desktop/Research/Research_ML_WENO/Buckley_Leverett_CD_Test/Buckley_Leverett_CD_Data_1024/Basic_test_set_{}/u_ex64_2".format(folder))
@@ -131,7 +137,7 @@ for j in range(1000):
             params_test = validation_problems_boxes(kk)
             problem_test = problem_class(sample_id = None, example = "boxes", space_steps=64, time_steps=None, params=params_test)
         elif example == "gravity":
-            params_test = validation_problems_BL(kk)
+            params_test = validation_problems_BL_3(kk)
             problem_test = problem_class(sample_id=None, example="gravity", space_steps=64, time_steps=None, params=params_test)
         with torch.no_grad():
           u_init, tt = train_model.init_run_weno(problem_test, vectorized=True, just_one_time_step=False)

@@ -9,7 +9,7 @@ from define_WENO_Network import WENONetwork
 
 class FancyNet(nn.Module):
     def __init__(self):
-        self.num_inner_convs = 1
+        self.num_inner_convs = 5
         super(FancyNet, self).__init__()
         self.conv0 = nn.Conv1d(2, 10, kernel_size=5, stride=1, padding=2)
         self.convs = [nn.Conv1d(10, 10, kernel_size=5, stride=1, padding=2) for k in range(self.num_inner_convs)]
@@ -18,17 +18,17 @@ class FancyNet(nn.Module):
     def forward(self, x):
         x = F.elu(self.conv0(x))
         for k in range(self.num_inner_convs):
-            x = F.elu(self.convs[k](x)) + x
-        x = (self.conv_out(x))
+            x = F.elu(self.convs[k](x)) #+ x
+        x = F.sigmoid(self.conv_out(x))
         return x
 
 class WENONetwork_2(WENONetwork):
 
-    # def get_inner_nn_weno6(self):
-    #     return FancyNet()
-    #
-    # def get_inner_nn_weno5(self):
-    #     return FancyNet()
+    def get_inner_nn_weno6(self):
+        return FancyNet()
+
+    def get_inner_nn_weno5(self):
+        return FancyNet()
 
     def init_run_weno(self, problem, vectorized, just_one_time_step):
         m = problem.space_steps
