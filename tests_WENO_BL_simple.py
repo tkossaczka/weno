@@ -12,11 +12,11 @@ torch.set_default_dtype(torch.float64)
 
 train_model = WENONetwork_2()
 problem= Buckley_Leverett
-example = "gravity"
+example = "degenerate"
 
 if example == "degenerate":
     train_model = torch.load("C:/Users/Tatiana/Desktop/Research/Research_ML_WENO/Buckley_Leverett_CD_Test/Models/Model_8/660.pt")
-    u_ex = np.load("C:/Users/Tatiana/Desktop/Research/Research_ML_WENO/Buckley_Leverett_CD_Test/Buckley_Leverett_CD_Data_1024/Basic_test_set_1/u_exact64_5.npy")
+    u_ex = torch.load("C:/Users/Tatiana/Desktop/Research/Research_ML_WENO/Buckley_Leverett_CD_Test/Buckley_Leverett_CD_Data_1024/Basic_test_set_1/u_ex64_5")
     problem_main = problem(sample_id=None, example = example, space_steps=64, time_steps=None, params=None)
     print(problem_main.params)
     u_init, nn = train_model.init_run_weno(problem_main, vectorized=True, just_one_time_step=False)
@@ -30,11 +30,11 @@ if example == "degenerate":
             u_t = train_model.run_weno(problem_main, u_t, mweno=True, mapped=False, vectorized=True, trainable=True, k=k)
         V_t, S, _ = problem_main.transformation(u_t)
     sp_st = problem_main.space_steps
-    error_t_mean = np.sqrt(4 / sp_st) * (np.sqrt(np.sum((u_t.detach().numpy() - u_ex.detach().numpy()) ** 2)))
-    error_nt_mean = np.sqrt(4 / sp_st) * (np.sqrt(np.sum((u_nt.detach().numpy() - u_ex.detach().numpy()) ** 2)))
-    error_nt_max = np.max(np.absolute(u_ex.detach().numpy() - u_nt.detach().numpy()))
-    error_t_max = np.max(np.absolute(u_ex.detach().numpy() - u_t.detach().numpy()))
-    plt.plot(S, V_nt, S, V_t, S, u_ex)
+    error_t_mean = np.sqrt(4 / sp_st) * (np.sqrt(np.sum((u_t.detach().numpy() - u_ex.detach().numpy()[:,-1]) ** 2)))
+    error_nt_mean = np.sqrt(4 / sp_st) * (np.sqrt(np.sum((u_nt.detach().numpy() - u_ex.detach().numpy()[:,-1]) ** 2)))
+    error_nt_max = np.max(np.absolute(u_ex.detach().numpy()[:,-1] - u_nt.detach().numpy()))
+    error_t_max = np.max(np.absolute(u_ex.detach().numpy()[:,-1] - u_t.detach().numpy()))
+    plt.plot(S, V_nt, S, V_t, S, u_ex[:,-1])
 
 if example == "gravity":
     rng = 5
