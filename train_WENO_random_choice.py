@@ -3,7 +3,6 @@ from utils.problem_handler import ProblemHandler
 import torch
 from torch import optim
 from define_problem_PME import PME
-from define_problem_PME_boxes import PME_boxes
 from define_problem_Buckley_Leverett import Buckley_Leverett
 import os, sys
 import numpy as np
@@ -33,7 +32,7 @@ def exact_loss(u, u_ex):
 optimizer = optim.Adam(train_model.parameters(), lr=0.0001) #, weight_decay=0.01)
 # optimizer = optim.Adam(train_model.parameters(), lr=0.01, weight_decay=0.001)
 
-def validation_problems(j):
+def validation_problems_barenblatt(j):
     params_vld = []
     params_vld.append({'T': 2, 'e': 1e-13, 'L': 6, 'power': 2, 'd': 1})
     params_vld.append({'T': 2, 'e': 1e-13, 'L': 6, 'power': 3, 'd': 1})
@@ -79,7 +78,6 @@ all_loss_test = []
 # current_problem_classes = [(PME, {"example": "Barenblatt", "space_steps": 64, "time_steps": None, "params": None})]
 # example = "Barenblatt"
 
-# problem_class = PME_boxes
 # current_problem_classes = [(PME_boxes, {"sample_id": 1, "example": "boxes", "space_steps": 64, "time_steps": None, "params": 0})]
 # example = "boxes"
 # u_ex_0 = torch.load("C:/Users/Tatiana/Desktop/Research/Research_ML_WENO/PME_Test/PME_Data_1024/Basic_test_set/u_ex64_0")
@@ -131,7 +129,7 @@ for j in range(1000):
       for kk in range(5):
         single_problem_loss_test = []
         if example == "Barenblatt":
-            params_test = validation_problems(kk)
+            params_test = validation_problems_barenblatt(kk)
             problem_test = problem_class(example="Barenblatt", space_steps=64, time_steps=None, params=params_test)
         elif example == "boxes":
             params_test = validation_problems_boxes(kk)

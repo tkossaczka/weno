@@ -9,7 +9,6 @@ from define_WENO_Network_2 import WENONetwork_2
 from scipy.stats import norm
 from define_problem_heat_eq import heat_equation
 from define_problem_PME import PME
-from define_problem_PME_boxes import PME_boxes
 from initial_condition_generator import init_PME
 
 torch.set_default_dtype(torch.float64)

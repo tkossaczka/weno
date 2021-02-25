@@ -2,7 +2,6 @@ import torch
 import matplotlib.pyplot as plt
 import numpy as np
 from define_problem_PME import PME
-from define_problem_PME_boxes import PME_boxes
 from define_WENO_Network_2 import WENONetwork_2
 
 train_model = WENONetwork_2()
@@ -40,7 +39,7 @@ u_ex_2 = torch.load("C:/Users/Tatiana/Desktop/Research/Research_ML_WENO/PME_Test
 u_ex_3 = torch.load("C:/Users/Tatiana/Desktop/Research/Research_ML_WENO/PME_Test/PME_Data_1024/Basic_test_set/u_ex64_3")
 u_exs = [u_ex_0, u_ex_1, u_ex_2, u_ex_3]
 
-problem = PME_boxes
+problem = PME
 all_loss_test = []
 example = "boxes"
 
