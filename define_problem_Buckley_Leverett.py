@@ -72,7 +72,7 @@ class Buckley_Leverett():
         if example == "degenerate":
             n = np.ceil(0.4*T / (h ** 2))
         if example == "gravity_2d":
-            n = np.ceil(1*T / (h ** 2))
+            n = np.ceil(0.5*T / (h ** 2))
         n = int(n)
         t = T / n
         x = np.linspace(L, R, m + 1)

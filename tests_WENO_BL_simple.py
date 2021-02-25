@@ -22,7 +22,7 @@ if example == "degenerate":
     u_init, nn = train_model.init_run_weno(problem_main, vectorized=True, just_one_time_step=False)
     u_nt = u_init
     for k in range(nn):
-        u_nt = train_model.run_weno(problem_main, u_nt, mweno=False, mapped=True, vectorized=True, trainable=False, k=k)
+        u_nt = train_model.run_weno(problem_main, u_nt, mweno=True, mapped=False, vectorized=True, trainable=False, k=k)
     V_nt, S, _ = problem_main.transformation(u_nt)
     with torch.no_grad():
         u_t = u_init
