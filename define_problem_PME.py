@@ -2,10 +2,23 @@ import numpy as np
 import torch
 import random
 from initial_condition_generator import init_PME
+import pandas as pd
 
 class PME():
-    def __init__(self, example, space_steps, time_steps=None, params=None, w5_minus="no"):
-        self.params = params
+    def __init__(self, sample_id, example, space_steps, time_steps=None, params=None):
+        if example == "boxes":
+            if sample_id == None:
+                self.params = params
+                self.sample_id = sample_id
+            else:
+                self.sample_id = random.randint(0, 135)
+                self.df = pd.read_csv("C:/Users/Tatiana/Desktop/Research/Research_ML_WENO/PME_Test/PME_Data_1024/parameters.txt")
+                self.u_ex = np.load("C:/Users/Tatiana/Desktop/Research/Research_ML_WENO/PME_Test/PME_Data_1024/u_exact64_{}.npy".format(self.sample_id))
+                self.u_ex = torch.Tensor(self.u_ex)
+                power = float(self.df[self.df.sample_id == self.sample_id]["power"])
+                self.params = {'T': 0.5, 'e': 1e-13, 'L': 6, 'power': power, 'd': 1}
+        elif example == "Barenblatt":
+            self.params = params
         self.example = example
         if params is None:
             self.init_params()
@@ -16,15 +29,21 @@ class PME():
             self.time_steps = n
         self.initial_condition = self.__compute_initial_condition()
         self.boundary_condition = self.compute_boundary_condition()
-        self.w5_minus = w5_minus
+        self.w5_minus = "no"
 
     def init_params(self):
         params = dict()
-        params["T"] = 1.4 #2 #1.4
+        example = self.example
+        if example == "Barenblatt":
+            params["T"] = 1.4 #2 #1.4
+            params["power"] = random.uniform(2, 8)  # random.uniform(2,5) #random.uniform(2,8)
+            params["d"] = 1
+        elif example == "boxes":
+            params["T"] = 0.5  # 2 #1.4
+            params["power"] = random.uniform(2, 6)  # random.uniform(2,5) #random.uniform(2,8)
+            params["d"] = 1
         params["e"] = 10 ** (-13)
         params["L"] = 6
-        params["power"] = random.uniform(2,8) #random.uniform(2,5) #random.uniform(2,8)
-        params["d"] = 1
         self.params = params
 
     def get_params(self):
@@ -32,16 +51,21 @@ class PME():
 
     def __compute_n_t_h_x_time(self):
         example = self.example
+        T = self.params["T"]
+        L = self.params["L"]
+        m = self.space_steps
+        h = 2 * L / m
+        x = np.linspace(-L, L, m + 1)
         if example == "Barenblatt":
-            T = self.params["T"]
-            L= self.params["L"]
-            m = self.space_steps
-            h = 2 * L / m
-            n = np.ceil(17*(T-1)/(h**2)) #10 pre m=2,3,4,5; 17 pre m=8
+            n = np.ceil(10*(T-1)/(h**2)) #10 pre m=2,3,4,5; 17 pre m=8
             n = int(n)
             t = (T-1) / n
-            x = np.linspace(-L, L, m + 1)
             time = np.linspace(1, T, n + 1)
+        elif example == "boxes":
+            n = np.ceil(15 * (T) / (h ** 2))  # 15 pre rovnaku vysku a m=2,3,4,5,6; 20 pre rovnaku vysku a m=7,8; 180 pre roznu vysku
+            n = int(n)
+            t = (T) / n
+            time = np.linspace(0, T, n + 1)
         return n, t, h, x, time
 
     def __compute_initial_condition(self):
@@ -58,21 +82,19 @@ class PME():
             for k in range(0, m + 1):
                 u_init[k] = (np.maximum(1 - kk*np.abs(x[k])**2, 0)) ** (1 / (mm - 1))
                 #u_init[k] = (np.maximum(1-(kk*(mm-1))/(2*mm)*np.abs(x[k])**2,0))**(1/(mm-1))
+        if example == "boxes":
+            u_init, self.height = init_PME(x)
         u_init = torch.Tensor(u_init)
         return u_init
 
     def compute_boundary_condition(self):
         n = self.time_steps
-
         u_bc_l = torch.zeros((3, n+1))
         u_bc_r = torch.zeros((3, n + 1))
-
         u1_bc_l = torch.zeros((3, n+1))
         u1_bc_r = torch.zeros((3, n+1))
-
         u2_bc_l = torch.zeros((3, n+1))
         u2_bc_r = torch.zeros((3, n+1))
-
         return u_bc_l, u_bc_r, u1_bc_l, u1_bc_r, u2_bc_l, u2_bc_r
 
     def der_2(self):
@@ -109,16 +131,19 @@ class PME():
         return u
 
     def exact(self, t):
-        #T = self.params["T"]
-        mm = self.params['power']
-        d = self.params["d"]
-        alpha = d / ((mm - 1) * d + 2)
-        kk = (alpha * (mm - 1)) / (2 * mm * d)
-        n,_, _,_,_ = self.__compute_n_t_h_x_time()
-        x, time = self.x, self.time
-        #kk = 1/(mm+1)
-        #u_ex = (1/T**kk) * (np.maximum(1-((kk*(mm-1))/(2*mm))*((np.abs(x)**2)/T**(2*kk)),0))**(1/(mm - 1))
-        u_ex = (t**(-alpha))*(np.maximum(1-kk*((np.abs(x))**2)*t**(-2*alpha/d), 0)) ** (1/(mm-1))
+        example = self.example
+        if example == "Barenblatt":
+            mm = self.params['power']
+            d = self.params["d"]
+            alpha = d / ((mm - 1) * d + 2)
+            kk = (alpha * (mm - 1)) / (2 * mm * d)
+            n,_, _,_,_ = self.__compute_n_t_h_x_time()
+            x, time = self.x, self.time
+            #kk = 1/(mm+1)
+            #u_ex = (1/T**kk) * (np.maximum(1-((kk*(mm-1))/(2*mm))*((np.abs(x)**2)/T**(2*kk)),0))**(1/(mm - 1))
+            u_ex = (t**(-alpha))*(np.maximum(1-kk*((np.abs(x))**2)*t**(-2*alpha/d), 0)) ** (1/(mm-1))
+        elif example == "boxes":
+            u_ex = self.u_ex[:, t]
         return u_ex
 
     def err(self, u_last):

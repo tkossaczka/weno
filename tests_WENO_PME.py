@@ -15,7 +15,7 @@ from initial_condition_generator import init_PME
 torch.set_default_dtype(torch.float64)
 
 #train_model = WENONetwork_2()
-train_model = torch.load("C:/Users/Tatiana/Desktop/Research/Research_ML_WENO/PME_Test/Models/Model_41/690.pt") #45/500 #46/650 # 41/690 for boxes
+train_model = torch.load("C:/Users/Tatiana/Desktop/Research/Research_ML_WENO/PME_Test/Models/Model_46/650.pt") #45/500 #46/650 # 41/690 for boxes
 
 def validation_problems(j):
     params_vld = []
@@ -58,10 +58,8 @@ u_exs = [u_ex_0, u_ex_1, u_ex_2, u_ex_3]
 # for j in range(8):
 #     u_exs.append(torch.Tensor(np.load("C:/Users/Tatiana/Desktop/Research/Research_ML_WENO/PME_Test/PME_Data_1024/Test_set/u_exact64_{}.npy".format(j))))
 
-problem= PME_boxes
-example = "boxes"
-# problem= PME
-# example = "boxes"
+problem= PME
+example = "Barenblatt"
 rng = 4
 err_nt_max_vec = np.zeros(rng)
 err_nt_mean_vec = np.zeros(rng)
@@ -72,7 +70,7 @@ for j in range(rng):
     print(j)
     if example == "Barenblatt":
         params = validation_problems(j)
-        problem_main = problem(example=example, space_steps=64, time_steps=None, params=params)
+        problem_main = problem(sample_id = None, example=example, space_steps=64, time_steps=None, params=params)
     else:
         params = validation_problems_boxes(j)
         problem_main = problem(sample_id = None, example=example, space_steps=64, time_steps=None, params=params)
