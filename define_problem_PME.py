@@ -17,7 +17,7 @@ class PME():
                 self.u_ex = torch.Tensor(self.u_ex)
                 power = float(self.df[self.df.sample_id == self.sample_id]["power"])
                 self.params = {'T': 0.5, 'e': 1e-13, 'L': 6, 'power': power, 'd': 1}
-        elif example == "Barenblatt" or example == "boxes_2d":
+        elif example == "Barenblatt" or example == "boxes_2d" or example == "Barenblatt_2d":
             self.params = params
         self.example = example
         if params is None:
@@ -49,6 +49,11 @@ class PME():
             params["power"] = 2
             params["d"] = 2
             params["L"] = 10
+        elif example == "Barenblatt_2d":
+            params["T"] = 2
+            params["power"] = 2
+            params["d"] = 2
+            params["L"] = 6
         params["e"] = 10 ** (-13)
         self.params = params
 
@@ -67,13 +72,18 @@ class PME():
             n = int(n)
             t = (T-1) / n
             time = np.linspace(1, T, n + 1)
+        elif example == "Barenblatt_2d":
+            n = np.ceil(14 * (T-1) / (h ** 2))
+            n = int(n)
+            t = (T-1) / n
+            time = np.linspace(1, T, n + 1)
         elif example == "boxes":
             n = np.ceil(15 * (T) / (h ** 2))  # 15 pre rovnaku vysku a m=2,3,4,5,6; 20 pre rovnaku vysku a m=7,8; 180 pre roznu vysku
             n = int(n)
             t = (T) / n
             time = np.linspace(0, T, n + 1)
         elif example == "boxes_2d":
-            n = np.ceil(15 * (T) / (h ** 2))  # 15 pre rovnaku vysku a m=2,3,4,5,6; 20 pre rovnaku vysku a m=7,8; 180 pre roznu vysku
+            n = np.ceil(8 * (T) / (h ** 2))
             n = int(n)
             t = (T) / n
             time = np.linspace(0, T, n + 1)
@@ -93,7 +103,18 @@ class PME():
             for k in range(0, m + 1):
                 u_init[k] = (np.maximum(1 - kk*np.abs(x[k])**2, 0)) ** (1 / (mm - 1))
                 #u_init[k] = (np.maximum(1-(kk*(mm-1))/(2*mm)*np.abs(x[k])**2,0))**(1/(mm-1))
-        if example == "boxes":
+        elif example == "Barenblatt_2d":
+            y = self.x
+            mm = self.params["power"]
+            d = self.params["d"]
+            m = self.space_steps
+            alpha = d / ((mm - 1) * d + 2)
+            kk = (alpha * (mm - 1)) / (2 * mm * d)
+            u_init = np.zeros((m + 1, m+1))
+            for k in range(0, m + 1):
+                for j in range(m+1):
+                    u_init[j,k] = (np.maximum(1 - kk * (np.abs(x[k])**2 + np.abs(y[j])**2) , 0)) ** (1 / (mm - 1))
+        elif example == "boxes":
             u_init, self.height = init_PME(x)
         elif example == "boxes_2d":
             m = self.space_steps
@@ -160,11 +181,22 @@ class PME():
             d = self.params["d"]
             alpha = d / ((mm - 1) * d + 2)
             kk = (alpha * (mm - 1)) / (2 * mm * d)
-            n,_, _,_,_ = self.__compute_n_t_h_x_time()
-            x, time = self.x, self.time
+            x = self.x
             #kk = 1/(mm+1)
             #u_ex = (1/T**kk) * (np.maximum(1-((kk*(mm-1))/(2*mm))*((np.abs(x)**2)/T**(2*kk)),0))**(1/(mm - 1))
             u_ex = (t**(-alpha))*(np.maximum(1-kk*((np.abs(x))**2)*t**(-2*alpha/d), 0)) ** (1/(mm-1))
+        elif example == "Barenblatt_2d":
+            m = self.space_steps
+            mm = self.params['power']
+            d = self.params["d"]
+            alpha = d / ((mm - 1) * d + 2)
+            kk = (alpha * (mm - 1)) / (2 * mm * d)
+            x = self.x
+            y = self.x
+            u_ex = np.zeros((m + 1, m+1))
+            for k in range(0, m + 1):
+                for j in range(m+1):
+                    u_ex[j,k] = (t ** (-alpha)) * (np.maximum(1 - kk * (np.abs(x[k])**2 + np.abs(y[j])**2)  * t ** (-2 * alpha / d), 0)) ** (1 / (mm - 1))
         elif example == "boxes":
             u_ex = self.u_ex[:, t]
         return u_ex

@@ -27,10 +27,9 @@ def exact_loss(u, u_ex):
     loss = error
     return loss
 
-#optimizer = optim.SGD(train_model.parameters(), lr=0.1)
-# optimizer = optim.Adam(train_model.parameters(), lr=0.1)
-optimizer = optim.Adam(train_model.parameters(), lr=0.0001) #, weight_decay=0.01)
+# optimizer = optim.Adam(train_model.parameters(), lr=0.0001)   # Buckley-Leverett
 # optimizer = optim.Adam(train_model.parameters(), lr=0.01, weight_decay=0.001)
+optimizer = optim.Adam(train_model.parameters(), lr=0.1, weight_decay=0.0001) # PME Barenblatt
 
 def validation_problems_barenblatt(j):
     params_vld = []
