@@ -206,14 +206,10 @@ class WENONetwork_2(WENONetwork):
         term_1 = problem.der_1()
         term_0 = problem.der_0()
         term_const = problem.der_const()
-        u_bc_l_x, u_bc_r_x, u1_bc_l_x, u1_bc_r_x, u2_bc_l_x, u2_bc_r_x = problem.boundary_condition_2d
-
+        # u_bc_l_x, u_bc_r_x, u1_bc_l_x, u1_bc_r_x, u2_bc_l_x, u2_bc_r_x = problem.boundary_condition_2d
         w5_minus = problem.w5_minus
-
         uu = u
 
-        uu_conv_x = problem.funct_convection_x(uu)
-        uu_conv_y = problem.funct_convection_y(uu)
         uu_diff = problem.funct_diffusion(uu)
         u1 = torch.zeros(m+1,m+1)
         RHSd_x = torch.zeros(m+1,m+1)
@@ -226,6 +222,8 @@ class WENONetwork_2(WENONetwork):
             RHSd_x[3:-3,j] = self.WENO6(uu_diff[:,j], e, mweno=mweno, mapped=mapped, trainable=trainable)
             RHSd_y[j,3:-3] = self.WENO6(uu_diff[j,:], e, mweno=mweno, mapped=mapped, trainable=trainable)
         if w5_minus=='Lax-Friedrichs':
+            uu_conv_x = problem.funct_convection_x(uu)
+            uu_conv_y = problem.funct_convection_y(uu)
             for j in range(m + 1):
                 max_der_x = torch.max(torch.abs(problem.funct_derivative_x(uu[:,j])))
                 RHSc_p_x[3:-3,j] = self.WENO5(0.5 * (uu_conv_x[:,j] + max_der_x * uu[:,j]), e, w5_minus=False, mweno=mweno, mapped=mapped, trainable=trainable)
@@ -236,14 +234,14 @@ class WENONetwork_2(WENONetwork):
             RHSc_x = RHSc_p_x + RHSc_n_x
             RHSc_y = RHSc_p_y + RHSc_n_y
             u1 = uu + t * ((term_2 / h ** 2) * RHSd_x + (term_2 / h ** 2) * RHSd_y - (term_1 / h) * RHSc_x - (term_1 / h) * RHSc_y + term_0 * uu)
+        if w5_minus == "no":
+            u1 = uu + t * ((term_2 / h ** 2) * RHSd_x + (term_2 / h ** 2) * RHSd_y + term_0 * uu)
 
         # u1[0:3,:] = u1_bc_l_x[0:3,:]
         # u1[-3:,:] = u1_bc_r_x[0:3,:]
         # u1[:,0:3] = u1_bc_l_x[0:3,:]
         # u1[:,-3:] = u1_bc_r_x[0:3,:]
 
-        uu1_conv_x = problem.funct_convection_x(u1)
-        uu1_conv_y = problem.funct_convection_y(u1)
         uu1_diff = problem.funct_diffusion(u1)
         u2 = torch.zeros(m+1,m+1)
         RHS1d_x = torch.zeros(m+1,m+1)
@@ -256,6 +254,8 @@ class WENONetwork_2(WENONetwork):
             RHS1d_x[3:-3, j] = self.WENO6(uu1_diff[:, j], e, mweno=mweno, mapped=mapped, trainable=trainable)
             RHS1d_y[j, 3:-3] = self.WENO6(uu1_diff[j, :], e, mweno=mweno, mapped=mapped, trainable=trainable)
         if w5_minus=='Lax-Friedrichs':
+            uu1_conv_x = problem.funct_convection_x(u1)
+            uu1_conv_y = problem.funct_convection_y(u1)
             for j in range(m + 1):
                 max_der_x = torch.max(torch.abs(problem.funct_derivative_x(u1[:,j])))
                 RHS1c_p_x[3:-3,j] = self.WENO5(0.5 * (uu1_conv_x[:,j] + max_der_x * u1[:,j]), e, w5_minus=False, mweno=mweno, mapped=mapped, trainable=trainable)
@@ -266,14 +266,14 @@ class WENONetwork_2(WENONetwork):
             RHS1c_x = RHS1c_p_x + RHS1c_n_x
             RHS1c_y = RHS1c_p_y + RHS1c_n_y
             u2 = 0.75*uu+0.25*u1+0.25*t*((term_2/h ** 2)*RHS1d_x +(term_2/h ** 2)*RHS1d_y - (term_1/h)*RHS1c_x - (term_1/h)*RHS1c_y + term_0*u1)
+        if w5_minus == "no":
+            u2 = 0.75 * uu + 0.25 * u1 + 0.25 * t * ((term_2 / h ** 2) * RHS1d_x + (term_2 / h ** 2) * RHS1d_y  + term_0 * u1)
 
         # u2[0:3,:] = u2_bc_l_x
         # u2[-3:,:] = u2_bc_r_x
         # u2[:,0:3] = u2_bc_l_x
         # u2[:,-3:] = u2_bc_r_x
 
-        uu2_conv_x = problem.funct_convection_x(u2)
-        uu2_conv_y = problem.funct_convection_y(u2)
         uu2_diff = problem.funct_diffusion(u2)
         u_ret = torch.zeros(m+1,m+1)
         RHS2d_x = torch.zeros(m+1,m+1)
@@ -286,6 +286,8 @@ class WENONetwork_2(WENONetwork):
             RHS2d_x[3:-3, j] = self.WENO6(uu2_diff[:, j], e, mweno=mweno, mapped=mapped, trainable=trainable)
             RHS2d_y[j, 3:-3] = self.WENO6(uu2_diff[j, :], e, mweno=mweno, mapped=mapped, trainable=trainable)
         if w5_minus == 'Lax-Friedrichs':
+            uu2_conv_x = problem.funct_convection_x(u2)
+            uu2_conv_y = problem.funct_convection_y(u2)
             for j in range(m + 1):
                 max_der_x = torch.max(torch.abs(problem.funct_derivative_x(u2[:,j])))
                 RHS2c_p_x[3:-3,j] = self.WENO5(0.5 * (uu2_conv_x[:,j] + max_der_x * u2[:,j]), e, w5_minus=False, mweno=mweno, mapped=mapped, trainable=trainable)
@@ -296,8 +298,10 @@ class WENONetwork_2(WENONetwork):
             RHS2c_x = RHS2c_p_x + RHS2c_n_x
             RHS2c_y = RHS2c_p_y + RHS2c_n_y
             u_ret = (1 / 3) * uu + (2 / 3) * u2 + (2 / 3) * t * ( (term_2 / h ** 2) * RHS2d_x + (term_2 / h ** 2) * RHS2d_y - (term_1 / h) * RHS2c_x - (term_1 / h) * RHS2c_y + term_0 * u2)
+        if w5_minus == "no":
+            u_ret = (1 / 3) * uu + (2 / 3) * u2 + (2 / 3) * t * ( (term_2 / h ** 2) * RHS2d_x + (term_2 / h ** 2) * RHS2d_y + term_0 * u2)
 
-            # u_ret[0:3, :] = u_bc_l_x
+        # u_ret[0:3, :] = u_bc_l_x
             # u_ret[-3:, :] = u_bc_r_x
             # u_ret[:, 0:3] = u_bc_l_x
             # u_ret[:, -3:] = u_bc_r_x

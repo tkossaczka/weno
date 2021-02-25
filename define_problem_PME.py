@@ -17,7 +17,7 @@ class PME():
                 self.u_ex = torch.Tensor(self.u_ex)
                 power = float(self.df[self.df.sample_id == self.sample_id]["power"])
                 self.params = {'T': 0.5, 'e': 1e-13, 'L': 6, 'power': power, 'd': 1}
-        elif example == "Barenblatt":
+        elif example == "Barenblatt" or example == "boxes_2d":
             self.params = params
         self.example = example
         if params is None:
@@ -38,12 +38,18 @@ class PME():
             params["T"] = 1.4 #2 #1.4
             params["power"] = random.uniform(2, 8)  # random.uniform(2,5) #random.uniform(2,8)
             params["d"] = 1
+            params["L"] = 6
         elif example == "boxes":
             params["T"] = 0.5  # 2 #1.4
             params["power"] = random.uniform(2, 6)  # random.uniform(2,5) #random.uniform(2,8)
             params["d"] = 1
+            params["L"] = 6
+        elif example == "boxes_2d":
+            params["T"] = 0.5  # 2 #1.4
+            params["power"] = 2
+            params["d"] = 2
+            params["L"] = 10
         params["e"] = 10 ** (-13)
-        params["L"] = 6
         self.params = params
 
     def get_params(self):
@@ -66,6 +72,11 @@ class PME():
             n = int(n)
             t = (T) / n
             time = np.linspace(0, T, n + 1)
+        elif example == "boxes_2d":
+            n = np.ceil(15 * (T) / (h ** 2))  # 15 pre rovnaku vysku a m=2,3,4,5,6; 20 pre rovnaku vysku a m=7,8; 180 pre roznu vysku
+            n = int(n)
+            t = (T) / n
+            time = np.linspace(0, T, n + 1)
         return n, t, h, x, time
 
     def __compute_initial_condition(self):
@@ -84,6 +95,18 @@ class PME():
                 #u_init[k] = (np.maximum(1-(kk*(mm-1))/(2*mm)*np.abs(x[k])**2,0))**(1/(mm-1))
         if example == "boxes":
             u_init, self.height = init_PME(x)
+        elif example == "boxes_2d":
+            m = self.space_steps
+            u_init = np.zeros((m + 1, m+1))
+            y = self.x
+            for k in range(m+1):
+                for j in range(m+1):
+                    if (x[k]-2)**2 + (y[j]+2)**2 < 6:
+                        u_init[j,k] = np.exp(-1/(6-(x[k]-2)**2-(y[j]+2)**2))
+                    elif (x[k]+2)**2 + (y[j]-2)**2 < 6:
+                        u_init[j,k] = np.exp(-1/(6-(x[k]+2)**2-(y[j]-2)**2))
+                    else:
+                        u_init[j,k] = 0
         u_init = torch.Tensor(u_init)
         return u_init
 
