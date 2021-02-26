@@ -218,9 +218,21 @@ class WENONetwork_2(WENONetwork):
         RHSc_n_x = torch.zeros(m+1,m+1)
         RHSc_p_y = torch.zeros(m+1,m+1)
         RHSc_n_y = torch.zeros(m+1,m+1)
-        for j in range(m+1):
-            RHSd_x[3:-3,j] = self.WENO6(uu_diff[:,j], e, mweno=mweno, mapped=mapped, trainable=trainable)
-            RHSd_y[j,3:-3] = self.WENO6(uu_diff[j,:], e, mweno=mweno, mapped=mapped, trainable=trainable)
+
+        uu_diff_x = torch.reshape(uu_diff.T, (1,(m+1)*(m+1)))
+        uu_diff_y = torch.reshape(uu_diff, (1,(m+1)*(m+1)))
+        RHSd_xr = self.WENO6(uu_diff_x.squeeze(0), e, mweno=mweno, mapped=mapped, trainable=trainable)
+        RHSd_yr = self.WENO6(uu_diff_y.squeeze(0), e, mweno=mweno, mapped=mapped, trainable=trainable)
+        RHSd_y2 = torch.zeros((m+1)**2)
+        RHSd_y2[3:-3] = RHSd_yr
+        RHSd_x2 = torch.zeros((m+1)**2)
+        RHSd_x2[3:-3] = RHSd_xr
+        RHSd_y = RHSd_y2.reshape(m+1,m+1)
+        RHSd_x = (RHSd_x2.reshape(m+1,m+1)).T
+
+        # for j in range(m+1):
+        #     RHSd_x[3:-3,j] = self.WENO6(uu_diff[:,j], e, mweno=mweno, mapped=mapped, trainable=trainable)
+        #     RHSd_y[j,3:-3] = self.WENO6(uu_diff[j,:], e, mweno=mweno, mapped=mapped, trainable=trainable)
         if w5_minus=='Lax-Friedrichs':
             uu_conv_x = problem.funct_convection_x(uu)
             uu_conv_y = problem.funct_convection_y(uu)
@@ -250,9 +262,21 @@ class WENONetwork_2(WENONetwork):
         RHS1c_n_x = torch.zeros(m+1,m+1)
         RHS1c_p_y = torch.zeros(m+1,m+1)
         RHS1c_n_y = torch.zeros(m+1,m+1)
-        for j in range(m + 1):
-            RHS1d_x[3:-3, j] = self.WENO6(uu1_diff[:, j], e, mweno=mweno, mapped=mapped, trainable=trainable)
-            RHS1d_y[j, 3:-3] = self.WENO6(uu1_diff[j, :], e, mweno=mweno, mapped=mapped, trainable=trainable)
+
+        uu1_diff_x = torch.reshape(uu1_diff.T, (1, (m + 1) * (m + 1)))
+        uu1_diff_y = torch.reshape(uu1_diff, (1, (m + 1) * (m + 1)))
+        RHS1d_xr = self.WENO6(uu1_diff_x.squeeze(0), e, mweno=mweno, mapped=mapped, trainable=trainable)
+        RHS1d_yr = self.WENO6(uu1_diff_y.squeeze(0), e, mweno=mweno, mapped=mapped, trainable=trainable)
+        RHS1d_y2 = torch.zeros((m + 1) ** 2)
+        RHS1d_y2[3:-3] = RHS1d_yr
+        RHS1d_x2 = torch.zeros((m + 1) ** 2)
+        RHS1d_x2[3:-3] = RHS1d_xr
+        RHS1d_y = RHS1d_y2.reshape(m + 1, m + 1)
+        RHS1d_x = (RHS1d_x2.reshape(m + 1, m + 1)).T
+
+        # for j in range(m + 1):
+        #     RHS1d_x[3:-3, j] = self.WENO6(uu1_diff[:, j], e, mweno=mweno, mapped=mapped, trainable=trainable)
+        #     RHS1d_y[j, 3:-3] = self.WENO6(uu1_diff[j, :], e, mweno=mweno, mapped=mapped, trainable=trainable)
         if w5_minus=='Lax-Friedrichs':
             uu1_conv_x = problem.funct_convection_x(u1)
             uu1_conv_y = problem.funct_convection_y(u1)
@@ -282,9 +306,21 @@ class WENONetwork_2(WENONetwork):
         RHS2c_n_x = torch.zeros(m+1,m+1)
         RHS2c_p_y = torch.zeros(m+1,m+1)
         RHS2c_n_y = torch.zeros(m+1,m+1)
-        for j in range(m + 1):
-            RHS2d_x[3:-3, j] = self.WENO6(uu2_diff[:, j], e, mweno=mweno, mapped=mapped, trainable=trainable)
-            RHS2d_y[j, 3:-3] = self.WENO6(uu2_diff[j, :], e, mweno=mweno, mapped=mapped, trainable=trainable)
+
+        uu2_diff_x = torch.reshape(uu2_diff.T, (1, (m + 1) * (m + 1)))
+        uu2_diff_y = torch.reshape(uu2_diff, (1, (m + 1) * (m + 1)))
+        RHS2d_xr = self.WENO6(uu2_diff_x.squeeze(0), e, mweno=mweno, mapped=mapped, trainable=trainable)
+        RHS2d_yr = self.WENO6(uu2_diff_y.squeeze(0), e, mweno=mweno, mapped=mapped, trainable=trainable)
+        RHS2d_y2 = torch.zeros((m + 1) ** 2)
+        RHS2d_y2[3:-3] = RHS2d_yr
+        RHS2d_x2 = torch.zeros((m + 1) ** 2)
+        RHS2d_x2[3:-3] = RHS2d_xr
+        RHS2d_y = RHS2d_y2.reshape(m + 1, m + 1)
+        RHS2d_x = (RHS2d_x2.reshape(m + 1, m + 1)).T
+
+        # for j in range(m + 1):
+        #     RHS2d_x[3:-3, j] = self.WENO6(uu2_diff[:, j], e, mweno=mweno, mapped=mapped, trainable=trainable)
+        #     RHS2d_y[j, 3:-3] = self.WENO6(uu2_diff[j, :], e, mweno=mweno, mapped=mapped, trainable=trainable)
         if w5_minus == 'Lax-Friedrichs':
             uu2_conv_x = problem.funct_convection_x(u2)
             uu2_conv_y = problem.funct_convection_y(u2)

@@ -54,8 +54,8 @@ u_exact_adjusted = u_ex[0:space_steps_exact+1:divider_space,0:space_steps_exact+
 
 error_nt_max = np.max(np.max(np.abs(u_exact_adjusted-UU)))
 error_t_max = np.max(np.max(np.abs(u_exact_adjusted-UU2)))
-error_nt_mean = (1 / space_steps)*(np.sqrt(np.sum(u_exact_adjusted-UU)** 2))
-error_t_mean = (1 / space_steps)*(np.sqrt(np.sum(u_exact_adjusted-UU2)** 2))
+error_nt_mean = (1 / space_steps)*(np.sqrt(np.sum((u_exact_adjusted-UU)** 2)))
+error_t_mean = (1 / space_steps)*(np.sqrt(np.sum((u_exact_adjusted-UU2)** 2)))
 
 # np.save("C:/Users/Tatiana/Desktop/Research/Research_ML_WENO/Buckley_Leverett_CD_Test/BL_2d/u_ex_1.npy",UU)
 # np.save("C:/Users/Tatiana/Desktop/Research/Research_ML_WENO/Buckley_Leverett_CD_Test/BL_2d/x.npy",X)

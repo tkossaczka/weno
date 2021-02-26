@@ -51,9 +51,9 @@ class PME():
             params["L"] = 10
         elif example == "Barenblatt_2d":
             params["T"] = 2
-            params["power"] = 2 #random.uniform(2, 5)
+            params["power"] = random.uniform(2, 5)
             params["d"] = 2
-            params["L"] = 6
+            params["L"] = 10
         params["e"] = 10 ** (-13)
         self.params = params
 
@@ -73,7 +73,7 @@ class PME():
             t = (T-1) / n
             time = np.linspace(1, T, n + 1)
         elif example == "Barenblatt_2d":
-            n = np.ceil(14 * (T-1) / (h ** 2)) #14 pre m=2,3,4,5;
+            n = np.ceil(15 * (T-1) / (h ** 2)) #15 pre m=2,3,4,5;
             n = int(n)
             t = (T-1) / n
             time = np.linspace(1, T, n + 1)
