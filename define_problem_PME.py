@@ -36,7 +36,7 @@ class PME():
         example = self.example
         if example == "Barenblatt":
             params["T"] = 1.4 #2 #1.4
-            params["power"] = random.uniform(2, 8)  # random.uniform(2,5) #random.uniform(2,8)
+            params["power"] = random.uniform(2, 5)  # random.uniform(2,5) #random.uniform(2,8)
             params["d"] = 1
             params["L"] = 6
         elif example == "boxes":
@@ -46,12 +46,12 @@ class PME():
             params["L"] = 6
         elif example == "boxes_2d":
             params["T"] = 0.5  # 2 #1.4
-            params["power"] = 2
+            params["power"] = random.uniform(2, 5)
             params["d"] = 2
             params["L"] = 10
         elif example == "Barenblatt_2d":
             params["T"] = 2
-            params["power"] = 2
+            params["power"] = 2 #random.uniform(2, 5)
             params["d"] = 2
             params["L"] = 6
         params["e"] = 10 ** (-13)
@@ -73,7 +73,7 @@ class PME():
             t = (T-1) / n
             time = np.linspace(1, T, n + 1)
         elif example == "Barenblatt_2d":
-            n = np.ceil(14 * (T-1) / (h ** 2))
+            n = np.ceil(14 * (T-1) / (h ** 2)) #14 pre m=2,3,4,5;
             n = int(n)
             t = (T-1) / n
             time = np.linspace(1, T, n + 1)

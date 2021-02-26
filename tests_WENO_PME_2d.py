@@ -12,7 +12,7 @@ from initial_condition_generator import init_PME
 torch.set_default_dtype(torch.float64)
 
 train_model = WENONetwork_2()
-train_model = torch.load("C:/Users/Tatiana/Desktop/Research/Research_ML_WENO/PME_Test/Models/Model_46/650.pt")
+train_model = torch.load("C:/Users/Tatiana/Desktop/Research/Research_ML_WENO/PME_Test/Models_2d/Model_0/330.pt")
 problem= PME
 example = "Barenblatt_2d"
 
@@ -30,8 +30,8 @@ if example == "boxes_2d":
         for k in range(nn):
             u_t = train_model.run_weno_2d(problem_main, u_t, mweno=True, mapped=False, vectorized=True, trainable=True, k=k)
 elif example == "Barenblatt_2d":
-    params = {'T': 1.4, 'power': 5, 'd': 2, 'L': 10, 'e': 1e-13}
-    problem_main = problem(sample_id=None, example=example, space_steps=30, time_steps=None, params=params)
+    params = {'T': 2, 'power': 2, 'd': 2, 'L': 10, 'e': 1e-13}
+    problem_main = problem(sample_id=None, example=example, space_steps=32, time_steps=None, params=params)
     print(problem_main.params)
     u_init, nn = train_model.init_run_weno(problem_main, vectorized=True, just_one_time_step=False, dim=2)
     u_nt = u_init

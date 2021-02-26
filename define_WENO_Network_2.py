@@ -308,8 +308,11 @@ class WENONetwork_2(WENONetwork):
 
         return u_ret
 
-    def forward(self, problem, u_ret, k, mweno, mapped):
-        u = self.run_weno(problem,u_ret,mweno=mweno,mapped=mapped,vectorized=True,trainable=True,k=k)
+    def forward(self, problem, u_ret, k, mweno, mapped, dim = 1):
+        if dim == 2:
+            u = self.run_weno_2d(problem,u_ret,mweno=mweno,mapped=mapped,vectorized=True,trainable=True,k=k)
+        else:
+            u = self.run_weno(problem,u_ret,mweno=mweno,mapped=mapped,vectorized=True,trainable=True,k=k)
         # V,_,_ = problem.transformation(u)
         return u
 

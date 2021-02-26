@@ -11,7 +11,7 @@ from define_problem_Buckley_Leverett import Buckley_Leverett
 torch.set_default_dtype(torch.float64)
 
 train_model = WENONetwork_2()
-train_model = torch.load("C:/Users/Tatiana/Desktop/Research/Research_ML_WENO/Buckley_Leverett_CD_Test/Models/Model_8/660.pt") #45/500 #46/650
+train_model = torch.load("C:/Users/Tatiana/Desktop/Research/Research_ML_WENO/Buckley_Leverett_CD_Test/Models/Model_8/660.pt")
 
 problem= Buckley_Leverett
 

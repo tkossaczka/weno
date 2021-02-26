@@ -12,7 +12,7 @@ torch.set_default_dtype(torch.float64)
 
 train_model = WENONetwork_2()
 problem= Buckley_Leverett
-example = "degenerate"
+example = "gravity"
 
 if example == "degenerate":
     train_model = torch.load("C:/Users/Tatiana/Desktop/Research/Research_ML_WENO/Buckley_Leverett_CD_Test/Models/Model_8/660.pt")
@@ -39,14 +39,14 @@ if example == "degenerate":
 if example == "gravity":
     rng = 5
     train_model = torch.load("C:/Users/Tatiana/Desktop/Research/Research_ML_WENO/Buckley_Leverett_CD_Test/Models/Model_8/660.pt")
-    df = pd.read_csv("C:/Users/Tatiana/Desktop/Research/Research_ML_WENO/Buckley_Leverett_CD_Test/Buckley_Leverett_CD_Data_1024/Validation_set/parameters.txt")
+    df = pd.read_csv("C:/Users/Tatiana/Desktop/Research/Research_ML_WENO/Buckley_Leverett_CD_Test/Buckley_Leverett_CD_Data_1024/Validation_set_2/parameters.txt")
     err_nt_max_vec = np.zeros(rng)
     err_nt_mean_vec = np.zeros(rng)
     err_t_max_vec = np.zeros(rng)
     err_t_mean_vec = np.zeros(rng)
     for j in range (rng):
         sample_id = j
-        u_ex = np.load("C:/Users/Tatiana/Desktop/Research/Research_ML_WENO/Buckley_Leverett_CD_Test/Buckley_Leverett_CD_Data_1024/Validation_set/u_exact64_{}.npy".format(sample_id))
+        u_ex = np.load("C:/Users/Tatiana/Desktop/Research/Research_ML_WENO/Buckley_Leverett_CD_Test/Buckley_Leverett_CD_Data_1024/Validation_set_2/u_exact64_{}.npy".format(sample_id))
         u_ex = torch.Tensor(u_ex[:,-1])
         C = float(df[df.sample_id == sample_id]["C"])
         G = float(df[df.sample_id == sample_id]["G"])
