@@ -50,6 +50,9 @@ def validation_problems_barenblatt_2d(j):
     params_vld.append({'T': 2, 'e': 1e-13, 'L': 10, 'power': 3, 'd': 2})
     params_vld.append({'T': 2, 'e': 1e-13, 'L': 10, 'power': 4, 'd': 2})
     params_vld.append({'T': 2, 'e': 1e-13, 'L': 10, 'power': 5, 'd': 2})
+    params_vld.append({'T': 2, 'e': 1e-13, 'L': 10, 'power': 6, 'd': 2})
+    params_vld.append({'T': 2, 'e': 1e-13, 'L': 10, 'power': 7, 'd': 2})
+    params_vld.append({'T': 2, 'e': 1e-13, 'L': 10, 'power': 8, 'd': 2})
     return params_vld[j]
 
 def validation_problems_boxes(j):
@@ -89,6 +92,7 @@ all_loss_test = []
 problem_class = PME
 current_problem_classes = [(PME, {"sample_id": None, "example": "Barenblatt_2d", "space_steps": 32, "time_steps": None, "params": None})]
 example = "Barenblatt_2d"
+rng = 7
 
 # current_problem_classes = [(PME, {"sample_id": None, "example": "Barenblatt", "space_steps": 64, "time_steps": None, "params": None})]
 # example = "Barenblatt"
@@ -139,7 +143,7 @@ for j in range(1000):
     if example == "Barenblatt":
         base_path = "C:/Users/Tatiana/Desktop/Research/Research_ML_WENO/PME_Test/Models/Model_48/"
     elif example == "Barenblatt_2d":
-        base_path = "C:/Users/Tatiana/Desktop/Research/Research_ML_WENO/PME_Test/Models_2d/Model_4/"
+        base_path = "C:/Users/Tatiana/Desktop/Research/Research_ML_WENO/PME_Test/Models_2d/Model_5/"
     elif example == "gravity":
         base_path = "C:/Users/Tatiana/Desktop/Research/Research_ML_WENO/Buckley_Leverett_CD_Test/Models/Model_14/"
     if not os.path.exists(base_path):
@@ -149,7 +153,7 @@ for j in range(1000):
     # TEST IF LOSS IS DECREASING WITH THE NUMBER OF ITERATIONS INCREASING
     if not (j % test_modulo):
         print("TESTING ON VALIDATION PROBLEMS")
-        for kk in range(4):
+        for kk in range(rng):
             single_problem_loss_test = []
             if example == "Barenblatt":
                 params_test = validation_problems_barenblatt(kk)
