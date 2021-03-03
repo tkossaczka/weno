@@ -90,9 +90,9 @@ def validation_problems_BL_3(j):
 all_loss_test = []
 
 problem_class = PME
-current_problem_classes = [(PME, {"sample_id": None, "example": "Barenblatt_2d", "space_steps": 32, "time_steps": None, "params": None})]
+current_problem_classes = [(PME, {"sample_id": None, "example": "Barenblatt_2d", "space_steps": 64, "time_steps": None, "params": None})]
 example = "Barenblatt_2d"
-rng = 7
+rng = 4
 
 # current_problem_classes = [(PME, {"sample_id": None, "example": "Barenblatt", "space_steps": 64, "time_steps": None, "params": None})]
 # example = "Barenblatt"
@@ -118,7 +118,7 @@ rng = 7
 
 phandler = ProblemHandler(problem_classes = current_problem_classes, max_num_open_problems=200)
 test_modulo=100
-for j in range(1000):
+for j in range(500):
     loss_test = []
     problem_specs, problem_id = phandler.get_random_problem(0.1)
     problem = problem_specs["problem"]
@@ -143,7 +143,7 @@ for j in range(1000):
     if example == "Barenblatt":
         base_path = "C:/Users/Tatiana/Desktop/Research/Research_ML_WENO/PME_Test/Models/Model_48/"
     elif example == "Barenblatt_2d":
-        base_path = "C:/Users/Tatiana/Desktop/Research/Research_ML_WENO/PME_Test/Models_2d/Model_5/"
+        base_path = "C:/Users/Tatiana/Desktop/Research/Research_ML_WENO/PME_Test/Models_2d/Model_6/"
     elif example == "gravity":
         base_path = "C:/Users/Tatiana/Desktop/Research/Research_ML_WENO/Buckley_Leverett_CD_Test/Models/Model_14/"
     if not os.path.exists(base_path):
@@ -160,7 +160,7 @@ for j in range(1000):
                 problem_test = problem_class(sample_id=None, example="Barenblatt", space_steps=64, time_steps=None, params=params_test)
             elif example == "Barenblatt_2d":
                 params_test = validation_problems_barenblatt_2d(kk)
-                problem_test = problem_class(sample_id=None, example="Barenblatt_2d", space_steps=32, time_steps=None, params=params_test)
+                problem_test = problem_class(sample_id=None, example="Barenblatt_2d", space_steps=64, time_steps=None, params=params_test)
             elif example == "boxes":
                 params_test = validation_problems_boxes(kk)
                 problem_test = problem_class(sample_id=None, example="boxes", space_steps=64, time_steps=None, params=params_test)
