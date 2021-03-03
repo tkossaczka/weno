@@ -12,44 +12,32 @@ from torchvision import datasets, transforms # Popular datasets, architectures a
 class WENONetwork(nn.Module):
     def __init__(self):
         super().__init__()
-        self.inner_nn_weno5_plus = self.get_inner_nn_weno5()
-        self.inner_nn_weno5_minus = self.get_inner_nn_weno5()
+        # self.inner_nn_weno5_plus = self.get_inner_nn_weno5()
+        # self.inner_nn_weno5_minus = self.get_inner_nn_weno5()
         self.inner_nn_weno6 = self.get_inner_nn_weno6()
         self.weno5_mult_bias, self.weno6_mult_bias = self.get_multiplicator_biases()
 
     # def get_inner_nn_weno5(self):
     #     net = nn.Sequential(
-    #         nn.Conv1d(2, 20, kernel_size=5, stride=1, padding=2),
+    #         nn.Conv2d(2, 5, kernel_size=5, stride=1, padding=2),
     #         nn.ELU(),
-    #         nn.Conv1d(20, 20, kernel_size=5, stride=1, padding=2),
+    #         nn.Conv2d(5, 5, kernel_size=5, stride=1, padding=2),
     #         nn.ELU(),
-    #         # nn.Conv1d(10, 10, kernel_size=1, stride=1, padding=0),
-    #         # nn.ELU(),
-    #         # nn.Conv1d(80, 40, kernel_size=1, stride=1, padding=0),
-    #         # nn.ELU(),
-    #         # nn.Conv1d(40, 20, kernel_size=3, stride=1, padding=1),
-    #         # nn.ELU(),
-    #         nn.Conv1d(20, 1, kernel_size=1, stride=1, padding=0),
+    #         nn.Conv2d(5, 1, kernel_size=1, stride=1, padding=0),
     #         nn.Sigmoid()
     #         )
     #     return net
-    #
-    # def get_inner_nn_weno6(self):
-    #     net = nn.Sequential(
-    #         nn.Conv1d(2, 20, kernel_size=5, stride=1, padding=2),
-    #         nn.ELU(),
-    #         nn.Conv1d(20, 20, kernel_size=5, stride=1, padding=2),
-    #         nn.ELU(),
-    #         # nn.Conv1d(10, 10, kernel_size=1, stride=1, padding=0),
-    #         # nn.ELU(),
-    #         # nn.Conv1d(80, 40, kernel_size=1, stride=1, padding=0),
-    #         # nn.ELU(),
-    #         # nn.Conv1d(40, 20, kernel_size=3, stride=1, padding=1),
-    #         # nn.ELU(),
-    #         nn.Conv1d(20, 1, kernel_size=1, stride=1, padding=0),
-    #         nn.Sigmoid()
-    #         )
-    #     return net
+
+    def get_inner_nn_weno6(self):
+        net = nn.Sequential(
+            nn.Conv2d(1, 5, kernel_size=5, stride=1, padding=2),
+            nn.ELU(),
+            nn.Conv2d(5, 5, kernel_size=5, stride=1, padding=2),
+            nn.ELU(),
+            nn.Conv2d(5, 1, kernel_size=1, stride=1, padding=0),
+            nn.Sigmoid()
+            )
+        return net
 
     def get_multiplicator_biases(self):
         # first for weno 5, second for weno 6
@@ -188,7 +176,7 @@ class WENONetwork(nn.Module):
 
         return RHS
 
-    def WENO6(self, uu, e, mweno, mapped, trainable=True):
+    def WENO6(self, u, uu, e, mweno, mapped, trainable=True):
         uu_left = uu[:-1]
         uu_right = uu[1:]
 
@@ -221,9 +209,13 @@ class WENONetwork(nn.Module):
             dif2 = self.__get_average_diff2(uu)
             dif12 = torch.stack([dif, dif2])
             dif12 = self.prepare_dif(dif12)
-            beta_multiplicators = self.inner_nn_weno6(dif12)[0, 0, :] + self.weno6_mult_bias
+            beta_multiplicators = self.inner_nn_weno6(u[None, None, :, :]) + self.weno6_mult_bias
             # beta_multiplicators_left = beta_multiplicators[:-1]
             # beta_multiplicators_right = beta_multiplicators[1:]
+
+            beta_multiplicators = beta_multiplicators[0, 0, :, :]
+            m = beta_multiplicators.shape[0]
+            beta_multiplicators = torch.reshape(beta_multiplicators, (1, (m) * (m)))[0,:]
 
             betap_corrected_list = []
             betan_corrected_list = []

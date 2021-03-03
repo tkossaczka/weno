@@ -25,12 +25,27 @@ class FancyNet(nn.Module):
     #     return x
 
     ## STTUCTURE FOR PME
+    # def __init__(self):
+    #     self.num_inner_convs = 2
+    #     super(FancyNet, self).__init__()
+    #     self.conv0 = nn.Conv1d(2, 5, kernel_size=5, stride=1, padding=2)
+    #     self.convs = [nn.Conv1d(5, 5, kernel_size=5, stride=1, padding=2) for k in range(self.num_inner_convs)]
+    #     self.conv_out = nn.Conv1d(5, 1, kernel_size=1, stride=1, padding=0)
+    #
+    # def forward(self, x):
+    #     x = F.elu(self.conv0(x))
+    #     for k in range(self.num_inner_convs):
+    #         x = F.elu(self.convs[k](x)) + x
+    #     x = self.conv_out(x)
+    #     return x
+
+    ## STTUCTURE FOR PME 2d
     def __init__(self):
         self.num_inner_convs = 2
         super(FancyNet, self).__init__()
-        self.conv0 = nn.Conv1d(2, 5, kernel_size=5, stride=1, padding=2)
-        self.convs = [nn.Conv1d(5, 5, kernel_size=5, stride=1, padding=2) for k in range(self.num_inner_convs)]
-        self.conv_out = nn.Conv1d(5, 1, kernel_size=1, stride=1, padding=0)
+        self.conv0 = nn.Conv2d(2, 5, kernel_size=5, stride=1, padding=2)
+        self.convs = [nn.Conv2d(5, 5, kernel_size=5, stride=1, padding=2) for k in range(self.num_inner_convs)]
+        self.conv_out = nn.Conv2d(5, 1, kernel_size=1, stride=1, padding=0)
 
     def forward(self, x):
         x = F.elu(self.conv0(x))
@@ -41,11 +56,11 @@ class FancyNet(nn.Module):
 
 class WENONetwork_2(WENONetwork):
 
-    def get_inner_nn_weno6(self):
-        return FancyNet()
-
-    def get_inner_nn_weno5(self):
-        return FancyNet()
+    # def get_inner_nn_weno6(self):
+    #     return FancyNet()
+    #
+    # def get_inner_nn_weno5(self):
+    #     return FancyNet()
 
     def init_run_weno(self, problem, vectorized, just_one_time_step, dim=1):
         m = problem.space_steps
@@ -221,8 +236,8 @@ class WENONetwork_2(WENONetwork):
 
         uu_diff_x = torch.reshape(uu_diff.T, (1,(m+1)*(m+1)))
         uu_diff_y = torch.reshape(uu_diff, (1,(m+1)*(m+1)))
-        RHSd_xr = self.WENO6(uu_diff_x.squeeze(0), e, mweno=mweno, mapped=mapped, trainable=trainable)
-        RHSd_yr = self.WENO6(uu_diff_y.squeeze(0), e, mweno=mweno, mapped=mapped, trainable=trainable)
+        RHSd_xr = self.WENO6(uu_diff.T, uu_diff_x.squeeze(0), e, mweno=mweno, mapped=mapped, trainable=trainable)
+        RHSd_yr = self.WENO6(uu_diff, uu_diff_y.squeeze(0), e, mweno=mweno, mapped=mapped, trainable=trainable)
         RHSd_y2 = torch.zeros((m+1)**2)
         RHSd_y2[3:-3] = RHSd_yr
         RHSd_x2 = torch.zeros((m+1)**2)
@@ -265,8 +280,8 @@ class WENONetwork_2(WENONetwork):
 
         uu1_diff_x = torch.reshape(uu1_diff.T, (1, (m + 1) * (m + 1)))
         uu1_diff_y = torch.reshape(uu1_diff, (1, (m + 1) * (m + 1)))
-        RHS1d_xr = self.WENO6(uu1_diff_x.squeeze(0), e, mweno=mweno, mapped=mapped, trainable=trainable)
-        RHS1d_yr = self.WENO6(uu1_diff_y.squeeze(0), e, mweno=mweno, mapped=mapped, trainable=trainable)
+        RHS1d_xr = self.WENO6(uu1_diff.T, uu1_diff_x.squeeze(0), e, mweno=mweno, mapped=mapped, trainable=trainable)
+        RHS1d_yr = self.WENO6(uu1_diff, uu1_diff_y.squeeze(0), e, mweno=mweno, mapped=mapped, trainable=trainable)
         RHS1d_y2 = torch.zeros((m + 1) ** 2)
         RHS1d_y2[3:-3] = RHS1d_yr
         RHS1d_x2 = torch.zeros((m + 1) ** 2)
@@ -309,8 +324,8 @@ class WENONetwork_2(WENONetwork):
 
         uu2_diff_x = torch.reshape(uu2_diff.T, (1, (m + 1) * (m + 1)))
         uu2_diff_y = torch.reshape(uu2_diff, (1, (m + 1) * (m + 1)))
-        RHS2d_xr = self.WENO6(uu2_diff_x.squeeze(0), e, mweno=mweno, mapped=mapped, trainable=trainable)
-        RHS2d_yr = self.WENO6(uu2_diff_y.squeeze(0), e, mweno=mweno, mapped=mapped, trainable=trainable)
+        RHS2d_xr = self.WENO6(uu2_diff.T, uu2_diff_x.squeeze(0), e, mweno=mweno, mapped=mapped, trainable=trainable)
+        RHS2d_yr = self.WENO6(uu2_diff, uu2_diff_y.squeeze(0), e, mweno=mweno, mapped=mapped, trainable=trainable)
         RHS2d_y2 = torch.zeros((m + 1) ** 2)
         RHS2d_y2[3:-3] = RHS2d_yr
         RHS2d_x2 = torch.zeros((m + 1) ** 2)
