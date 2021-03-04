@@ -90,12 +90,14 @@ def validation_problems_BL_3(j):
 all_loss_test = []
 
 problem_class = PME
-current_problem_classes = [(PME, {"sample_id": None, "example": "Barenblatt_2d", "space_steps": 32, "time_steps": None, "params": None})]
-example = "Barenblatt_2d"
-rng = 4
 
-# current_problem_classes = [(PME, {"sample_id": None, "example": "Barenblatt", "space_steps": 64, "time_steps": None, "params": None})]
-# example = "Barenblatt"
+# current_problem_classes = [(PME, {"sample_id": None, "example": "Barenblatt_2d", "space_steps": 32, "time_steps": None, "params": None})]
+# example = "Barenblatt_2d"
+# rng = 4
+
+current_problem_classes = [(PME, {"sample_id": None, "example": "Barenblatt", "space_steps": 64, "time_steps": None, "params": None})]
+example = "Barenblatt"
+rng = 4
 
 # current_problem_classes = [(PME_boxes, {"sample_id": 1, "example": "boxes", "space_steps": 64, "time_steps": None, "params": 0})]
 # example = "boxes"
@@ -118,14 +120,17 @@ rng = 4
 
 phandler = ProblemHandler(problem_classes = current_problem_classes, max_num_open_problems=200)
 test_modulo=100
-for j in range(500):
+for j in range(1000):
     loss_test = []
     problem_specs, problem_id = phandler.get_random_problem(0.1)
     problem = problem_specs["problem"]
     params = problem.params
     step = problem_specs["step"]
     u_last = problem_specs["last_solution"]
-    u_new = train_model.forward(problem, u_last,step, mweno = True, mapped = False, dim =2)
+    if example == "Barenblatt_2d":
+        u_new = train_model.forward(problem, u_last, step, mweno = True, mapped = False, dim =2)
+    else:
+        u_new = train_model.forward(problem, u_last, step, mweno = True, mapped = False)
     if example == "Barenblatt" or example == "Barenblatt_2d":
         u_exact = problem.exact(problem.time[step+1])
     elif example == "boxes" or example == "gravity":
@@ -141,7 +146,7 @@ for j in range(500):
     u_new.detach_()
     phandler.update_problem(problem_id, u_new)
     if example == "Barenblatt":
-        base_path = "C:/Users/Tatiana/Desktop/Research/Research_ML_WENO/PME_Test/Models/Model_48/"
+        base_path = "C:/Users/Tatiana/Desktop/Research/Research_ML_WENO/PME_Test/Models/Model_50/"
     elif example == "Barenblatt_2d":
         base_path = "C:/Users/Tatiana/Desktop/Research/Research_ML_WENO/PME_Test/Models_2d/Model_6/"
     elif example == "gravity":

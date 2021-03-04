@@ -14,7 +14,7 @@ from initial_condition_generator import init_PME
 torch.set_default_dtype(torch.float64)
 
 #train_model = WENONetwork_2()
-train_model = torch.load("C:/Users/Tatiana/Desktop/Research/Research_ML_WENO/PME_Test/Models/Model_47/999.pt") #45/500 #46/650 # 47/999 # 41/690 for boxes
+train_model = torch.load("C:/Users/Tatiana/Desktop/Research/Research_ML_WENO/PME_Test/Models/Model_50/650.pt") #45/500 #46/650 # 47/999 # 41/690 for boxes
 
 def validation_problems(j):
     params_vld = []
@@ -59,7 +59,7 @@ u_exs = [u_ex_0, u_ex_1, u_ex_2, u_ex_3]
 
 problem= PME
 example = "Barenblatt"
-rng = 4
+rng = 7
 err_nt_max_vec = np.zeros(rng)
 err_nt_mean_vec = np.zeros(rng)
 err_t_max_vec = np.zeros(rng)

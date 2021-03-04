@@ -24,10 +24,11 @@ class PME():
             self.init_params()
         self.space_steps = space_steps
         self.time_steps = time_steps
-        n, self.t, self.h, self.x, self.time = self.__compute_n_t_h_x_time()
+        self.h, self.x = self.__compute_h_x()
+        self.initial_condition = self.__compute_initial_condition()
+        n, self.t, self.time = self.__compute_n_t_time()
         if time_steps is None:
             self.time_steps = n
-        self.initial_condition = self.__compute_initial_condition()
         self.boundary_condition = self.compute_boundary_condition()
         self.w5_minus = "no"
 
@@ -36,7 +37,7 @@ class PME():
         example = self.example
         if example == "Barenblatt":
             params["T"] = 1.4 #2 #1.4
-            params["power"] = random.uniform(2, 5)  # random.uniform(2,5) #random.uniform(2,8)
+            params["power"] = random.uniform(2, 8)  # random.uniform(2,5) #random.uniform(2,8)
             params["d"] = 1
             params["L"] = 6
         elif example == "boxes":
@@ -60,17 +61,24 @@ class PME():
     def get_params(self):
         return self.params
 
-    def __compute_n_t_h_x_time(self):
+    def __compute_h_x(self):
         example = self.example
         T = self.params["T"]
         L = self.params["L"]
         m = self.space_steps
-        uu = self.initial_condition
         h = 2 * L / m
         x = np.linspace(-L, L, m + 1)
+        return h, x
+
+    def __compute_n_t_time(self):
+        example = self.example
+        uu = self.initial_condition
+        T = self.params["T"]
+        h = self.h
+        power = self.params["power"]
         if example == "Barenblatt":
-            dif = 0.5 * torch.roll(uu, -1) - 0.5 * torch.roll(uu, 1)
-            CFL = torch.max(dif)/0.42
+            dif = (power*uu**(power-1))  #(0.5 * torch.roll(uu**(power), -1) - 0.5 * torch.roll(uu**(power), 1))/h
+            CFL = torch.max(dif)/0.4
             n = np.ceil(CFL*(T-1)/(h**2)) #10 pre m=2,3,4,5; 17 pre m=8
             n = int(n)
             t = (T-1) / n
@@ -90,7 +98,7 @@ class PME():
             n = int(n)
             t = (T) / n
             time = np.linspace(0, T, n + 1)
-        return n, t, h, x, time
+        return n, t, time
 
     def __compute_initial_condition(self):
         x = self.x
