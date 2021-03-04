@@ -22,8 +22,8 @@ def monotonicity_loss(u):
 
 def exact_loss(u, u_ex):
     error = train_model.compute_error(u, u_ex)
-    # loss = 10e1*error
-    loss = 10e4*error # PME Barenblatt
+    loss = 10e2*error # PME boxes
+    # loss = 10e4*error # PME Barenblatt
     # loss = error
     return loss
 
@@ -33,8 +33,8 @@ def exact_loss_2d(u, u_ex):
     return loss
 
 # optimizer = optim.Adam(train_model.parameters(), lr=0.0001)   # Buckley-Leverett
-# optimizer = optim.Adam(train_model.parameters(), lr=0.01, weight_decay=0.001)
-optimizer = optim.Adam(train_model.parameters(), lr=0.1, weight_decay=0.0001) # PME Barenblatt
+optimizer = optim.Adam(train_model.parameters(), lr=0.1, weight_decay=0.001)  # PME boxes
+# optimizer = optim.Adam(train_model.parameters(), lr=0.1, weight_decay=0.0001) # PME Barenblatt
 
 def validation_problems_barenblatt(j):
     params_vld = []
@@ -95,17 +95,18 @@ problem_class = PME
 # example = "Barenblatt_2d"
 # rng = 4
 
-current_problem_classes = [(PME, {"sample_id": None, "example": "Barenblatt", "space_steps": 64, "time_steps": None, "params": None})]
-example = "Barenblatt"
-rng = 4
+# current_problem_classes = [(PME, {"sample_id": None, "example": "Barenblatt", "space_steps": 64, "time_steps": None, "params": None})]
+# example = "Barenblatt"
+# rng = 4
 
-# current_problem_classes = [(PME_boxes, {"sample_id": 1, "example": "boxes", "space_steps": 64, "time_steps": None, "params": 0})]
-# example = "boxes"
-# u_ex_0 = torch.load("C:/Users/Tatiana/Desktop/Research/Research_ML_WENO/PME_Test/PME_Data_1024/Basic_test_set/u_ex64_0")
-# u_ex_1 = torch.load("C:/Users/Tatiana/Desktop/Research/Research_ML_WENO/PME_Test/PME_Data_1024/Basic_test_set/u_ex64_1")
-# u_ex_2 = torch.load("C:/Users/Tatiana/Desktop/Research/Research_ML_WENO/PME_Test/PME_Data_1024/Basic_test_set/u_ex64_2")
-# u_ex_3 = torch.load("C:/Users/Tatiana/Desktop/Research/Research_ML_WENO/PME_Test/PME_Data_1024/Basic_test_set/u_ex64_3")
-# u_exs = [u_ex_0, u_ex_1, u_ex_2, u_ex_3]
+current_problem_classes = [(PME, {"sample_id": 1, "example": "boxes", "space_steps": 64, "time_steps": None, "params": 0})]
+example = "boxes"
+u_ex_0 = torch.load("C:/Users/Tatiana/Desktop/Research/Research_ML_WENO/PME_Test/PME_Data_1024/Basic_test_set/u_ex64_0")
+u_ex_1 = torch.load("C:/Users/Tatiana/Desktop/Research/Research_ML_WENO/PME_Test/PME_Data_1024/Basic_test_set/u_ex64_1")
+u_ex_2 = torch.load("C:/Users/Tatiana/Desktop/Research/Research_ML_WENO/PME_Test/PME_Data_1024/Basic_test_set/u_ex64_2")
+u_ex_3 = torch.load("C:/Users/Tatiana/Desktop/Research/Research_ML_WENO/PME_Test/PME_Data_1024/Basic_test_set/u_ex64_3")
+u_exs = [u_ex_0, u_ex_1, u_ex_2, u_ex_3]
+rng = 4
 
 # problem_class = Buckley_Leverett
 # current_problem_classes = [(Buckley_Leverett, {"sample_id": 1, "example": "gravity", "space_steps": 64, "time_steps": None, "params": 0})]
@@ -147,6 +148,8 @@ for j in range(1000):
     phandler.update_problem(problem_id, u_new)
     if example == "Barenblatt":
         base_path = "C:/Users/Tatiana/Desktop/Research/Research_ML_WENO/PME_Test/Models/Model_50/"
+    if example == "boxes":
+        base_path = "C:/Users/Tatiana/Desktop/Research/Research_ML_WENO/PME_Test/Models_boxes/Model_0/"
     elif example == "Barenblatt_2d":
         base_path = "C:/Users/Tatiana/Desktop/Research/Research_ML_WENO/PME_Test/Models_2d/Model_6/"
     elif example == "gravity":

@@ -42,7 +42,7 @@ class PME():
             params["L"] = 6
         elif example == "boxes":
             params["T"] = 0.5  # 2 #1.4
-            params["power"] = random.uniform(2, 6)  # random.uniform(2,5) #random.uniform(2,8)
+            params["power"] = random.uniform(2, 8)  # random.uniform(2,5) #random.uniform(2,8)
             params["d"] = 1
             params["L"] = 6
         elif example == "boxes_2d":
@@ -77,7 +77,7 @@ class PME():
         h = self.h
         power = self.params["power"]
         if example == "Barenblatt":
-            dif = (power*uu**(power-1))  #(0.5 * torch.roll(uu**(power), -1) - 0.5 * torch.roll(uu**(power), 1))/h
+            dif = (power*uu**(power-1))
             CFL = torch.max(dif)/0.4
             n = np.ceil(CFL*(T-1)/(h**2)) #10 pre m=2,3,4,5; 17 pre m=8
             n = int(n)
@@ -89,7 +89,9 @@ class PME():
             t = (T-1) / n
             time = np.linspace(1, T, n + 1)
         elif example == "boxes":
-            n = np.ceil(15 * (T) / (h ** 2))  # 15 pre rovnaku vysku a m=2,3,4,5,6; 20 pre rovnaku vysku a m=7,8; 180 pre roznu vysku
+            dif = (power*uu**(power-1))
+            CFL = torch.max(dif)/0.4
+            n = np.ceil(CFL * (T) / (h ** 2))  # 15 pre rovnaku vysku a m=2,3,4,5,6; 20 pre rovnaku vysku a m=7,8; 180 pre roznu vysku
             n = int(n)
             t = (T) / n
             time = np.linspace(0, T, n + 1)
