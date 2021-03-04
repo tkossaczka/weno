@@ -90,7 +90,7 @@ def validation_problems_BL_3(j):
 all_loss_test = []
 
 problem_class = PME
-current_problem_classes = [(PME, {"sample_id": None, "example": "Barenblatt_2d", "space_steps": 64, "time_steps": None, "params": None})]
+current_problem_classes = [(PME, {"sample_id": None, "example": "Barenblatt_2d", "space_steps": 32, "time_steps": None, "params": None})]
 example = "Barenblatt_2d"
 rng = 4
 
@@ -160,7 +160,7 @@ for j in range(500):
                 problem_test = problem_class(sample_id=None, example="Barenblatt", space_steps=64, time_steps=None, params=params_test)
             elif example == "Barenblatt_2d":
                 params_test = validation_problems_barenblatt_2d(kk)
-                problem_test = problem_class(sample_id=None, example="Barenblatt_2d", space_steps=64, time_steps=None, params=params_test)
+                problem_test = problem_class(sample_id=None, example="Barenblatt_2d", space_steps=32, time_steps=None, params=params_test)
             elif example == "boxes":
                 params_test = validation_problems_boxes(kk)
                 problem_test = problem_class(sample_id=None, example="boxes", space_steps=64, time_steps=None, params=params_test)

@@ -49,7 +49,7 @@ for j in range(rng):
                 u_t = train_model.run_weno_2d(problem_main, u_t, mweno=True, mapped=False, vectorized=True, trainable=True, k=k)
     elif example == "Barenblatt_2d":
         params = validation_problems_barenblatt_2d(j)
-        problem_main = problem(sample_id=None, example=example, space_steps=32, time_steps=None, params=params)
+        problem_main = problem(sample_id=None, example=example, space_steps=64, time_steps=None, params=params)
         print(problem_main.params)
         u_init, nn = train_model.init_run_weno(problem_main, vectorized=True, just_one_time_step=False, dim=2)
         u_nt = u_init

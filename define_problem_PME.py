@@ -65,10 +65,13 @@ class PME():
         T = self.params["T"]
         L = self.params["L"]
         m = self.space_steps
+        uu = self.initial_condition
         h = 2 * L / m
         x = np.linspace(-L, L, m + 1)
         if example == "Barenblatt":
-            n = np.ceil(10*(T-1)/(h**2)) #10 pre m=2,3,4,5; 17 pre m=8
+            dif = 0.5 * torch.roll(uu, -1) - 0.5 * torch.roll(uu, 1)
+            CFL = torch.max(dif)/0.42
+            n = np.ceil(CFL*(T-1)/(h**2)) #10 pre m=2,3,4,5; 17 pre m=8
             n = int(n)
             t = (T-1) / n
             time = np.linspace(1, T, n + 1)
