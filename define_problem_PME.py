@@ -11,9 +11,9 @@ class PME():
                 self.params = params
                 self.sample_id = sample_id
             else:
-                self.sample_id = random.randint(0, 135)
+                self.sample_id = random.randint(0, 85)
                 self.df = pd.read_csv("C:/Users/Tatiana/Desktop/Research/Research_ML_WENO/PME_Test/PME_Data_1024/parameters.txt")
-                self.u_ex = np.load("C:/Users/Tatiana/Desktop/Research/Research_ML_WENO/PME_Test/PME_Data_1024/u_exact64_{}.npy".format(self.sample_id))
+                self.u_ex = np.load("C:/Users/Tatiana/Desktop/Research/Research_ML_WENO/PME_Test/PME_Data_1024/u_exact_{}.npy".format(self.sample_id))
                 self.u_ex = torch.Tensor(self.u_ex)
                 power = float(self.df[self.df.sample_id == self.sample_id]["power"])
                 self.params = {'T': 0.5, 'e': 1e-13, 'L': 6, 'power': power, 'd': 1}
@@ -31,6 +31,14 @@ class PME():
             self.time_steps = n
         self.boundary_condition = self.compute_boundary_condition()
         self.w5_minus = "no"
+        if example == "boxes" and sample_id != None:
+            space_steps_exact = self.u_ex.shape[0]
+            time_steps_exact = self.u_ex.shape[1]
+            divider_space = space_steps_exact / self.space_steps
+            divider_time = time_steps_exact / self.time_steps
+            divider_space = int(divider_space)
+            divider_time = int(divider_time)
+            self.u_ex = self.u_ex[0:space_steps_exact + 1:divider_space, 0:time_steps_exact + 1:divider_time]
 
     def init_params(self):
         params = dict()

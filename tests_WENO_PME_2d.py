@@ -27,7 +27,7 @@ train_model = WENONetwork_2()
 train_model = torch.load("C:/Users/Tatiana/Desktop/Research/Research_ML_WENO/PME_Test/Models_2d/Model_5/400.pt")   # 4/200 # 5/400
 problem= PME
 example = "Barenblatt_2d"
-rng = 7
+rng = 4
 err_nt_max_vec = np.zeros(rng)
 err_nt_mean_vec = np.zeros(rng)
 err_t_max_vec = np.zeros(rng)
@@ -49,7 +49,7 @@ for j in range(rng):
                 u_t = train_model.run_weno_2d(problem_main, u_t, mweno=True, mapped=False, vectorized=True, trainable=True, k=k)
     elif example == "Barenblatt_2d":
         params = validation_problems_barenblatt_2d(j)
-        problem_main = problem(sample_id=None, example=example, space_steps=64, time_steps=None, params=params)
+        problem_main = problem(sample_id=None, example=example, space_steps=32, time_steps=None, params=params)
         print(problem_main.params)
         u_init, nn = train_model.init_run_weno(problem_main, vectorized=True, just_one_time_step=False, dim=2)
         u_nt = u_init

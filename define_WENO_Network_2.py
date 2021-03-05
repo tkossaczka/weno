@@ -393,7 +393,7 @@ class WENONetwork_2(WENONetwork):
             print(problem.space_steps, problem.time_steps)
         return vecerr, order
 
-    def compute_exact(self,problem_class, problem, space_steps, time_steps, just_one_time_step, trainable):
+    def compute_exact(self, problem_class, problem, space_steps, time_steps, just_one_time_step, trainable):
         if hasattr(problem_class, 'exact'):
             print('nic netreba')
         else:
@@ -401,11 +401,11 @@ class WENONetwork_2(WENONetwork):
             for k in range(nn):
                 u[:, k + 1] = self.run_weno(problem, u, mweno=True, mapped=False, vectorized=False, trainable=trainable, k=k)
         u_exact = u
-        space_steps_exact = problem.space_steps
-        time_steps_exact = problem.time_steps
-        divider_space = space_steps_exact / space_steps
-        divider_time = time_steps_exact / time_steps
-        divider_space = int(divider_space)
-        divider_time = int(divider_time)
-        u_exact_adjusted = u_exact[0:space_steps_exact+1:divider_space,0:time_steps_exact+1:divider_time]
-        return u_exact, u_exact_adjusted
+        #space_steps_exact = problem.space_steps
+        #time_steps_exact = problem.time_steps
+        #divider_space = space_steps_exact / space_steps
+        #divider_time = time_steps_exact / time_steps
+        #divider_space = int(divider_space)
+        #divider_time = int(divider_time)
+        #u_exact_adjusted = u_exact[0:space_steps_exact+1:divider_space,0:time_steps_exact+1:divider_time]
+        return u_exact #, u_exact_adjusted

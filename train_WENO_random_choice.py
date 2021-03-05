@@ -33,7 +33,7 @@ def exact_loss_2d(u, u_ex):
     return loss
 
 # optimizer = optim.Adam(train_model.parameters(), lr=0.0001)   # Buckley-Leverett
-optimizer = optim.Adam(train_model.parameters(), lr=0.1, weight_decay=0.001)  # PME boxes
+optimizer = optim.Adam(train_model.parameters(), lr=0.01, weight_decay=0.001)  # PME boxes
 # optimizer = optim.Adam(train_model.parameters(), lr=0.1, weight_decay=0.0001) # PME Barenblatt
 
 def validation_problems_barenblatt(j):
@@ -101,10 +101,10 @@ problem_class = PME
 
 current_problem_classes = [(PME, {"sample_id": 1, "example": "boxes", "space_steps": 64, "time_steps": None, "params": 0})]
 example = "boxes"
-u_ex_0 = torch.load("C:/Users/Tatiana/Desktop/Research/Research_ML_WENO/PME_Test/PME_Data_1024/Basic_test_set/u_ex64_0")
-u_ex_1 = torch.load("C:/Users/Tatiana/Desktop/Research/Research_ML_WENO/PME_Test/PME_Data_1024/Basic_test_set/u_ex64_1")
-u_ex_2 = torch.load("C:/Users/Tatiana/Desktop/Research/Research_ML_WENO/PME_Test/PME_Data_1024/Basic_test_set/u_ex64_2")
-u_ex_3 = torch.load("C:/Users/Tatiana/Desktop/Research/Research_ML_WENO/PME_Test/PME_Data_1024/Basic_test_set/u_ex64_3")
+u_ex_0 = torch.load("C:/Users/Tatiana/Desktop/Research/Research_ML_WENO/PME_Test/PME_Data_1024/Basic_test_set/u_ex_0")
+u_ex_1 = torch.load("C:/Users/Tatiana/Desktop/Research/Research_ML_WENO/PME_Test/PME_Data_1024/Basic_test_set/u_ex_1")
+u_ex_2 = torch.load("C:/Users/Tatiana/Desktop/Research/Research_ML_WENO/PME_Test/PME_Data_1024/Basic_test_set/u_ex_2")
+u_ex_3 = torch.load("C:/Users/Tatiana/Desktop/Research/Research_ML_WENO/PME_Test/PME_Data_1024/Basic_test_set/u_ex_3")
 u_exs = [u_ex_0, u_ex_1, u_ex_2, u_ex_3]
 rng = 4
 
@@ -121,10 +121,11 @@ rng = 4
 
 phandler = ProblemHandler(problem_classes = current_problem_classes, max_num_open_problems=200)
 test_modulo=100
-for j in range(1000):
+for j in range(500):
     loss_test = []
     problem_specs, problem_id = phandler.get_random_problem(0.1)
     problem = problem_specs["problem"]
+    print(problem.sample_id)
     params = problem.params
     step = problem_specs["step"]
     u_last = problem_specs["last_solution"]
@@ -149,7 +150,7 @@ for j in range(1000):
     if example == "Barenblatt":
         base_path = "C:/Users/Tatiana/Desktop/Research/Research_ML_WENO/PME_Test/Models/Model_50/"
     if example == "boxes":
-        base_path = "C:/Users/Tatiana/Desktop/Research/Research_ML_WENO/PME_Test/Models_boxes/Model_0/"
+        base_path = "C:/Users/Tatiana/Desktop/Research/Research_ML_WENO/PME_Test/Models_boxes/Model_1/"
     elif example == "Barenblatt_2d":
         base_path = "C:/Users/Tatiana/Desktop/Research/Research_ML_WENO/PME_Test/Models_2d/Model_6/"
     elif example == "gravity":
@@ -193,7 +194,7 @@ for j in range(1000):
                 u_exact_test = torch.Tensor(u_exact_test)
                 single_problem_loss_test.append(exact_loss(u_test, u_exact_test))
             elif example == "boxes":
-                single_problem_loss_test.append(exact_loss(u_test, u_exs[kk][:, -1]))
+                single_problem_loss_test.append(exact_loss(u_test, u_exs[kk][0:1024 + 1:16, -1]))
             elif example == "gravity":
                 single_problem_loss_test.append(exact_loss(u_test, u_exs[kk][:, -1]))
             elif example == "Barenblatt_2d":
