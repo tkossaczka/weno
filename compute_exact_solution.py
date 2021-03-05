@@ -74,10 +74,10 @@ if __name__ == "__main__":
 #     params_vld.append({'T': 0.5, 'e': 1e-13, 'L': 6, 'power': 5, 'd': 1})
 #     return params_vld[j]
 #
-params = {'T': 0.5, 'e': 1e-13, 'L': 6, 'power': 5, 'd': 1}
-problem_ex_test = problem(sample_id = None, example= "boxes", space_steps=64 * 2 * 2 * 2 * 2 , time_steps=None, params=params)
-u_ex = train_model.compute_exact(PME, problem_ex_test, 64, 214, just_one_time_step=False, trainable=False)
-torch.save(u_ex, "C:/Users/Tatiana/Desktop/Research/Research_ML_WENO/PME_Test/PME_Data_1024/Basic_test_set/u_ex_3")
+# params = {'T': 0.5, 'e': 1e-13, 'L': 6, 'power': 5, 'd': 1}
+# problem_ex_test = problem(sample_id = None, example= "boxes", space_steps=64 * 2 * 2 * 2 * 2 , time_steps=None, params=params)
+# u_ex = train_model.compute_exact(PME, problem_ex_test, 64, 214, just_one_time_step=False, trainable=False)
+# torch.save(u_ex, "C:/Users/Tatiana/Desktop/Research/Research_ML_WENO/PME_Test/PME_Data_1024/Basic_test_set/u_ex_3")
 #torch.save(u_ex64, "C:/Users/Tatiana/Desktop/Research/Research_ML_WENO/PME_Test/PME_Data_1024/Basic_test_set/u_ex64_3")
 
 
