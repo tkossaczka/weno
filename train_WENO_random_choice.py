@@ -33,7 +33,7 @@ def exact_loss_2d(u, u_ex):
     return loss
 
 # optimizer = optim.Adam(train_model.parameters(), lr=0.0001)   # Buckley-Leverett
-optimizer = optim.Adam(train_model.parameters(), lr=0.01, weight_decay=0.0001)  # PME boxes
+optimizer = optim.Adam(train_model.parameters(), lr=0.001, weight_decay=0.00001)  # PME boxes
 # optimizer = optim.Adam(train_model.parameters(), lr=0.1, weight_decay=0.0001) # PME Barenblatt
 
 def validation_problems_barenblatt(j):
