@@ -33,7 +33,7 @@ def exact_loss_2d(u, u_ex):
     return loss
 
 # optimizer = optim.Adam(train_model.parameters(), lr=0.0001)   # Buckley-Leverett
-optimizer = optim.Adam(train_model.parameters(), lr=0.001, weight_decay=0.00001)  # PME boxes
+optimizer = optim.Adam(train_model.parameters(), lr=0.01, weight_decay=0.0001)  # PME boxes
 # optimizer = optim.Adam(train_model.parameters(), lr=0.1, weight_decay=0.0001) # PME Barenblatt
 
 def validation_problems_barenblatt(j):
@@ -150,7 +150,7 @@ for j in range(2000):
     if example == "Barenblatt":
         base_path = "C:/Users/Tatiana/Desktop/Research/Research_ML_WENO/PME_Test/Models/Model_50/"
     if example == "boxes":
-        base_path = "C:/Users/Tatiana/Desktop/Research/Research_ML_WENO/PME_Test/Models_boxes/Model_1/"
+        base_path = "C:/Users/Tatiana/Desktop/Research/Research_ML_WENO/PME_Test/Models_boxes/Model_4/"
     elif example == "Barenblatt_2d":
         base_path = "C:/Users/Tatiana/Desktop/Research/Research_ML_WENO/PME_Test/Models_2d/Model_6/"
     elif example == "gravity":
