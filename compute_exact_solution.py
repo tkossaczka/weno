@@ -63,7 +63,7 @@ if __name__ == "__main__":
     args = parser.parse_args()
     save_problem_and_solution(args.save_path, args.sample_number)
 
-# seq 86 200 | xargs -i{} -P6 python compute_exact_solution.py C:\Users\Tatiana\Desktop\Research\Research_ML_WENO\PME_Test\PME_Data_1024 {}
+# seq 0 100 | xargs -i{} -P6 python compute_exact_solution.py C:\Users\Tatiana\Desktop\Research\Research_ML_WENO\PME_Test\PME_Data_1024_2 {}
 # seq 101 300 | xargs -i{} -P6 python compute_exact_solution.py C:\Users\Tatiana\Desktop\Research\Research_ML_WENO\Buckley_Leverett_CD_Test\Buckley_Leverett_CD_Data_1024 {}
 
 # def validation_problems(j):

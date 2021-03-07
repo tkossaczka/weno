@@ -121,7 +121,7 @@ rng = 4
 
 phandler = ProblemHandler(problem_classes = current_problem_classes, max_num_open_problems=200)
 test_modulo=50
-for j in range(2000):
+for j in range(1000):
     loss_test = []
     problem_specs, problem_id = phandler.get_random_problem(0.1)
     problem = problem_specs["problem"]
@@ -143,14 +143,19 @@ for j in range(2000):
         loss = exact_loss_2d(u_new,u_exact)
     else:
         loss = exact_loss(u_new,u_exact)
+    # minibatch_size=25
+    # loss = loss/minibatch_size
     loss.backward()  # Backward pass
+    # if j%minibatch_size == 0:
+    #     print("optimizer_step")
     optimizer.step()  # Optimize weights
+        # optimizer.zero_grad()
     u_new.detach_()
     phandler.update_problem(problem_id, u_new)
     if example == "Barenblatt":
         base_path = "C:/Users/Tatiana/Desktop/Research/Research_ML_WENO/PME_Test/Models/Model_50/"
     if example == "boxes":
-        base_path = "C:/Users/Tatiana/Desktop/Research/Research_ML_WENO/PME_Test/Models_boxes/Model_4/"
+        base_path = "C:/Users/Tatiana/Desktop/Research/Research_ML_WENO/PME_Test/Models_boxes/Model_6/"
     elif example == "Barenblatt_2d":
         base_path = "C:/Users/Tatiana/Desktop/Research/Research_ML_WENO/PME_Test/Models_2d/Model_6/"
     elif example == "gravity":
