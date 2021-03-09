@@ -33,7 +33,7 @@ def exact_loss_2d(u, u_ex):
     return loss
 
 # optimizer = optim.Adam(train_model.parameters(), lr=0.0001)   # Buckley-Leverett
-optimizer = optim.Adam(train_model.parameters(), lr=0.001, weight_decay=0.00001)  # PME boxes
+optimizer = optim.Adam(train_model.parameters(), lr=0.00001, weight_decay=0.00001)  # PME boxes
 # optimizer = optim.Adam(train_model.parameters(), lr=0.1, weight_decay=0.0001) # PME Barenblatt
 
 def validation_problems_barenblatt(j):
@@ -121,7 +121,7 @@ rng = 4
 
 phandler = ProblemHandler(problem_classes = current_problem_classes, max_num_open_problems=200)
 test_modulo=50
-for j in range(1000):
+for j in range(3000):
     loss_test = []
     problem_specs, problem_id = phandler.get_random_problem(0.1)
     problem = problem_specs["problem"]
@@ -143,8 +143,8 @@ for j in range(1000):
         loss = exact_loss_2d(u_new,u_exact)
     else:
         loss = exact_loss(u_new,u_exact)
-    # minibatch_size=25
-    # loss = loss/minibatch_size
+    minibatch_size=25
+    loss = loss/minibatch_size
     loss.backward()  # Backward pass
     # if j%minibatch_size == 0:
     #     print("optimizer_step")
@@ -155,9 +155,9 @@ for j in range(1000):
     if example == "Barenblatt":
         base_path = "C:/Users/Tatiana/Desktop/Research/Research_ML_WENO/PME_Test/Models/Model_50/"
     if example == "boxes":
-        base_path = "C:/Users/Tatiana/Desktop/Research/Research_ML_WENO/PME_Test/Models_boxes/Model_6/"
+        base_path = "C:/Users/Tatiana/Desktop/Research/Research_ML_WENO/PME_Test/Models_boxes/Model_9/"
     elif example == "Barenblatt_2d":
-        base_path = "C:/Users/Tatiana/Desktop/Research/Research_ML_WENO/PME_Test/Models_2d/Model_6/"
+        base_path = "C:/Users/Tatiana/Desktop/Research/Research_ML_WENO/PME_Test/Models_2d/Model_7/"
     elif example == "gravity":
         base_path = "C:/Users/Tatiana/Desktop/Research/Research_ML_WENO/Buckley_Leverett_CD_Test/Models/Model_14/"
     if not os.path.exists(base_path):
