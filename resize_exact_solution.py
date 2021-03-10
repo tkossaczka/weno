@@ -12,7 +12,7 @@ torch.set_default_dtype(torch.float64)
 problem = PME
 train_model = WENONetwork_2()
 
-for j in range(101):
+for j in range(174,378):
     df = pd.read_csv("C:/Users/Tatiana/Desktop/Research/Research_ML_WENO/PME_Test/PME_Data_1024/parameters.txt")
     u_ex = np.load("C:/Users/Tatiana/Desktop/Research/Research_ML_WENO/PME_Test/PME_Data_1024/u_exact_{}.npy".format(j))
     power = float(df[df.sample_id == j]["power"])
