@@ -2,11 +2,7 @@ from define_WENO_Network import WENONetwork
 import torch
 from torch import optim
 from define_problem_Digital import Digital_option
-from define_problem_heat_eq import heat_equation
-from define_problem_Call import Call_option
-from define_problem_Buckley_Leverett import Buckley_Leverett
-from define_problem_PME import PME
-import os, sys
+import os
 import numpy as np
 import matplotlib.pyplot as plt
 

@@ -1,13 +1,8 @@
 import torch
-import matplotlib.pyplot as plt
 import numpy as np
-from matplotlib import cm
-from mpl_toolkits.mplot3d import Axes3D
-from define_WENO_Network import WENONetwork
 from define_WENO_Euler import WENONetwork_Euler
 from define_Euler_system import Euler_system
-from mpl_toolkits.axes_grid1.inset_locator import mark_inset
-from mpl_toolkits.axes_grid1.inset_locator import inset_axes
+
 
 def monotonicity_loss(u):
     monotonicity = np.sum(np.abs(np.minimum(u[:-1]-u[1:], 0)))

@@ -1,9 +1,5 @@
 import torch
-import matplotlib.pyplot as plt
 import numpy as np
-from matplotlib import cm
-from mpl_toolkits.mplot3d import Axes3D
-from define_WENO_Network import WENONetwork
 from define_WENO_Euler import WENONetwork_Euler
 from define_Euler_system import Euler_system
 
@@ -191,9 +187,6 @@ pd.DataFrame(err_mat_ratios).to_latex()
 # plt.plot(x,p_nt_JS, x,p_nt, x,p_t,x,p_ex.detach().numpy())
 # plt.figure(3)
 # plt.plot(x,u_nt_JS, x,u_nt, x,u_t,x,u_ex.detach().numpy())
-
-from mpl_toolkits.axes_grid1.inset_locator import mark_inset
-from mpl_toolkits.axes_grid1.inset_locator import inset_axes
 
 # # SOD u
 # fig, ax = plt.subplots()

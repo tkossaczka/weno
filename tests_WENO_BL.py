@@ -1,11 +1,7 @@
 import torch
 import matplotlib.pyplot as plt
 import numpy as np
-import pandas as pd
-from matplotlib import cm
-from mpl_toolkits.mplot3d import Axes3D
-from define_WENO_Network_2 import WENONetwork_2
-from scipy.stats import norm
+from network.define_WENO_Network_2 import WENONetwork_2
 from define_problem_Buckley_Leverett import Buckley_Leverett
 
 torch.set_default_dtype(torch.float64)

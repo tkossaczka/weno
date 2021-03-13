@@ -1,4 +1,3 @@
-from define_WENO_Network import WENONetwork
 from define_WENO_Euler import WENONetwork_Euler
 import torch
 from torch import optim

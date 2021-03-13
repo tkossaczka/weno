@@ -1,13 +1,5 @@
 import torch
-from define_problem_Digital import Digital_option
-from define_WENO_Network import WENONetwork
 from define_problem_heat_eq import heat_equation
-from define_problem_Call import Call_option
-from define_problem_transport_eq import transport_equation
-from define_problem_PME import PME
-from define_problem_Call_GS import Call_option_GS
-from define_problem_Digital_GS import Digital_option_GS
-from define_problem_Buckley_Leverett import Buckley_Leverett
 
 with torch.no_grad():
     train_model = torch.load("C:/Users/Tatiana/Desktop/Research/Research_ML_WENO/PME_Test/Models/Model_41/690.pt")

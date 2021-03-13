@@ -1,10 +1,7 @@
 import torch
 import matplotlib.pyplot as plt
 import numpy as np
-from matplotlib import cm
-from mpl_toolkits.mplot3d import Axes3D
 from define_WENO_Network import WENONetwork
-from define_WENO_Euler import WENONetwork_Euler
 from define_Euler_system import Euler_system
 torch.set_default_dtype(torch.float64)
 

@@ -501,13 +501,6 @@ class WENONetwork(nn.Module):
         u_exact_adjusted = u_exact[0:space_steps_exact+1:divider_space,0:time_steps_exact+1:divider_time]
         return u_exact, u_exact_adjusted
 
-    def compute_error(self, u, u_ex):
-        u_last = u
-        u_ex_last = u_ex
-        err = torch.mean((u_ex_last - u_last)**2)
-        #err = torch.max(torch.abs(u_ex_last - u_last))
-        return err
-
     def order_compute(self, iterations, initial_space_steps, initial_time_steps, params, problem_class, trainable):
         problem = problem_class(space_steps=initial_space_steps, time_steps=initial_time_steps, params=params)
         vecerr = np.zeros((iterations))[:, None]

@@ -1,15 +1,8 @@
 import torch
 import matplotlib.pyplot as plt
 import numpy as np
-from matplotlib import cm
-from mpl_toolkits.mplot3d import Axes3D
 from define_problem_Digital import Digital_option
-from define_WENO_Network_2 import WENONetwork_2
 from scipy.stats import norm
-from define_problem_Call import Call_option
-from define_problem_Call_GS import Call_option_GS
-from define_problem_Digital_GS import Digital_option_GS
-from define_SFD2_Solver import SFD2_Solver
 
 torch.set_default_dtype(torch.float64)
 

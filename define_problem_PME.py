@@ -195,8 +195,6 @@ class PME():
             alpha = d / ((mm - 1) * d + 2)
             kk = (alpha * (mm - 1)) / (2 * mm * d)
             x = self.x
-            #kk = 1/(mm+1)
-            #u_ex = (1/T**kk) * (np.maximum(1-((kk*(mm-1))/(2*mm))*((np.abs(x)**2)/T**(2*kk)),0))**(1/(mm - 1))
             u_ex = (t**(-alpha))*(np.maximum(1-kk*((np.abs(x))**2)*t**(-2*alpha/d), 0)) ** (1/(mm-1))
         elif example == "Barenblatt_2d":
             m = self.space_steps

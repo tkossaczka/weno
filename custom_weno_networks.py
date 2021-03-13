@@ -1,6 +1,5 @@
 from define_WENO_Network import WENONetwork
 
-import torch
 from torch import nn
 
 class LargeWENONetwork(WENONetwork):

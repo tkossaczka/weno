@@ -1,15 +1,7 @@
 import torch
 import matplotlib.pyplot as plt
 import numpy as np
-import pandas as pd
-from matplotlib import cm
-from mpl_toolkits.mplot3d import Axes3D
-from define_problem_Digital import Digital_option
-from define_WENO_Network_2 import WENONetwork_2
-from scipy.stats import norm
-from define_problem_heat_eq import heat_equation
 from define_problem_PME import PME
-from initial_condition_generator import init_PME
 
 torch.set_default_dtype(torch.float64)
 

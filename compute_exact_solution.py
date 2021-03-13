@@ -1,12 +1,8 @@
 import torch
-import pandas as pd
 import numpy as np
-from define_WENO_Network_2 import WENONetwork_2
+from network.define_WENO_Network_2 import WENONetwork_2
 from define_problem_PME import PME
-from define_problem_Buckley_Leverett import Buckley_Leverett
-import random
-import os, sys, argparse
-import matplotlib.pyplot as plt
+import os, argparse
 
 torch.set_default_dtype(torch.float64)
 

@@ -2,7 +2,7 @@ import torch
 import matplotlib.pyplot as plt
 import numpy as np
 from define_problem_Digital import Digital_option
-from define_WENO_Network_2 import WENONetwork_2
+from network.define_WENO_Network_2 import WENONetwork_2
 
 train_model = WENONetwork_2()
 torch.set_default_dtype(torch.float64)

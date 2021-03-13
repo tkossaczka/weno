@@ -1,4 +1,3 @@
-from define_WENO_Network import WENONetwork
 from define_WENO_Euler import WENONetwork_Euler
 import torch
 from torch import optim
@@ -6,9 +5,7 @@ from define_Euler_system import Euler_system
 import numpy as np
 import matplotlib.pyplot as plt
 import torch.onnx
-import os, sys
-import random
-import pandas as pd
+import os
 
 torch.set_default_dtype(torch.float64)
 
