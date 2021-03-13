@@ -7,16 +7,16 @@ import pandas as pd
 class PME():
     def __init__(self, sample_id, example, space_steps, time_steps=None, params=None):
         if example == "boxes":
-            if sample_id == None: # FIXME toto mas naopak...
-                self.params = params
-                self.sample_id = sample_id
-            else: # FIXME ...s tymto!
-                self.sample_id = random.randint(0,373)
+            if sample_id != None:
+                self.sample_id = random.randint(0,373) #sample_id + 1
                 self.df = pd.read_csv("C:/Users/Tatiana/Desktop/Research/Research_ML_WENO/PME_Test/PME_Data_1024/parameters.txt")
                 self.u_ex = np.load("C:/Users/Tatiana/Desktop/Research/Research_ML_WENO/PME_Test/PME_Data_1024/u_exact64_{}.npy".format(self.sample_id))
                 self.u_ex = torch.Tensor(self.u_ex)
                 power = float(self.df[self.df.sample_id == self.sample_id]["power"])
                 self.params = {'T': 0.5, 'e': 1e-13, 'L': 6, 'power': power, 'd': 1}
+            else:
+                self.params = params
+                self.sample_id = sample_id
         elif example == "Barenblatt" or example == "boxes_2d" or example == "Barenblatt_2d":
             self.params = params
         self.example = example

@@ -33,9 +33,9 @@ def exact_loss_2d(u, u_ex):
     return loss
 
 # optimizer = optim.Adam(train_model.parameters(), lr=0.0001)   # Buckley-Leverett
-optimizer = optim.Adam(train_model.parameters(), lr=0.00001, weight_decay=0.00001)  # PME boxes
+optimizer = optim.Adam(train_model.parameters(), lr=0.001, weight_decay=0.00001)  # PME boxes
 # optimizer = optim.Adam(train_model.parameters(), lr=0.1, weight_decay=0.0001) # PME Barenblatt
-optimizer = optim.SGD(train_model.parameters(), lr=0.01, weight_decay=0.00001)
+#optimizer = optim.SGD(train_model.parameters(), lr=0.01, weight_decay=0.00001)
 
 def validation_problems_barenblatt(j):
     params_vld = []
@@ -100,7 +100,7 @@ problem_class = PME
 # example = "Barenblatt"
 # rng = 4
 
-current_problem_classes = [(PME, {"sample_id": 1, "example": "boxes", "space_steps": 64, "time_steps": None, "params": 0})]
+current_problem_classes = [(PME, {"sample_id": 0, "example": "boxes", "space_steps": 64, "time_steps": None, "params": 0})]
 example = "boxes"
 u_ex_0 = torch.load("C:/Users/Tatiana/Desktop/Research/Research_ML_WENO/PME_Test/PME_Data_1024/Basic_test_set/u_ex_0")
 u_ex_1 = torch.load("C:/Users/Tatiana/Desktop/Research/Research_ML_WENO/PME_Test/PME_Data_1024/Basic_test_set/u_ex_1")
@@ -126,7 +126,7 @@ for j in range(2000):
     loss_test = []
     problem_specs, problem_id = phandler.get_random_problem(0.1)
     problem = problem_specs["problem"]
-    # print(problem.sample_id)
+    #print(problem.sample_id)
     params = problem.params
     step = problem_specs["step"]
     u_last = problem_specs["last_solution"]
@@ -156,7 +156,7 @@ for j in range(2000):
     if example == "Barenblatt":
         base_path = "C:/Users/Tatiana/Desktop/Research/Research_ML_WENO/PME_Test/Models/Model_50/"
     if example == "boxes":
-        base_path = "C:/Users/Tatiana/Desktop/Research/Research_ML_WENO/PME_Test/Models_boxes/Model_10/"
+        base_path = "C:/Users/Tatiana/Desktop/Research/Research_ML_WENO/PME_Test/Models_boxes/Model_11/"
     elif example == "Barenblatt_2d":
         base_path = "C:/Users/Tatiana/Desktop/Research/Research_ML_WENO/PME_Test/Models_2d/Model_7/"
     elif example == "gravity":
