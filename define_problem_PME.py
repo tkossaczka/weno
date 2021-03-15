@@ -8,7 +8,7 @@ class PME():
     def __init__(self, sample_id, example, space_steps, time_steps=None, params=None):
         if example == "boxes":
             if sample_id != None:
-                self.sample_id = random.randint(0,373) #sample_id + 1
+                self.sample_id = random.randint(0,367) #sample_id + 1
                 self.df = pd.read_csv("C:/Users/Tatiana/Desktop/Research/Research_ML_WENO/PME_Test/PME_Data_1024/parameters.txt")
                 self.u_ex = np.load("C:/Users/Tatiana/Desktop/Research/Research_ML_WENO/PME_Test/PME_Data_1024/u_exact64_{}.npy".format(self.sample_id))
                 self.u_ex = torch.Tensor(self.u_ex)
