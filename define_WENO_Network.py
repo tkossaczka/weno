@@ -222,6 +222,7 @@ class WENONetwork(nn.Module):
             dif12 = torch.stack([dif, dif2])
             dif12 = self.prepare_dif(dif12)
             beta_multiplicators = self.inner_nn_weno6(dif12)[0, 0, :] + self.weno6_mult_bias
+            # beta_multiplicators = beta_multiplicators**2
             # beta_multiplicators_left = beta_multiplicators[:-1]
             # beta_multiplicators_right = beta_multiplicators[1:]
 
