@@ -14,8 +14,8 @@ from initial_condition_generator import init_PME
 torch.set_default_dtype(torch.float64)
 
 #train_model = WENONetwork_2()
-train_model = torch.load("C:/Users/Tatiana/Desktop/Research/Research_ML_WENO/PME_Test/Models/Model_41/690.pt") #45/500 #46/650 # 47/999 # 41/690 for boxes
-# train_model = torch.load("C:/Users/Tatiana/Desktop/Research/Research_ML_WENO/PME_Test/Models_boxes/Model_14/1700.pt") #45/500 #46/650 # 47/999 # 41/690 for boxes
+# train_model = torch.load("C:/Users/Tatiana/Desktop/Research/Research_ML_WENO/PME_Test/Models/Model_41/690.pt") #45/500 #46/650 # 47/999 # 41/690 for boxes
+train_model = torch.load("C:/Users/Tatiana/Desktop/Research/Research_ML_WENO/PME_Test/Models_boxes/Model_18/1600.pt") #45/500 #46/650 # 47/999 # 41/690 for boxes
 
 # def validation_problems(j):
 #     params_vld = []
@@ -41,7 +41,8 @@ u_ex_1 = torch.load("C:/Users/Tatiana/Desktop/Research/Research_ML_WENO/PME_Test
 u_ex_2 = torch.load("C:/Users/Tatiana/Desktop/Research/Research_ML_WENO/PME_Test/PME_Data_1024/Basic_test_set/u_ex_2")
 u_ex_3 = torch.load("C:/Users/Tatiana/Desktop/Research/Research_ML_WENO/PME_Test/PME_Data_1024/Basic_test_set/u_ex_3")
 u_ex_4 = torch.load("C:/Users/Tatiana/Desktop/Research/Research_ML_WENO/PME_Test/PME_Data_1024/Basic_test_set/u_ex_4")
-u_exs = [u_ex_0[0:1024 + 1:16, :], u_ex_1[0:1024 + 1:16, :], u_ex_2[0:1024 + 1:16, :], u_ex_3[0:1024 + 1:16, :], u_ex_4[0:1024 + 1:16, :]]
+# u_exs = [u_ex_0[0:1024 + 1:16, :], u_ex_1[0:1024 + 1:16, :], u_ex_2[0:1024 + 1:16, :], u_ex_3[0:1024 + 1:16, :], u_ex_4[0:1024 + 1:16, :]]
+u_exs = [u_ex_0[0:1024 + 1:8, :], u_ex_1[0:1024 + 1:8, :], u_ex_2[0:1024 + 1:8, :], u_ex_3[0:1024 + 1:8, :], u_ex_4[0:1024 + 1:8, :]]
 
 # df=pd.read_csv("C:/Users/Tatiana/Desktop/Research/Research_ML_WENO/PME_Test/PME_Data_1024/Test_set/parameters.txt")
 # def validation_problems_boxes(j):
@@ -72,7 +73,7 @@ for j in range(rng):
         problem_main = problem(sample_id = None, example=example, space_steps=64, time_steps=None, params=params)
     else:
         params = validation_problems_boxes(j)
-        problem_main = problem(sample_id = None, example=example, space_steps=64, time_steps=None, params=params)
+        problem_main = problem(sample_id = None, example=example, space_steps=128, time_steps=None, params=params)
     # params = {'T': 2, 'e': 1e-13, 'L': 6, 'power': 8, 'd': 1}
     # problem_main = problem(example=example, space_steps=64, time_steps=None, params = params)
     params = problem_main.get_params()

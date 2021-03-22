@@ -22,7 +22,7 @@ def monotonicity_loss(u):
 
 def exact_loss(u, u_ex):
     error = train_model.compute_error(u, u_ex)
-    loss = 10e1*error # PME boxes
+    loss = 10e3*error # PME boxes
     # loss = 10e4*error # PME Barenblatt
     # loss = error
     return loss
@@ -101,7 +101,7 @@ problem_class = PME
 # example = "Barenblatt"
 # rng = 4
 
-current_problem_classes = [(PME, {"sample_id": 0, "example": "boxes", "space_steps": 64, "time_steps": None, "params": 0})]
+current_problem_classes = [(PME, {"sample_id": 0, "example": "boxes", "space_steps": 128, "time_steps": None, "params": 0})]
 example = "boxes"
 u_ex_0 = torch.load("C:/Users/Tatiana/Desktop/Research/Research_ML_WENO/PME_Test/PME_Data_1024/Basic_test_set/u_ex_0")
 u_ex_1 = torch.load("C:/Users/Tatiana/Desktop/Research/Research_ML_WENO/PME_Test/PME_Data_1024/Basic_test_set/u_ex_1")
@@ -109,7 +109,7 @@ u_ex_2 = torch.load("C:/Users/Tatiana/Desktop/Research/Research_ML_WENO/PME_Test
 u_ex_3 = torch.load("C:/Users/Tatiana/Desktop/Research/Research_ML_WENO/PME_Test/PME_Data_1024/Basic_test_set/u_ex_3")
 u_ex_4 = torch.load("C:/Users/Tatiana/Desktop/Research/Research_ML_WENO/PME_Test/PME_Data_1024/Basic_test_set/u_ex_4")
 u_exs = [u_ex_0, u_ex_1, u_ex_2, u_ex_3, u_ex_4]
-rng = 5
+rng = 4
 
 # problem_class = Buckley_Leverett
 # current_problem_classes = [(Buckley_Leverett, {"sample_id": 1, "example": "gravity", "space_steps": 64, "time_steps": None, "params": 0})]
@@ -123,7 +123,7 @@ rng = 5
 # u_exs = [u_ex_0, u_ex_1, u_ex_2, u_ex_3, u_ex_4]
 
 phandler = ProblemHandler(problem_classes = current_problem_classes, max_num_open_problems=300)
-test_modulo=25
+test_modulo=100
 for j in range(2000):
     loss_test = []
     problem_specs, problem_id = phandler.get_random_problem(0.1)
@@ -155,18 +155,19 @@ for j in range(2000):
         # optimizer.zero_grad()
     u_new.detach_()
     phandler.update_problem(problem_id, u_new)
-    if example == "Barenblatt":
-        base_path = "C:/Users/Tatiana/Desktop/Research/Research_ML_WENO/PME_Test/Models/Model_50/"
-    if example == "boxes":
-        base_path = "C:/Users/Tatiana/Desktop/Research/Research_ML_WENO/PME_Test/Models_boxes/Model_16/"
-    elif example == "Barenblatt_2d":
-        base_path = "C:/Users/Tatiana/Desktop/Research/Research_ML_WENO/PME_Test/Models_2d/Model_7/"
-    elif example == "gravity":
-        base_path = "C:/Users/Tatiana/Desktop/Research/Research_ML_WENO/Buckley_Leverett_CD_Test/Models/Model_14/"
-    if not os.path.exists(base_path):
-        os.mkdir(base_path)
-    path = os.path.join(base_path, "{}.pt".format(j))
-    torch.save(train_model, path)
+    if not (j % test_modulo):
+        if example == "Barenblatt":
+            base_path = "C:/Users/Tatiana/Desktop/Research/Research_ML_WENO/PME_Test/Models/Model_50/"
+        if example == "boxes":
+            base_path = "C:/Users/Tatiana/Desktop/Research/Research_ML_WENO/PME_Test/Models_boxes/Model_14/"
+        elif example == "Barenblatt_2d":
+            base_path = "C:/Users/Tatiana/Desktop/Research/Research_ML_WENO/PME_Test/Models_2d/Model_7/"
+        elif example == "gravity":
+            base_path = "C:/Users/Tatiana/Desktop/Research/Research_ML_WENO/Buckley_Leverett_CD_Test/Models/Model_14/"
+        if not os.path.exists(base_path):
+            os.mkdir(base_path)
+        path = os.path.join(base_path, "{}.pt".format(j))
+        torch.save(train_model, path)
     # TEST IF LOSS IS DECREASING WITH THE NUMBER OF ITERATIONS INCREASING
     if not (j % test_modulo):
         print("TESTING ON VALIDATION PROBLEMS")
@@ -180,7 +181,7 @@ for j in range(2000):
                 problem_test = problem_class(sample_id=None, example="Barenblatt_2d", space_steps=32, time_steps=None, params=params_test)
             elif example == "boxes":
                 params_test = validation_problems_boxes(kk)
-                problem_test = problem_class(sample_id=None, example="boxes", space_steps=64, time_steps=None, params=params_test)
+                problem_test = problem_class(sample_id=None, example="boxes", space_steps=128, time_steps=None, params=params_test)
             elif example == "gravity":
                 params_test = validation_problems_BL(kk)
                 problem_test = problem_class(sample_id=None, example="gravity", space_steps=64, time_steps=None, params=params_test)
@@ -202,7 +203,7 @@ for j in range(2000):
                 u_exact_test = torch.Tensor(u_exact_test)
                 single_problem_loss_test.append(exact_loss(u_test, u_exact_test))
             elif example == "boxes":
-                single_problem_loss_test.append(exact_loss(u_test, u_exs[kk][0:1024 + 1:16, -1]))
+                single_problem_loss_test.append(exact_loss(u_test, u_exs[kk][0:1024 + 1:8, -1]))
             elif example == "gravity":
                 single_problem_loss_test.append(exact_loss(u_test, u_exs[kk][:, -1]))
             elif example == "Barenblatt_2d":
