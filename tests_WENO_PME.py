@@ -41,8 +41,7 @@ u_ex_1 = torch.load("C:/Users/Tatiana/Desktop/Research/Research_ML_WENO/PME_Test
 u_ex_2 = torch.load("C:/Users/Tatiana/Desktop/Research/Research_ML_WENO/PME_Test/PME_Data_1024/Basic_test_set/u_ex_2")
 u_ex_3 = torch.load("C:/Users/Tatiana/Desktop/Research/Research_ML_WENO/PME_Test/PME_Data_1024/Basic_test_set/u_ex_3")
 u_ex_4 = torch.load("C:/Users/Tatiana/Desktop/Research/Research_ML_WENO/PME_Test/PME_Data_1024/Basic_test_set/u_ex_4")
-# u_exs = [u_ex_0[0:1024 + 1:16, :], u_ex_1[0:1024 + 1:16, :], u_ex_2[0:1024 + 1:16, :], u_ex_3[0:1024 + 1:16, :], u_ex_4[0:1024 + 1:16, :]]
-u_exs = [u_ex_0[0:1024 + 1:8, :], u_ex_1[0:1024 + 1:8, :], u_ex_2[0:1024 + 1:8, :], u_ex_3[0:1024 + 1:8, :], u_ex_4[0:1024 + 1:8, :]]
+u_exs = [u_ex_0[0:1024 + 1:16, :], u_ex_1[0:1024 + 1:16, :], u_ex_2[0:1024 + 1:16, :], u_ex_3[0:1024 + 1:16, :], u_ex_4[0:1024 + 1:16, :]]
 
 # df=pd.read_csv("C:/Users/Tatiana/Desktop/Research/Research_ML_WENO/PME_Test/PME_Data_1024/Test_set/parameters.txt")
 # def validation_problems_boxes(j):
@@ -73,7 +72,7 @@ for j in range(rng):
         problem_main = problem(sample_id = None, example=example, space_steps=64, time_steps=None, params=params)
     else:
         params = validation_problems_boxes(j)
-        problem_main = problem(sample_id = None, example=example, space_steps=128, time_steps=None, params=params)
+        problem_main = problem(sample_id = None, example=example, space_steps=64, time_steps=None, params=params)
     # params = {'T': 2, 'e': 1e-13, 'L': 6, 'power': 8, 'd': 1}
     # problem_main = problem(example=example, space_steps=64, time_steps=None, params = params)
     params = problem_main.get_params()

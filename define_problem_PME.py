@@ -8,11 +8,13 @@ class PME():
     def __init__(self, sample_id, example, space_steps, time_steps=None, params=None):
         if example == "boxes":
             if sample_id != None:
-                self.sample_id = random.randint(0,367) #sample_id + 1
-                self.df = pd.read_csv("C:/Users/Tatiana/Desktop/Research/Research_ML_WENO/PME_Test/PME_Data_1024/parameters.txt")
-                self.u_ex = np.load("C:/Users/Tatiana/Desktop/Research/Research_ML_WENO/PME_Test/PME_Data_1024/u_exact128_{}.npy".format(self.sample_id))
-                self.u_ex = torch.Tensor(self.u_ex)
+                self.df = pd.read_csv("C:/Users/Tatiana/Desktop/Research/Research_ML_WENO/PME_Test/PME_Data_1024/Basic_test_set/parameters.txt")
+                self.df_short = self.df[self.df["power"]<3]
+                self.sample_id = 0 #int(random.choice(np.array(self.df_short)[:,0]))
                 power = float(self.df[self.df.sample_id == self.sample_id]["power"])
+                self.u_ex = np.load("C:/Users/Tatiana/Desktop/Research/Research_ML_WENO/PME_Test/PME_Data_1024/Basic_test_set/u_exact64_{}.npy".format(self.sample_id))
+                self.u_ex = torch.Tensor(self.u_ex)
+                self.power = float(self.df[self.df.sample_id == self.sample_id]["power"])
                 self.params = {'T': 0.5, 'e': 1e-13, 'L': 6, 'power': power, 'd': 1}
             else:
                 self.params = params

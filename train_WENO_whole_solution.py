@@ -19,7 +19,7 @@ train_model = WENONetwork_2()
 # DROP PROBLEM FOR TRAINING
 #params = None
 # problem_class = Buckley_Leverett
-problem_class = Digital_option
+# problem_class = Digital_option
 problem_class = PME
 
 def monotonicity_loss(u):
@@ -33,8 +33,8 @@ def exact_loss(u, u_ex):
     return loss
 
 #optimizer = optim.SGD(train_model.parameters(), lr=0.1)
-optimizer = optim.Adam(train_model.parameters(), lr=0.001)
-# optimizer = optim.Adam(train_model.parameters(), lr=0.0001, weight_decay=0.0001)
+#optimizer = optim.Adam(train_model.parameters(), lr=0.001)
+optimizer = optim.Adam(train_model.parameters(), lr=0.0001, weight_decay=0.00001)
 
 def validation_problems_digital(j):
     params_vld = []
@@ -82,7 +82,7 @@ if problem_class == PME:
     u_ex_3 = torch.load("C:/Users/Tatiana/Desktop/Research/Research_ML_WENO/PME_Test/PME_Data_1024/Basic_test_set/u_ex_3")
     u_ex_4 = torch.load("C:/Users/Tatiana/Desktop/Research/Research_ML_WENO/PME_Test/PME_Data_1024/Basic_test_set/u_ex_4")
     u_exs = [u_ex_0, u_ex_1, u_ex_2, u_ex_3, u_ex_4]
-    rng = 5
+    rng = 1
 
 all_loss_test = []
 save_id = 0
@@ -94,15 +94,15 @@ for j in range(100):
         params = None
         problem_main = problem_class(space_steps=64, time_steps=None, params=params)
         u_init, nn = train_model.init_run_weno(problem_main, vectorized=True, just_one_time_step=True)
-        # parameters needed for the computation of exact solution
-        params_main = problem_main.params
-        rate = params_main['rate']
-        sigma = params_main['sigma']
-        T = params_main['T']
-        E = params_main['E']
-        x, time = problem_main.x, problem_main.time
-        tt = T - time
-        S = E * np.exp(x)
+        # # parameters needed for the computation of exact solution
+        # params_main = problem_main.params
+        # rate = params_main['rate']
+        # sigma = params_main['sigma']
+        # T = params_main['T']
+        # E = params_main['E']
+        # x, time = problem_main.x, problem_main.time
+        # tt = T - time
+        # S = E * np.exp(x)
     elif problem_class == Buckley_Leverett:
         params = 0
         problem_main = problem_class(sample_id=j, example = "gravity", space_steps = 64, time_steps = None, params = params)
@@ -142,7 +142,7 @@ for j in range(100):
     elif problem_class == Buckley_Leverett:
         base_path = "C:/Users/Tatiana/Desktop/Research/Research_ML_WENO/Buckley_Leverett_CD_Test/Models/Model_5/"
     elif problem_class == PME:
-        base_path = "C:/Users/Tatiana/Desktop/Research/Research_ML_WENO/PME_Test/Models_boxes/Model_13/"
+        base_path = "C:/Users/Tatiana/Desktop/Research/Research_ML_WENO/PME_Test/Models_boxes/Model_15/"
     if not os.path.exists(base_path):
         os.mkdir(base_path)
     path = os.path.join(base_path, "{}.pt".format(save_id))
