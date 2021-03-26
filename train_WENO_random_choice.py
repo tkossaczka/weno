@@ -33,9 +33,11 @@ def exact_loss_2d(u, u_ex):
     return loss
 
 # optimizer = optim.Adam(train_model.parameters(), lr=0.0001)   # Buckley-Leverett
-optimizer = optim.Adam(train_model.parameters(), lr=0.0001, weight_decay=0.00001)  # PME boxes
+optimizer = optim.Adam(train_model.parameters(), lr=0.001, weight_decay=0.00001)  # PME boxes
+#oprimizer = optim.Adagrad(train_model.parameters(), lr=0.01, lr_decay=0.2, weight_decay=0.00001)
 # optimizer = optim.Adam(train_model.parameters(), lr=0.1, weight_decay=0.0001) # PME Barenblatt
 #optimizer = optim.SGD(train_model.parameters(), lr=0.01, weight_decay=0.00001)
+bound = 1.15
 
 def validation_problems_barenblatt(j):
     params_vld = []
@@ -109,7 +111,7 @@ u_ex_2 = torch.load("C:/Users/Tatiana/Desktop/Research/Research_ML_WENO/PME_Test
 u_ex_3 = torch.load("C:/Users/Tatiana/Desktop/Research/Research_ML_WENO/PME_Test/PME_Data_1024/Basic_test_set/u_ex_3")
 u_ex_4 = torch.load("C:/Users/Tatiana/Desktop/Research/Research_ML_WENO/PME_Test/PME_Data_1024/Basic_test_set/u_ex_4")
 u_exs = [u_ex_0, u_ex_1, u_ex_2, u_ex_3, u_ex_4]
-rng = 1
+rng = 4
 
 # problem_class = Buckley_Leverett
 # current_problem_classes = [(Buckley_Leverett, {"sample_id": 1, "example": "gravity", "space_steps": 64, "time_steps": None, "params": 0})]
@@ -122,9 +124,9 @@ rng = 1
 # u_ex_4 = torch.load("C:/Users/Tatiana/Desktop/Research/Research_ML_WENO/Buckley_Leverett_CD_Test/Buckley_Leverett_CD_Data_1024/Basic_test_set_{}/u_ex64_4".format(folder))
 # u_exs = [u_ex_0, u_ex_1, u_ex_2, u_ex_3, u_ex_4]
 
-phandler = ProblemHandler(problem_classes = current_problem_classes, max_num_open_problems=5)
-test_modulo=2
-for j in range(400):
+phandler = ProblemHandler(problem_classes = current_problem_classes, max_num_open_problems=20)
+test_modulo=8
+for j in range(1000):
     loss_test = []
     problem_specs, problem_id = phandler.get_random_problem(0.1)
     problem = problem_specs["problem"]
@@ -159,7 +161,7 @@ for j in range(400):
         if example == "Barenblatt":
             base_path = "C:/Users/Tatiana/Desktop/Research/Research_ML_WENO/PME_Test/Models/Model_50/"
         if example == "boxes":
-            base_path = "C:/Users/Tatiana/Desktop/Research/Research_ML_WENO/PME_Test/Models_boxes/Model_15/"
+            base_path = "C:/Users/Tatiana/Desktop/Research/Research_ML_WENO/PME_Test/Models_boxes/Model_18/"
         elif example == "Barenblatt_2d":
             base_path = "C:/Users/Tatiana/Desktop/Research/Research_ML_WENO/PME_Test/Models_2d/Model_7/"
         elif example == "gravity":
@@ -215,6 +217,10 @@ for j in range(400):
             loss_test.append(single_problem_loss_test)
         print(loss_test)
         all_loss_test.append(loss_test)
+        if np.max(np.array(all_loss_test)[:, :, 0][0,:] / np.array(all_loss_test)[:, :, 0][-1,:]) > bound:
+            print("lr will be updated")
+            optimizer.defaults['lr'] = optimizer.defaults['lr'] * 0.5
+            bound = bound+0.05
 
 # print("number of parameters:", sum(p.numel() for p in train_model.parameters()))
 # g=train_model.parameters()
