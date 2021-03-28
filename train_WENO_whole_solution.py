@@ -21,6 +21,9 @@ train_model = WENONetwork_2()
 # problem_class = Buckley_Leverett
 # problem_class = Digital_option
 problem_class = PME
+# example = "boxes"
+example = "Barenblatt"
+rng = 4
 
 def monotonicity_loss(u):
     monotonicity = torch.sum(torch.max(u[:-1]-u[1:], torch.Tensor([0.0])))
@@ -29,12 +32,22 @@ def monotonicity_loss(u):
 
 def exact_loss(u, u_ex):
     error = train_model.compute_error(u, u_ex)
-    loss = error
+    # loss = error
+    loss = 10e4*error # PME Barenblatt
     return loss
 
 #optimizer = optim.SGD(train_model.parameters(), lr=0.1)
 #optimizer = optim.Adam(train_model.parameters(), lr=0.001)
-optimizer = optim.Adam(train_model.parameters(), lr=0.0001, weight_decay=0.00001)
+# optimizer = optim.Adam(train_model.parameters(), lr=0.0001, weight_decay=0.00001)
+optimizer = optim.Adam(train_model.parameters(), lr=0.1, weight_decay=0.0001) # PME Barenblatt
+
+def validation_problems_barenblatt(j):
+    params_vld = []
+    params_vld.append({'T': 2, 'e': 1e-13, 'L': 6, 'power': 2, 'd': 1})
+    params_vld.append({'T': 2, 'e': 1e-13, 'L': 6, 'power': 3, 'd': 1})
+    params_vld.append({'T': 2, 'e': 1e-13, 'L': 6, 'power': 4, 'd': 1})
+    params_vld.append({'T': 2, 'e': 1e-13, 'L': 6, 'power': 5, 'd': 1})
+    return params_vld[j]
 
 def validation_problems_digital(j):
     params_vld = []
@@ -74,20 +87,19 @@ if problem_class == Buckley_Leverett:
     u_exs = [u_ex_0, u_ex_1, u_ex_2, u_ex_3, u_ex_4]
     rng = 5
 
-if problem_class == PME:
-    example = "boxes"
+if problem_class == PME and example == "boxes":
     u_ex_0 = torch.load("C:/Users/Tatiana/Desktop/Research/Research_ML_WENO/PME_Test/PME_Data_1024/Basic_test_set/u_ex_0")
     u_ex_1 = torch.load("C:/Users/Tatiana/Desktop/Research/Research_ML_WENO/PME_Test/PME_Data_1024/Basic_test_set/u_ex_1")
     u_ex_2 = torch.load("C:/Users/Tatiana/Desktop/Research/Research_ML_WENO/PME_Test/PME_Data_1024/Basic_test_set/u_ex_2")
     u_ex_3 = torch.load("C:/Users/Tatiana/Desktop/Research/Research_ML_WENO/PME_Test/PME_Data_1024/Basic_test_set/u_ex_3")
     u_ex_4 = torch.load("C:/Users/Tatiana/Desktop/Research/Research_ML_WENO/PME_Test/PME_Data_1024/Basic_test_set/u_ex_4")
     u_exs = [u_ex_0, u_ex_1, u_ex_2, u_ex_3, u_ex_4]
-    rng = 1
+    rng = 4
 
 all_loss_test = []
 save_id = 0
 
-for j in range(100):
+for j in range(20):
     loss_test = []
     # Forward path
     if problem_class == Digital_option:
@@ -108,8 +120,11 @@ for j in range(100):
         problem_main = problem_class(sample_id=j, example = "gravity", space_steps = 64, time_steps = None, params = params)
         u_init, nn = train_model.init_run_weno(problem_main, vectorized=True, just_one_time_step=False)
     elif problem_class == PME:
-        params = 0
-        problem_main = problem_class(sample_id=0, example="boxes", space_steps=64, time_steps=None, params=params)
+        if example == "boxes":
+            params = 0
+        elif example == "Barenblatt":
+            params = None
+        problem_main = problem_class(sample_id=0, example = example, space_steps=64, time_steps=None, params=params)
         u_init, nn = train_model.init_run_weno(problem_main, vectorized=True, just_one_time_step=False)
     u_train = u_init
     print(problem_main.params)
@@ -129,8 +144,12 @@ for j in range(100):
             exact = problem_main.exact(k + 1)
             ex_loss = exact_loss(V_train,exact)
             loss = ex_loss
-        elif problem_class == PME:
+        elif problem_class == PME and example == "boxes":
             exact = problem_main.exact(k + 1)
+            ex_loss = exact_loss(V_train, exact)
+            loss = ex_loss
+        elif problem_class == PME and example == "Barenblatt":
+            exact = torch.Tensor(problem_main.exact(problem_main.time[k + 1]))
             ex_loss = exact_loss(V_train, exact)
             loss = ex_loss
         loss.backward()  # Backward pass
@@ -141,8 +160,10 @@ for j in range(100):
         base_path ="C:/Users/Tatiana/Desktop/Research/Research_ML_WENO/Digital_Option_Test/Models/Model_17/"
     elif problem_class == Buckley_Leverett:
         base_path = "C:/Users/Tatiana/Desktop/Research/Research_ML_WENO/Buckley_Leverett_CD_Test/Models/Model_5/"
-    elif problem_class == PME:
+    elif problem_class == PME and example == "boxes":
         base_path = "C:/Users/Tatiana/Desktop/Research/Research_ML_WENO/PME_Test/Models_boxes/Model_15/"
+    elif problem_class == PME and example == "Barenblatt":
+        base_path = "C:/Users/Tatiana/Desktop/Research/Research_ML_WENO/PME_Test/Models/Model_51/"
     if not os.path.exists(base_path):
         os.mkdir(base_path)
     path = os.path.join(base_path, "{}.pt".format(save_id))
@@ -156,9 +177,12 @@ for j in range(100):
         elif problem_class == Buckley_Leverett:
             params_test = validation_problems_BL(kk)
             problem_test = problem_class(sample_id=None, example="gravity", space_steps=64, time_steps=None, params=params_test)
-        elif problem_class == PME:
+        elif problem_class == PME and example == "boxes":
             params_test = validation_problems_boxes(kk)
             problem_test = problem_class(sample_id=None, example="boxes", space_steps=64, time_steps=None, params=params_test)
+        elif problem_class == PME and example == "Barenblatt":
+            params_test = validation_problems_barenblatt(kk)
+            problem_test = problem_class(sample_id=None, example="Barenblatt", space_steps=64, time_steps=None, params=params_test)
         with torch.no_grad():
             if problem_class == Digital_option:
                 u_init, nn = train_model.init_run_weno(problem_test, vectorized=True, just_one_time_step=True)
@@ -173,9 +197,15 @@ for j in range(100):
             elif problem_class == Buckley_Leverett:
                 u_ex = u_exs[kk][:, -1]
                 single_problem_loss_test.append(exact_loss(V_test,u_ex))
-            elif problem_class == PME:
+            elif problem_class == PME and example == "boxes":
                 u_ex = u_exs[kk][0:1024 + 1:16, -1]
                 single_problem_loss_test.append(exact_loss(V_test, u_ex))
+            elif problem_class == PME and example == "Barenblatt":
+                T_test = problem_test.params['T']
+                power_test = problem_test.params['power']
+                u_exact_test = problem_test.exact(T_test)
+                u_exact_test = torch.Tensor(u_exact_test)
+                single_problem_loss_test.append(exact_loss(u_test, u_exact_test))
         loss_test.append(single_problem_loss_test)
     all_loss_test.append(loss_test)
     save_id = save_id + 1

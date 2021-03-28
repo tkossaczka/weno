@@ -22,8 +22,8 @@ def monotonicity_loss(u):
 
 def exact_loss(u, u_ex):
     error = train_model.compute_error(u, u_ex)
-    loss = 10e1*error # PME boxes
-    # loss = 10e4*error # PME Barenblatt
+    # loss = 10e1*error # PME boxes
+    loss = 10e4*error # PME Barenblatt
     # loss = error
     return loss
 
@@ -33,9 +33,9 @@ def exact_loss_2d(u, u_ex):
     return loss
 
 # optimizer = optim.Adam(train_model.parameters(), lr=0.0001)   # Buckley-Leverett
-optimizer = optim.Adam(train_model.parameters(), lr=0.001, weight_decay=0.00001)  # PME boxes
+# optimizer = optim.Adam(train_model.parameters(), lr=0.001, weight_decay=0.00001)  # PME boxes
 #oprimizer = optim.Adagrad(train_model.parameters(), lr=0.01, lr_decay=0.2, weight_decay=0.00001)
-# optimizer = optim.Adam(train_model.parameters(), lr=0.1, weight_decay=0.0001) # PME Barenblatt
+optimizer = optim.Adam(train_model.parameters(), lr=0.1, weight_decay=0.0001) # PME Barenblatt
 #optimizer = optim.SGD(train_model.parameters(), lr=0.01, weight_decay=0.00001)
 bound = 1.15
 
@@ -45,6 +45,9 @@ def validation_problems_barenblatt(j):
     params_vld.append({'T': 2, 'e': 1e-13, 'L': 6, 'power': 3, 'd': 1})
     params_vld.append({'T': 2, 'e': 1e-13, 'L': 6, 'power': 4, 'd': 1})
     params_vld.append({'T': 2, 'e': 1e-13, 'L': 6, 'power': 5, 'd': 1})
+    params_vld.append({'T': 2, 'e': 1e-13, 'L': 6, 'power': 6, 'd': 1})
+    params_vld.append({'T': 2, 'e': 1e-13, 'L': 6, 'power': 7, 'd': 1})
+    params_vld.append({'T': 2, 'e': 1e-13, 'L': 6, 'power': 8, 'd': 1})
     return params_vld[j]
 
 def validation_problems_barenblatt_2d(j):
@@ -99,19 +102,19 @@ problem_class = PME
 # example = "Barenblatt_2d"
 # rng = 4
 
-# current_problem_classes = [(PME, {"sample_id": None, "example": "Barenblatt", "space_steps": 64, "time_steps": None, "params": None})]
-# example = "Barenblatt"
-# rng = 4
+current_problem_classes = [(PME, {"sample_id": None, "example": "Barenblatt", "space_steps": 64, "time_steps": None, "params": None})]
+example = "Barenblatt"
+rng = 7
 
-current_problem_classes = [(PME, {"sample_id": 0, "example": "boxes", "space_steps": 64, "time_steps": None, "params": 0})]
-example = "boxes"
-u_ex_0 = torch.load("C:/Users/Tatiana/Desktop/Research/Research_ML_WENO/PME_Test/PME_Data_1024/Basic_test_set/u_ex_0")
-u_ex_1 = torch.load("C:/Users/Tatiana/Desktop/Research/Research_ML_WENO/PME_Test/PME_Data_1024/Basic_test_set/u_ex_1")
-u_ex_2 = torch.load("C:/Users/Tatiana/Desktop/Research/Research_ML_WENO/PME_Test/PME_Data_1024/Basic_test_set/u_ex_2")
-u_ex_3 = torch.load("C:/Users/Tatiana/Desktop/Research/Research_ML_WENO/PME_Test/PME_Data_1024/Basic_test_set/u_ex_3")
-u_ex_4 = torch.load("C:/Users/Tatiana/Desktop/Research/Research_ML_WENO/PME_Test/PME_Data_1024/Basic_test_set/u_ex_4")
-u_exs = [u_ex_0, u_ex_1, u_ex_2, u_ex_3, u_ex_4]
-rng = 4
+# current_problem_classes = [(PME, {"sample_id": 0, "example": "boxes", "space_steps": 64, "time_steps": None, "params": 0})]
+# example = "boxes"
+# u_ex_0 = torch.load("C:/Users/Tatiana/Desktop/Research/Research_ML_WENO/PME_Test/PME_Data_1024/Basic_test_set/u_ex_0")
+# u_ex_1 = torch.load("C:/Users/Tatiana/Desktop/Research/Research_ML_WENO/PME_Test/PME_Data_1024/Basic_test_set/u_ex_1")
+# u_ex_2 = torch.load("C:/Users/Tatiana/Desktop/Research/Research_ML_WENO/PME_Test/PME_Data_1024/Basic_test_set/u_ex_2")
+# u_ex_3 = torch.load("C:/Users/Tatiana/Desktop/Research/Research_ML_WENO/PME_Test/PME_Data_1024/Basic_test_set/u_ex_3")
+# u_ex_4 = torch.load("C:/Users/Tatiana/Desktop/Research/Research_ML_WENO/PME_Test/PME_Data_1024/Basic_test_set/u_ex_4")
+# u_exs = [u_ex_0, u_ex_1, u_ex_2, u_ex_3, u_ex_4]
+# rng = 4
 
 # problem_class = Buckley_Leverett
 # current_problem_classes = [(Buckley_Leverett, {"sample_id": 1, "example": "gravity", "space_steps": 64, "time_steps": None, "params": 0})]
@@ -124,8 +127,8 @@ rng = 4
 # u_ex_4 = torch.load("C:/Users/Tatiana/Desktop/Research/Research_ML_WENO/Buckley_Leverett_CD_Test/Buckley_Leverett_CD_Data_1024/Basic_test_set_{}/u_ex64_4".format(folder))
 # u_exs = [u_ex_0, u_ex_1, u_ex_2, u_ex_3, u_ex_4]
 
-phandler = ProblemHandler(problem_classes = current_problem_classes, max_num_open_problems=20)
-test_modulo=8
+phandler = ProblemHandler(problem_classes = current_problem_classes, max_num_open_problems=50)
+test_modulo=50
 for j in range(1000):
     loss_test = []
     problem_specs, problem_id = phandler.get_random_problem(0.1)
@@ -148,8 +151,8 @@ for j in range(1000):
         loss = exact_loss_2d(u_new,u_exact)
     else:
         loss = exact_loss(u_new,u_exact)
-    minibatch_size=25
-    loss = loss/minibatch_size
+    # minibatch_size=25
+    # loss = loss/minibatch_size
     loss.backward()  # Backward pass
     # if j%minibatch_size == 0:
     #     print("optimizer_step")
@@ -159,9 +162,9 @@ for j in range(1000):
     phandler.update_problem(problem_id, u_new)
     if not (j % test_modulo):
         if example == "Barenblatt":
-            base_path = "C:/Users/Tatiana/Desktop/Research/Research_ML_WENO/PME_Test/Models/Model_50/"
-        if example == "boxes":
-            base_path = "C:/Users/Tatiana/Desktop/Research/Research_ML_WENO/PME_Test/Models_boxes/Model_18/"
+            base_path = "C:/Users/Tatiana/Desktop/Research/Research_ML_WENO/PME_Test/Models/Model_52/"
+        elif example == "boxes":
+            base_path = "C:/Users/Tatiana/Desktop/Research/Research_ML_WENO/PME_Test/Models_boxes/Model_15/"  # TODO model 18 je uz obsadeny!!!!!
         elif example == "Barenblatt_2d":
             base_path = "C:/Users/Tatiana/Desktop/Research/Research_ML_WENO/PME_Test/Models_2d/Model_7/"
         elif example == "gravity":
@@ -217,10 +220,10 @@ for j in range(1000):
             loss_test.append(single_problem_loss_test)
         print(loss_test)
         all_loss_test.append(loss_test)
-        if np.max(np.array(all_loss_test)[:, :, 0][0,:] / np.array(all_loss_test)[:, :, 0][-1,:]) > bound:
-            print("lr will be updated")
-            optimizer.defaults['lr'] = optimizer.defaults['lr'] * 0.5
-            bound = bound+0.05
+        # if np.max(np.array(all_loss_test)[:, :, 0][0,:] / np.array(all_loss_test)[:, :, 0][-1,:]) > bound:
+        #     print("lr will be updated")
+        #     optimizer.defaults['lr'] = optimizer.defaults['lr'] * 0.5
+        #     bound = bound+0.05
 
 # print("number of parameters:", sum(p.numel() for p in train_model.parameters()))
 # g=train_model.parameters()
