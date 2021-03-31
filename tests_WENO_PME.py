@@ -14,9 +14,9 @@ from initial_condition_generator import init_PME
 torch.set_default_dtype(torch.float64)
 
 #train_model = WENONetwork_2()
-# train_model = torch.load("C:/Users/Tatiana/Desktop/Research/Research_ML_WENO/PME_Test/Models/Model_41/690.pt") #45/500 #46/650 # 47/999 # 41/690 for boxes
-# train_model = torch.load("C:/Users/Tatiana/Desktop/Research/Research_ML_WENO/PME_Test/Models_boxes/Model_14/480.pt") #45/500 #46/650 # 47/999 # 41/690 for boxes
-train_model = torch.load("C:/Users/Tatiana/Desktop/Research/Research_ML_WENO/PME_Test/Models/Model_52/950.pt") #45/500 #46/650 # 47/999 # 41/690 for boxes
+# train_model = torch.load("C:/Users/Tatiana/Desktop/Research/Research_ML_WENO/PME_Test/Models/Model_41/690.pt") #41/690 for boxes
+train_model = torch.load("C:/Users/Tatiana/Desktop/Research/Research_ML_WENO/PME_Test/Models_boxes/Model_16/3.pt") #5/999 for boxes
+# train_model = torch.load("C:/Users/Tatiana/Desktop/Research/Research_ML_WENO/PME_Test/Models/Model_52/950.pt") #45/500 #46/650 # 47/999
 
 def validation_problems(j):
     params_vld = []
@@ -59,10 +59,10 @@ u_exs = [u_ex_0[0:1024 + 1:16, :], u_ex_1[0:1024 + 1:16, :], u_ex_2[0:1024 + 1:1
 #     u_exs.append(torch.Tensor(np.load("C:/Users/Tatiana/Desktop/Research/Research_ML_WENO/PME_Test/PME_Data_1024/Test_set/u_exact64_{}.npy".format(j))))
 
 problem= PME
-# example = "boxes"
-# rng = 5
-example = "Barenblatt"
-rng = 7
+example = "boxes"
+rng = 5
+# example = "Barenblatt"
+# rng = 7
 err_nt_max_vec = np.zeros(rng)
 err_nt_mean_vec = np.zeros(rng)
 err_t_max_vec = np.zeros(rng)

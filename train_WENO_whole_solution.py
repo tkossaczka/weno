@@ -18,12 +18,16 @@ train_model = WENONetwork_2()
 
 # DROP PROBLEM FOR TRAINING
 #params = None
-# problem_class = Buckley_Leverett
+
+problem_class = Buckley_Leverett
+rng = 5
+
 # problem_class = Digital_option
-problem_class = PME
+
+# problem_class = PME
 # example = "boxes"
-example = "Barenblatt"
-rng = 4
+# example = "Barenblatt"
+# rng = 4
 
 def monotonicity_loss(u):
     monotonicity = torch.sum(torch.max(u[:-1]-u[1:], torch.Tensor([0.0])))
@@ -32,14 +36,15 @@ def monotonicity_loss(u):
 
 def exact_loss(u, u_ex):
     error = train_model.compute_error(u, u_ex)
-    # loss = error
-    loss = 10e4*error # PME Barenblatt
+    # loss = 10e1*error # PME boxes
+    # loss = 10e4*error # PME Barenblatt
+    loss = error # Buckley-Leverett
     return loss
 
 #optimizer = optim.SGD(train_model.parameters(), lr=0.1)
-#optimizer = optim.Adam(train_model.parameters(), lr=0.001)
-# optimizer = optim.Adam(train_model.parameters(), lr=0.0001, weight_decay=0.00001)
-optimizer = optim.Adam(train_model.parameters(), lr=0.1, weight_decay=0.0001) # PME Barenblatt
+optimizer = optim.Adam(train_model.parameters(), lr=0.0001)   # Buckley-Leverett
+# optimizer = optim.Adam(train_model.parameters(), lr=0.001, weight_decay=0.00001) # PME boxes
+# optimizer = optim.Adam(train_model.parameters(), lr=0.1, weight_decay=0.0001) # PME Barenblatt
 
 def validation_problems_barenblatt(j):
     params_vld = []
@@ -79,11 +84,12 @@ if problem_class == Digital_option:
 
 if problem_class == Buckley_Leverett:
     example = "gravity"
-    u_ex_0 = torch.load("C:/Users/Tatiana/Desktop/Research/Research_ML_WENO/Buckley_Leverett_CD_Test/Buckley_Leverett_CD_Data_1024/Basic_test_set/u_ex64_0")
-    u_ex_1 = torch.load("C:/Users/Tatiana/Desktop/Research/Research_ML_WENO/Buckley_Leverett_CD_Test/Buckley_Leverett_CD_Data_1024/Basic_test_set/u_ex64_1")
-    u_ex_2 = torch.load("C:/Users/Tatiana/Desktop/Research/Research_ML_WENO/Buckley_Leverett_CD_Test/Buckley_Leverett_CD_Data_1024/Basic_test_set/u_ex64_2")
-    u_ex_3 = torch.load("C:/Users/Tatiana/Desktop/Research/Research_ML_WENO/Buckley_Leverett_CD_Test/Buckley_Leverett_CD_Data_1024/Basic_test_set/u_ex64_3")
-    u_ex_4 = torch.load("C:/Users/Tatiana/Desktop/Research/Research_ML_WENO/Buckley_Leverett_CD_Test/Buckley_Leverett_CD_Data_1024/Basic_test_set/u_ex64_4")
+    folder = 1
+    u_ex_0 = torch.load("C:/Users/Tatiana/Desktop/Research/Research_ML_WENO/Buckley_Leverett_CD_Test/Buckley_Leverett_CD_Data_1024/Basic_test_set_{}/u_ex64_0".format(folder))
+    u_ex_1 = torch.load("C:/Users/Tatiana/Desktop/Research/Research_ML_WENO/Buckley_Leverett_CD_Test/Buckley_Leverett_CD_Data_1024/Basic_test_set_{}/u_ex64_1".format(folder))
+    u_ex_2 = torch.load("C:/Users/Tatiana/Desktop/Research/Research_ML_WENO/Buckley_Leverett_CD_Test/Buckley_Leverett_CD_Data_1024/Basic_test_set_{}/u_ex64_2".format(folder))
+    u_ex_3 = torch.load("C:/Users/Tatiana/Desktop/Research/Research_ML_WENO/Buckley_Leverett_CD_Test/Buckley_Leverett_CD_Data_1024/Basic_test_set_{}/u_ex64_3".format(folder))
+    u_ex_4 = torch.load("C:/Users/Tatiana/Desktop/Research/Research_ML_WENO/Buckley_Leverett_CD_Test/Buckley_Leverett_CD_Data_1024/Basic_test_set_{}/u_ex64_4".format(folder))
     u_exs = [u_ex_0, u_ex_1, u_ex_2, u_ex_3, u_ex_4]
     rng = 5
 
@@ -99,7 +105,7 @@ if problem_class == PME and example == "boxes":
 all_loss_test = []
 save_id = 0
 
-for j in range(20):
+for j in range(200):
     loss_test = []
     # Forward path
     if problem_class == Digital_option:
@@ -159,9 +165,9 @@ for j in range(20):
     if problem_class == Digital_option:
         base_path ="C:/Users/Tatiana/Desktop/Research/Research_ML_WENO/Digital_Option_Test/Models/Model_17/"
     elif problem_class == Buckley_Leverett:
-        base_path = "C:/Users/Tatiana/Desktop/Research/Research_ML_WENO/Buckley_Leverett_CD_Test/Models/Model_5/"
+        base_path = "C:/Users/Tatiana/Desktop/Research/Research_ML_WENO/Buckley_Leverett_CD_Test/Models/Model_14/"
     elif problem_class == PME and example == "boxes":
-        base_path = "C:/Users/Tatiana/Desktop/Research/Research_ML_WENO/PME_Test/Models_boxes/Model_15/"
+        base_path = "C:/Users/Tatiana/Desktop/Research/Research_ML_WENO/PME_Test/Models_boxes/Model_16/"
     elif problem_class == PME and example == "Barenblatt":
         base_path = "C:/Users/Tatiana/Desktop/Research/Research_ML_WENO/PME_Test/Models/Model_51/"
     if not os.path.exists(base_path):
