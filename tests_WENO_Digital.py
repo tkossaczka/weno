@@ -14,19 +14,19 @@ from define_SFD2_Solver import SFD2_Solver
 torch.set_default_dtype(torch.float64)
 
 # train_model = WENONetwork_2()
-train_model = torch.load("C:/Users/Tatiana/Desktop/Research/Research_ML_WENO/Digital_Option_Test/Models/Model_17/7999.pt")
+train_model = torch.load("C:/Users/Tatiana/Desktop/Research/Research_ML_WENO/Digital_Option_Test/Models/Model_18/1999.pt")
 
 params=None
 #params = {'sigma': 0.3, 'rate': 0.02, 'E': 50, 'T': 1, 'e': 1e-13, 'xl': -6, 'xr': 1.5, 'psi':20}
 #params = {'sigma': 0.3, 'rate': 0.25, 'E': 50, 'T': 1, 'e': 1e-13, 'xl': -1.5, 'xr': 2, 'psi':30}
 params = {'sigma': 0.3, 'rate': 0.1, 'E': 50, 'T': 1, 'e': 1e-13, 'xl': -6, 'xr': 1.5}
 # params = {'sigma': 0.2, 'rate': 0.08, 'E': 50, 'T': 1, 'e': 1e-13, 'xl': -6, 'xr': 1.5}
-# params = {'sigma': 0.33405, 'rate': 0.266078, 'E': 50, 'T': 1, 'e': 1e-13, 'xl': -6, 'xr': 1.5}
-# params = {'sigma': 0.29235803798039667,'rate': 0.23532633811960602,'E': 50,'T': 0.5,'e': 1e-13,'xl': -6,'xr': 1.5} # 80 space steps
+# params = {'sigma': 0.33405, 'rate': 0.266078, 'E': 50, 'T': 1, 'e': 1e-13, 'xl': -6, 'xr': 1.5}  # 64 space steps
+# params = {'sigma': 0.29235803798039667,'rate': 0.23532633811960602,'E': 50,'T': 0.5,'e': 1e-13,'xl': -6,'xr': 1.5} # 80 space steps ???
 
 problem= Digital_option
 
-problem_main = problem(space_steps=160, time_steps=None, params = params)
+problem_main = problem(space_steps=64, time_steps=None, params = params)
 params = problem_main.get_params()
 
 u_init, nn = train_model.init_run_weno(problem_main, vectorized=True, just_one_time_step=False)

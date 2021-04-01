@@ -1,4 +1,5 @@
 from define_WENO_Network import WENONetwork
+from define_WENO_Network_2 import WENONetwork_2
 import torch
 from torch import optim
 from define_problem_Digital import Digital_option
@@ -13,7 +14,7 @@ import matplotlib.pyplot as plt
 torch.set_default_dtype(torch.float64)
 
 # TRAIN NETWORK
-train_model = WENONetwork()
+train_model = WENONetwork_2()
 
 # DROP PROBLEM FOR TRAINING
 #params = None
@@ -50,7 +51,7 @@ for k in range(1000):
     loss.backward()  # Backward pass
     optimizer.step()  # Optimize weights
     print(k, loss)
-    base_path ="C:/Users/Tatiana/Desktop/Research/Research_ML_WENO/Digital_Option_Test/Models/Model_10/"
+    base_path ="C:/Users/Tatiana/Desktop/Research/Research_ML_WENO/Digital_Option_Test/Models/Model_18/"
     if not os.path.exists(base_path):
         os.mkdir(base_path)
     path = os.path.join(base_path, "{}.pt".format(k))

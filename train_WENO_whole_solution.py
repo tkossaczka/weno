@@ -19,10 +19,11 @@ train_model = WENONetwork_2()
 # DROP PROBLEM FOR TRAINING
 #params = None
 
-problem_class = Buckley_Leverett
-rng = 5
+# problem_class = Buckley_Leverett
+# rng = 5
 
-# problem_class = Digital_option
+problem_class = Digital_option
+rng = 3
 
 # problem_class = PME
 # example = "boxes"
@@ -42,9 +43,10 @@ def exact_loss(u, u_ex):
     return loss
 
 #optimizer = optim.SGD(train_model.parameters(), lr=0.1)
-optimizer = optim.Adam(train_model.parameters(), lr=0.0001)   # Buckley-Leverett
+# optimizer = optim.Adam(train_model.parameters(), lr=0.0001)   # Buckley-Leverett
 # optimizer = optim.Adam(train_model.parameters(), lr=0.001, weight_decay=0.00001) # PME boxes
 # optimizer = optim.Adam(train_model.parameters(), lr=0.1, weight_decay=0.0001) # PME Barenblatt
+optimizer = optim.Adam(train_model.parameters(), lr=0.001)
 
 def validation_problems_barenblatt(j):
     params_vld = []
@@ -105,7 +107,7 @@ if problem_class == PME and example == "boxes":
 all_loss_test = []
 save_id = 0
 
-for j in range(200):
+for j in range(2000):
     loss_test = []
     # Forward path
     if problem_class == Digital_option:
@@ -163,7 +165,7 @@ for j in range(200):
         print(j, k, loss)
         u_train.detach_()
     if problem_class == Digital_option:
-        base_path ="C:/Users/Tatiana/Desktop/Research/Research_ML_WENO/Digital_Option_Test/Models/Model_17/"
+        base_path ="C:/Users/Tatiana/Desktop/Research/Research_ML_WENO/Digital_Option_Test/Models/Model_18/"
     elif problem_class == Buckley_Leverett:
         base_path = "C:/Users/Tatiana/Desktop/Research/Research_ML_WENO/Buckley_Leverett_CD_Test/Models/Model_16/"
     elif problem_class == PME and example == "boxes":
