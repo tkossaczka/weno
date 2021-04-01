@@ -23,8 +23,8 @@ def monotonicity_loss(u):
 def exact_loss(u, u_ex):
     error = train_model.compute_error(u, u_ex)
     # loss = 10e1*error # PME boxes
-    # loss = 10e4*error # PME Barenblatt
-    loss = error
+    loss = 10e4*error # PME Barenblatt
+    # loss = error
     return loss
 
 def exact_loss_2d(u, u_ex):
@@ -32,11 +32,10 @@ def exact_loss_2d(u, u_ex):
     loss = 10e4*error
     return loss
 
-optimizer = optim.Adam(train_model.parameters(), lr=0.0001)   # Buckley-Leverett
+# optimizer = optim.Adam(train_model.parameters(), lr=0.0001)   # Buckley-Leverett
 # optimizer = optim.Adam(train_model.parameters(), lr=0.001, weight_decay=0.00001)  # PME boxes
-#oprimizer = optim.Adagrad(train_model.parameters(), lr=0.01, lr_decay=0.2, weight_decay=0.00001)
-# optimizer = optim.Adam(train_model.parameters(), lr=0.1, weight_decay=0.0001) # PME Barenblatt
-#optimizer = optim.SGD(train_model.parameters(), lr=0.01, weight_decay=0.00001)
+optimizer = optim.Adam(train_model.parameters(), lr=0.1, weight_decay=0.0001) # PME Barenblatt
+# optimizer = optim.SGD(train_model.parameters(), lr=0.01, weight_decay=0.00001)
 bound = 1.15
 
 def validation_problems_barenblatt(j):
@@ -102,9 +101,9 @@ problem_class = PME
 # example = "Barenblatt_2d"
 # rng = 4
 
-# current_problem_classes = [(PME, {"sample_id": None, "example": "Barenblatt", "space_steps": 64, "time_steps": None, "params": None})]
-# example = "Barenblatt"
-# rng = 7
+current_problem_classes = [(PME, {"sample_id": None, "example": "Barenblatt", "space_steps": 64, "time_steps": None, "params": None})]
+example = "Barenblatt"
+rng = 4
 
 # current_problem_classes = [(PME, {"sample_id": 0, "example": "boxes", "space_steps": 64, "time_steps": None, "params": 0})]
 # example = "boxes"
@@ -116,21 +115,21 @@ problem_class = PME
 # u_exs = [u_ex_0, u_ex_1, u_ex_2, u_ex_3, u_ex_4]
 # rng = 4
 
-problem_class = Buckley_Leverett
-current_problem_classes = [(Buckley_Leverett, {"sample_id": 1, "example": "gravity", "space_steps": 64, "time_steps": None, "params": 0})]
-example = "gravity"
-folder = 1
-u_ex_0 = torch.load("C:/Users/Tatiana/Desktop/Research/Research_ML_WENO/Buckley_Leverett_CD_Test/Buckley_Leverett_CD_Data_1024/Basic_test_set_{}/u_ex64_0".format(folder))
-u_ex_1 = torch.load("C:/Users/Tatiana/Desktop/Research/Research_ML_WENO/Buckley_Leverett_CD_Test/Buckley_Leverett_CD_Data_1024/Basic_test_set_{}/u_ex64_1".format(folder))
-u_ex_2 = torch.load("C:/Users/Tatiana/Desktop/Research/Research_ML_WENO/Buckley_Leverett_CD_Test/Buckley_Leverett_CD_Data_1024/Basic_test_set_{}/u_ex64_2".format(folder))
-u_ex_3 = torch.load("C:/Users/Tatiana/Desktop/Research/Research_ML_WENO/Buckley_Leverett_CD_Test/Buckley_Leverett_CD_Data_1024/Basic_test_set_{}/u_ex64_3".format(folder))
-u_ex_4 = torch.load("C:/Users/Tatiana/Desktop/Research/Research_ML_WENO/Buckley_Leverett_CD_Test/Buckley_Leverett_CD_Data_1024/Basic_test_set_{}/u_ex64_4".format(folder))
-u_exs = [u_ex_0, u_ex_1, u_ex_2, u_ex_3, u_ex_4]
-rng = 5
+# problem_class = Buckley_Leverett
+# current_problem_classes = [(Buckley_Leverett, {"sample_id": 1, "example": "gravity", "space_steps": 64, "time_steps": None, "params": 0})]
+# example = "gravity"
+# folder = 1
+# u_ex_0 = torch.load("C:/Users/Tatiana/Desktop/Research/Research_ML_WENO/Buckley_Leverett_CD_Test/Buckley_Leverett_CD_Data_1024/Basic_test_set_{}/u_ex64_0".format(folder))
+# u_ex_1 = torch.load("C:/Users/Tatiana/Desktop/Research/Research_ML_WENO/Buckley_Leverett_CD_Test/Buckley_Leverett_CD_Data_1024/Basic_test_set_{}/u_ex64_1".format(folder))
+# u_ex_2 = torch.load("C:/Users/Tatiana/Desktop/Research/Research_ML_WENO/Buckley_Leverett_CD_Test/Buckley_Leverett_CD_Data_1024/Basic_test_set_{}/u_ex64_2".format(folder))
+# u_ex_3 = torch.load("C:/Users/Tatiana/Desktop/Research/Research_ML_WENO/Buckley_Leverett_CD_Test/Buckley_Leverett_CD_Data_1024/Basic_test_set_{}/u_ex64_3".format(folder))
+# u_ex_4 = torch.load("C:/Users/Tatiana/Desktop/Research/Research_ML_WENO/Buckley_Leverett_CD_Test/Buckley_Leverett_CD_Data_1024/Basic_test_set_{}/u_ex64_4".format(folder))
+# u_exs = [u_ex_0, u_ex_1, u_ex_2, u_ex_3, u_ex_4]
+# rng = 5
 
-phandler = ProblemHandler(problem_classes = current_problem_classes, max_num_open_problems=200)
-test_modulo=500
-for j in range(4000):
+phandler = ProblemHandler(problem_classes = current_problem_classes, max_num_open_problems=100)
+test_modulo=100
+for j in range(1000):
     loss_test = []
     problem_specs, problem_id = phandler.get_random_problem(0.1)
     problem = problem_specs["problem"]
@@ -163,13 +162,13 @@ for j in range(4000):
     phandler.update_problem(problem_id, u_new)
     if not (j % test_modulo):
         if example == "Barenblatt":
-            base_path = "C:/Users/Tatiana/Desktop/Research/Research_ML_WENO/PME_Test/Models/Model_52/"
+            base_path = "C:/Users/Tatiana/Desktop/Research/Research_ML_WENO/PME_Test/Models/Model_53/"
         elif example == "boxes":
             base_path = "C:/Users/Tatiana/Desktop/Research/Research_ML_WENO/PME_Test/Models_boxes/Model_15/"  # TODO model 18 je uz obsadeny!!!!!
         elif example == "Barenblatt_2d":
             base_path = "C:/Users/Tatiana/Desktop/Research/Research_ML_WENO/PME_Test/Models_2d/Model_7/"
         elif example == "gravity":
-            base_path = "C:/Users/Tatiana/Desktop/Research/Research_ML_WENO/Buckley_Leverett_CD_Test/Models/Model_13/"
+            base_path = "C:/Users/Tatiana/Desktop/Research/Research_ML_WENO/Buckley_Leverett_CD_Test/Models/Model_17/"
         if not os.path.exists(base_path):
             os.mkdir(base_path)
         path = os.path.join(base_path, "{}.pt".format(j))

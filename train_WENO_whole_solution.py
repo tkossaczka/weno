@@ -165,7 +165,7 @@ for j in range(200):
     if problem_class == Digital_option:
         base_path ="C:/Users/Tatiana/Desktop/Research/Research_ML_WENO/Digital_Option_Test/Models/Model_17/"
     elif problem_class == Buckley_Leverett:
-        base_path = "C:/Users/Tatiana/Desktop/Research/Research_ML_WENO/Buckley_Leverett_CD_Test/Models/Model_14/"
+        base_path = "C:/Users/Tatiana/Desktop/Research/Research_ML_WENO/Buckley_Leverett_CD_Test/Models/Model_16/"
     elif problem_class == PME and example == "boxes":
         base_path = "C:/Users/Tatiana/Desktop/Research/Research_ML_WENO/PME_Test/Models_boxes/Model_16/"
     elif problem_class == PME and example == "Barenblatt":
