@@ -30,8 +30,7 @@ params=None
 # params = {'sigma': 0.28, 'rate': 0.13, 'E': 50, 'T': 1, 'e': 1e-13, 'xl': -6, 'xr': 1.5}
 
 # params to paper
-# params = {'sigma': 0.334, 'rate': 0.266, 'E': 50, 'T': 1, 'e': 1e-13, 'xl': -6, 'xr': 1.5}  # 64 space steps
-
+# train_model = torch.load("C:/Users/Tatiana/Desktop/Research/Research_ML_WENO/Digital_Option_Test/Models/Model_21/3390.pt")
 # params = {'sigma': 0.28, 'rate': 0.13, 'E': 50, 'T': 1, 'e': 1e-13, 'xl': -6, 'xr': 1.5} # 100 space steps, first time step
 # params = {'sigma': 0.4, 'rate': 0.15, 'E': 50, 'T': 1, 'e': 1e-13, 'xl': -6, 'xr': 1.5} # 100 space steps, first time step
 # params = {'sigma': 0.263, 'rate': 0.196, 'E': 50, 'T': 1, 'e': 1e-13, 'xl': -6, 'xr': 1.5} # 100 space steps, last time step
@@ -98,6 +97,9 @@ der2_t = der2_t.detach().numpy()
 der1_t = der1_t.detach().numpy()
 gamma_t = E * (der2_t / h**2 * (1 / S[3:-3]**2) - der1_t / h * (1 / S[3:-3]**2))
 plt.plot(S[3:-3], gamma_t)
+
+import pandas as pd
+pd.DataFrame(err_mat).to_latex()
 
 # model = SFD2_Solver()
 # e = problem_main.params['e']
