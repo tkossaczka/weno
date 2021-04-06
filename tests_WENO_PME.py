@@ -16,7 +16,7 @@ torch.set_default_dtype(torch.float64)
 #train_model = WENONetwork_2()
 # train_model = torch.load("C:/Users/Tatiana/Desktop/Research/Research_ML_WENO/PME_Test/Models/Model_41/690.pt") #41/690 for boxes
 # train_model = torch.load("C:/Users/Tatiana/Desktop/Research/Research_ML_WENO/PME_Test/Models_boxes/Model_16/3.pt") #5/999 for boxes
-train_model = torch.load("C:/Users/Tatiana/Desktop/Research/Research_ML_WENO/PME_Test/Models/Model_53/900.pt") #45/500 #46/650 # 47/999
+train_model = torch.load("C:/Users/Tatiana/Desktop/Research/Research_ML_WENO/PME_Test/Models/Model_51/700.pt") #45/500 #46/650 # 47/999
 
 def validation_problems(j):
     params_vld = []
