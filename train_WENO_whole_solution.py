@@ -37,9 +37,9 @@ def monotonicity_loss(u):
 
 def exact_loss(u, u_ex):
     error = train_model.compute_error(u, u_ex)
-    # loss = 10e1*error # PME boxes
+    loss = 10e1*error # PME boxes
     # loss = 10e4*error # PME Barenblatt
-    loss = error # Buckley-Leverett
+    # loss = error # Buckley-Leverett
     return loss
 
 #optimizer = optim.SGD(train_model.parameters(), lr=0.1)
@@ -107,12 +107,12 @@ if problem_class == PME and example == "boxes":
 all_loss_test = []
 save_id = 0
 
-for j in range(2000):
+for j in range(4000):
     loss_test = []
     # Forward path
     if problem_class == Digital_option:
         params = None
-        problem_main = problem_class(space_steps=64, time_steps=None, params=params)
+        problem_main = problem_class(space_steps=100, time_steps=None, params=params)
         u_init, nn = train_model.init_run_weno(problem_main, vectorized=True, just_one_time_step=True)
         # # parameters needed for the computation of exact solution
         # params_main = problem_main.params
@@ -165,7 +165,7 @@ for j in range(2000):
         print(j, k, loss)
         u_train.detach_()
     if problem_class == Digital_option:
-        base_path ="C:/Users/Tatiana/Desktop/Research/Research_ML_WENO/Digital_Option_Test/Models/Model_18/"
+        base_path ="C:/Users/Tatiana/Desktop/Research/Research_ML_WENO/Digital_Option_Test/Models/Model_21/"
     elif problem_class == Buckley_Leverett:
         base_path = "C:/Users/Tatiana/Desktop/Research/Research_ML_WENO/Buckley_Leverett_CD_Test/Models/Model_16/"
     elif problem_class == PME and example == "boxes":

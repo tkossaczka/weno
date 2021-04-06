@@ -23,8 +23,8 @@ class Digital_option():
 
     def init_params(self):
         params = dict()
-        params["sigma"] = 0.31 + max(0.07 * np.random.randn(), -0.3)
-        params["rate"] = 0.21 + max(0.07 * np.random.randn(), -0.2)
+        params["sigma"] = 0.31 + max(0.07 * np.random.randn(), -0.3)  # np.abs(0.3 * np.random.randn()) # 0.31 + max(0.15 * np.random.randn(), -0.3)
+        params["rate"] = 0.11 + max(0.07 * np.random.randn(), -0.1)  # np.abs(0.2 * np.random.randn()) # 0.11 + max(0.15 * np.random.randn(), -0.1)
         params["E"] = 50
         params["T"] = 1
         params["e"] = 10 ** (-13)

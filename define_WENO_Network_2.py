@@ -23,14 +23,13 @@ from define_WENO_Network import WENONetwork
 #         return x
 
 class FancyNet(nn.Module):
-    # STRUCTURE FOR BUCKLEY-LEVERETT
     def __init__(self):
         self.num_inner_convs = 1
         super(FancyNet, self).__init__()
-        self.conv0 = nn.Conv1d(2, 10, kernel_size=5, stride=1, padding=2)
-        self.convs = nn.ModuleList([nn.Conv1d(10, 10, kernel_size=5, stride=1, padding=2) for k in range(self.num_inner_convs)])
+        self.conv0 = nn.Conv1d(2, 5, kernel_size=5, stride=1, padding=2)
+        self.convs = nn.ModuleList([nn.Conv1d(5, 5, kernel_size=5, stride=1, padding=2) for k in range(self.num_inner_convs)])
         # self.conv1 = nn.Conv1d(10, 10, kernel_size=5, stride=1, padding=2)
-        self.conv_out = nn.Conv1d(10, 1, kernel_size=1, stride=1, padding=0)
+        self.conv_out = nn.Conv1d(5, 1, kernel_size=1, stride=1, padding=0)
         # self.elu = nn.ELU()
         # self.sigmoid = nn.Sigmoid()
 
@@ -40,6 +39,7 @@ class FancyNet(nn.Module):
             x = F.elu(self.convs[k](x)) #+ x
         # x = F.elu(self.conv1(x))
         x = torch.sigmoid(self.conv_out(x))
+        # x = (self.conv_out(x))
         return x
 
 # def FancyNet():
@@ -416,6 +416,7 @@ class WENONetwork_2(WENONetwork):
         V_classic, S, tt = problem.transformation(u_classic)
         plt.plot(S, V_classic.detach().numpy(), S, V_trained.detach().numpy())
         plt.show()
+        return V_classic, V_trained
 
     def order_compute(self, iterations, initial_space_steps, initial_time_steps, params, problem_class, trainable):
         problem = problem_class(space_steps=initial_space_steps, time_steps=initial_time_steps, params=params)
