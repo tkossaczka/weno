@@ -10,6 +10,7 @@ import matplotlib.pyplot as plt
 from scipy.stats import norm
 import torch.nn as nn
 import torch.nn.functional as F
+import random
 
 torch.set_default_dtype(torch.float64)
 
@@ -24,6 +25,8 @@ def exact_loss(u, u_ex):
     error = train_model.compute_error(u, u_ex)
     # loss = 10e1*error # PME boxes
     loss = 10e4*error # PME Barenblatt
+    if loss > 1:
+        loss = torch.sqrt(loss)
     # loss = error
     return loss
 
@@ -34,7 +37,7 @@ def exact_loss_2d(u, u_ex):
 
 # optimizer = optim.Adam(train_model.parameters(), lr=0.0001)   # Buckley-Leverett
 # optimizer = optim.Adam(train_model.parameters(), lr=0.001, weight_decay=0.00001)  # PME boxes
-optimizer = optim.Adam(train_model.parameters(), lr=0.01, weight_decay=0.0001) # PME Barenblatt
+optimizer = optim.Adam(train_model.parameters(), lr=0.1) #, weight_decay=0.1) # PME Barenblatt   # todo je lepsi lr 0.01?
 # optimizer = optim.SGD(train_model.parameters(), lr=0.01, weight_decay=0.00001)
 bound = 1.15
 
@@ -48,6 +51,47 @@ def validation_problems_barenblatt(j):
     params_vld.append({'T': 2, 'e': 1e-13, 'L': 6, 'power': 7, 'd': 1})
     params_vld.append({'T': 2, 'e': 1e-13, 'L': 6, 'power': 8, 'd': 1})
     return params_vld[j]
+
+# def validation_problems_barenblatt(j):
+#     params_vld = []
+#     params_vld.append({'T': 2, 'e': 1e-13, 'L': 6, 'power': 2.5, 'd': 1})
+#     params_vld.append({'T': 2, 'e': 1e-13, 'L': 6, 'power': 3.5, 'd': 1})
+#     params_vld.append({'T': 2, 'e': 1e-13, 'L': 6, 'power': 4.5, 'd': 1})
+#     params_vld.append({'T': 2, 'e': 1e-13, 'L': 6, 'power': 5.5, 'd': 1})
+#     params_vld.append({'T': 2, 'e': 1e-13, 'L': 6, 'power': 6.5, 'd': 1})
+#     params_vld.append({'T': 2, 'e': 1e-13, 'L': 6, 'power': 7.5, 'd': 1})
+#     params_vld.append({'T': 2, 'e': 1e-13, 'L': 6, 'power': 8.5, 'd': 1})
+#     return params_vld[j]
+
+# def validation_problems_barenblatt(j):  # tieto boli dobre, model 62
+#     params_vld = []
+#     params_vld.append({'T': 2, 'e': 1e-13, 'L': 6, 'power': 2.2, 'd': 1})
+#     params_vld.append({'T': 2, 'e': 1e-13, 'L': 6, 'power': 3.9, 'd': 1})
+#     params_vld.append({'T': 2, 'e': 1e-13, 'L': 6, 'power': 4.4, 'd': 1})
+#     params_vld.append({'T': 2, 'e': 1e-13, 'L': 6, 'power': 5.1, 'd': 1})
+#     return params_vld[j]
+
+a = random.uniform(2, 8)
+b = random.uniform(2, 8)
+c = random.uniform(2, 8)
+d = random.uniform(2, 8)
+e = random.uniform(2, 8)
+f = random.uniform(2, 8)
+g = random.uniform(2, 8)
+h = random.uniform(2, 8)
+print(a,b,c,d,e,f,g,h)
+
+# def validation_problems_barenblatt(j):
+#     params_vld = []
+#     params_vld.append({'T': 2, 'e': 1e-13, 'L': 6, 'power': a, 'd': 1})
+#     params_vld.append({'T': 2, 'e': 1e-13, 'L': 6, 'power': b, 'd': 1})
+#     params_vld.append({'T': 2, 'e': 1e-13, 'L': 6, 'power': c, 'd': 1})
+#     params_vld.append({'T': 2, 'e': 1e-13, 'L': 6, 'power': d, 'd': 1})
+#     params_vld.append({'T': 2, 'e': 1e-13, 'L': 6, 'power': e, 'd': 1})
+#     params_vld.append({'T': 2, 'e': 1e-13, 'L': 6, 'power': f, 'd': 1})
+#     params_vld.append({'T': 2, 'e': 1e-13, 'L': 6, 'power': g, 'd': 1})
+#     params_vld.append({'T': 2, 'e': 1e-13, 'L': 6, 'power': h, 'd': 1})
+#     return params_vld[j]
 
 def validation_problems_barenblatt_2d(j):
     params_vld = []
@@ -103,7 +147,7 @@ problem_class = PME
 
 current_problem_classes = [(PME, {"sample_id": None, "example": "Barenblatt", "space_steps": 64, "time_steps": None, "params": None})]
 example = "Barenblatt"
-rng = 4
+rng = 7
 
 # current_problem_classes = [(PME, {"sample_id": 0, "example": "boxes", "space_steps": 64, "time_steps": None, "params": 0})]
 # example = "boxes"
@@ -128,8 +172,8 @@ rng = 4
 # rng = 5
 
 phandler = ProblemHandler(problem_classes = current_problem_classes, max_num_open_problems=200)
-test_modulo=100
-for j in range(2000):
+test_modulo=20
+for j in range(200):
     loss_test = []
     problem_specs, problem_id = phandler.get_random_problem(0.1)
     problem = problem_specs["problem"]
@@ -162,7 +206,7 @@ for j in range(2000):
     phandler.update_problem(problem_id, u_new)
     if not (j % test_modulo):
         if example == "Barenblatt":
-            base_path = "C:/Users/Tatiana/Desktop/Research/Research_ML_WENO/PME_Test/Models/Model_51/"
+            base_path = "C:/Users/Tatiana/Desktop/Research/Research_ML_WENO/PME_Test/Models/Model_74/"
         elif example == "boxes":
             base_path = "C:/Users/Tatiana/Desktop/Research/Research_ML_WENO/PME_Test/Models_boxes/Model_16/"  # TODO model 18 je uz obsadeny!!!!!
         elif example == "Barenblatt_2d":
@@ -234,7 +278,8 @@ norm_losses=all_loss_test[:,:,0]/all_loss_test[:,:,0].max(axis=0)[None, :]
 print("trained:", all_loss_test[:,:,0].min(axis=0))
 plt.plot(norm_losses)
 plt.show()
+#
+# plt.figure(2)
+# plt.plot(all_loss_test[:,:,0])
 
-plt.figure(2)
-plt.plot(all_loss_test[:,:,0])
 # np.save("C:/Users/Tatiana/Desktop/Research/Research_ML_WENO/Buckley_Leverett_CD_Test/Models/Model_8/all_loss_test.npy",all_loss_test)

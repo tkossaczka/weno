@@ -24,7 +24,7 @@ from define_WENO_Network import WENONetwork
 
 class FancyNet(nn.Module):
     def __init__(self):
-        self.num_inner_convs = 2
+        self.num_inner_convs = 1
         super(FancyNet, self).__init__()
         self.conv0 = nn.Conv1d(2, 5, kernel_size=5, stride=1, padding=2)
         self.convs = nn.ModuleList([nn.Conv1d(5, 5, kernel_size=5, stride=1, padding=2) for k in range(self.num_inner_convs)])
@@ -33,16 +33,16 @@ class FancyNet(nn.Module):
     def forward(self, x):
         x = F.elu(self.conv0(x))
         for k in range(self.num_inner_convs):
-            x = F.elu(self.convs[k](x)) #+ x
+            x = F.elu(self.convs[k](x)) + x
         # x = torch.sigmoid(self.conv_out(x))
         x = (self.conv_out(x))
         return x
 
 # def FancyNet():
 #     net = nn.Sequential(
-#         nn.Conv1d(2, 10, kernel_size=5, stride=1, padding=2),
+#         nn.Conv1d(2, 5, kernel_size=5, stride=1, padding=2),
 #         nn.ELU(),
-#         nn.Conv1d(10, 10, kernel_size=5, stride=1, padding=2),
+#         nn.Conv1d(5, 5, kernel_size=5, stride=1, padding=2),
 #         nn.ELU(),
 #         # nn.Conv1d(5, 5, kernel_size=5, stride=1, padding=2),
 #         # nn.ELU(),
@@ -50,8 +50,8 @@ class FancyNet(nn.Module):
 #         # nn.ELU(),
 #         # nn.Conv1d(10, 10, kernel_size=5, stride=1, padding=2),
 #         # nn.ELU(),
-#         nn.Conv1d(10, 1, kernel_size=1, stride=1, padding=0),
-#         nn.Sigmoid()
+#         nn.Conv1d(5, 1, kernel_size=1, stride=1, padding=0),
+#         #nn.Sigmoid()
 #     )
 #     return net
 
