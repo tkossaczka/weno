@@ -24,7 +24,7 @@ def validation_problems_barenblatt_2d(j):
 
 train_model = WENONetwork_2()
 # train_model = torch.load("C:/Users/Tatiana/Desktop/Research/Research_ML_WENO/PME_Test/Models/Model_47/999.pt")
-train_model = torch.load("C:/Users/Tatiana/Desktop/Research/Research_ML_WENO/PME_Test/Models_2d/Model_5/400.pt")   # 4/200 # 5/400
+train_model = torch.load("C:/Users/Tatiana/Desktop/Research/Research_ML_WENO/PME_Test/Models_2d/Model_6/180.pt")   # 4/200 # 5/400
 problem= PME
 example = "Barenblatt_2d"
 rng = 4

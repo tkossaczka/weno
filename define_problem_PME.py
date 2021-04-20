@@ -174,7 +174,8 @@ class PME():
 
     def funct_diffusion(self,u):
         power = self.params["power"]
-        u_diff = torch.abs(u) ** power
+        u[u<0] = 0
+        u_diff = u ** power
         return u_diff
 
     def funct_convection(self, u):
@@ -240,6 +241,7 @@ class PME():
 
     def transformation(self, u):
         u = u
+        u[u<0] = 0
         t = self.time
         x = self.x
         return u, x, t
