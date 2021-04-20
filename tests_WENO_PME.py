@@ -17,15 +17,15 @@ torch.set_default_dtype(torch.float64)
 #train_model = WENONetwork_2()
 # train_model = torch.load("C:/Users/Tatiana/Desktop/Research/Research_ML_WENO/PME_Test/Models/Model_41/690.pt") #41/690 for boxes
 # train_model = torch.load("C:/Users/Tatiana/Desktop/Research/Research_ML_WENO/PME_Test/Models_boxes/Model_16/3.pt") #5/999 for boxes
-train_model = torch.load("C:/Users/Tatiana/Desktop/Research/Research_ML_WENO/PME_Test/Models/Model_97/160.pt") #45/500 #46/650 # 47/999
+train_model = torch.load("C:/Users/Tatiana/Desktop/Research/Research_ML_WENO/PME_Test/Models/Model_98/400.pt") #45/500 #46/650 # 47/999
 
 def validation_problems(j):
     params_vld = []
-    params_vld.append({'T': 5, 'e': 1e-13, 'L': 6, 'power': 2, 'd': 1})
-    params_vld.append({'T': 5, 'e': 1e-13, 'L': 6, 'power': 3, 'd': 1})
-    params_vld.append({'T': 5, 'e': 1e-13, 'L': 6, 'power': 4, 'd': 1})
-    params_vld.append({'T': 5, 'e': 1e-13, 'L': 6, 'power': 5, 'd': 1})
-    params_vld.append({'T': 5, 'e': 1e-13, 'L': 6, 'power': 6, 'd': 1})
+    params_vld.append({'T': 2, 'e': 1e-13, 'L': 6, 'power': 2, 'd': 1})
+    params_vld.append({'T': 2, 'e': 1e-13, 'L': 6, 'power': 3, 'd': 1})
+    params_vld.append({'T': 2, 'e': 1e-13, 'L': 6, 'power': 4, 'd': 1})
+    params_vld.append({'T': 2, 'e': 1e-13, 'L': 6, 'power': 5, 'd': 1})
+    params_vld.append({'T': 2, 'e': 1e-13, 'L': 6, 'power': 6, 'd': 1})
     params_vld.append({'T': 1.2, 'e': 1e-13, 'L': 6, 'power': 7, 'd': 1})
     params_vld.append({'T': 1.2, 'e': 1e-13, 'L': 6, 'power': 8, 'd': 1})
     return params_vld[j]

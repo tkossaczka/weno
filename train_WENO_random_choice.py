@@ -21,14 +21,14 @@ def monotonicity_loss(u):
     loss = monotonicity
     return loss
 
-def exact_loss(u, u_ex):
+def exact_loss(u, u_ex, power):
     error = train_model.compute_error(u, u_ex)
     # loss = error # PME boxes
     # if loss > 0.001:
     #     loss = loss/10
     loss = 10e4*error # PME Barenblatt
     if loss > 1:
-        loss = torch.sqrt(loss)
+        loss = loss**(1/power)
     # loss = error
     return loss
 
@@ -176,7 +176,7 @@ def validation_problems_BL_3(j):
     params_vld.append({'T': 0.2, 'e': 1e-13, 'L': 0, 'R': 1, 'C': 0.25, 'G': 4})
     return params_vld[j]
 all_loss_test = []
-all_loss_test_2 = []
+#all_loss_test_2 = []
 
 problem_class = PME
 
@@ -211,10 +211,10 @@ rng = 7
 # rng = 5
 
 phandler = ProblemHandler(problem_classes = current_problem_classes, max_num_open_problems=200)
-test_modulo=10
+test_modulo=100
 for j in range(500):
     loss_test = []
-    loss_test_2 = []
+    #loss_test_2 = []
     problem_specs, problem_id = phandler.get_random_problem(0.1)
     problem = problem_specs["problem"]
     #print(problem.sample_id, problem.power)
@@ -236,9 +236,9 @@ for j in range(500):
     if example == "Barenblatt_2d":
         loss = exact_loss_2d(u_new,u_exact)
     else:
-        loss_exact = exact_loss(u_new,u_exact)
-        loss_overflows = overflows_loss(u_new)
-        print(loss_exact, loss_overflows)
+        loss_exact = exact_loss(u_new,u_exact, problem.params['power'])
+        #loss_overflows = overflows_loss(u_new)
+        print(loss_exact) #, loss_overflows)
         loss = loss_exact #+ loss_overflows
     # print(loss)
     # minibatch_size=25
@@ -252,7 +252,7 @@ for j in range(500):
     phandler.update_problem(problem_id, u_new)
     if not (j % test_modulo):
         if example == "Barenblatt":
-            base_path = "C:/Users/Tatiana/Desktop/Research/Research_ML_WENO/PME_Test/Models/Model_97/"
+            base_path = "C:/Users/Tatiana/Desktop/Research/Research_ML_WENO/PME_Test/Models/Model_99/"
         elif example == "boxes":
             base_path = "C:/Users/Tatiana/Desktop/Research/Research_ML_WENO/PME_Test/Models_boxes/Model_19/"  # TODO model 18 je uz obsadeny!!!!!
         elif example == "Barenblatt_2d":
@@ -268,7 +268,7 @@ for j in range(500):
         print("TESTING ON VALIDATION PROBLEMS")
         for kk in range(rng):
             single_problem_loss_test = []
-            single_problem_loss_test_2 = []
+            #single_problem_loss_test_2 = []
             if example == "Barenblatt":
                 params_test = validation_problems_barenblatt(kk)
                 problem_test = problem_class(sample_id=None, example="Barenblatt", space_steps=64, time_steps=None, params=params_test)
@@ -299,8 +299,8 @@ for j in range(500):
                 power_test = problem_test.params['power']
                 u_exact_test = problem_test.exact(T_test)
                 u_exact_test = torch.Tensor(u_exact_test)
-                single_problem_loss_test.append(exact_loss(u_test, u_exact_test))
-                single_problem_loss_test_2.append(overflows_loss(u_test))
+                single_problem_loss_test.append(exact_loss(u_test, u_exact_test, problem_test.params['power']))
+                #single_problem_loss_test_2.append(overflows_loss(u_test))
             elif example == "boxes":
                 single_problem_loss_test.append(exact_loss(u_test, u_exs[kk][0:1024 + 1:16, -1]))
             elif example == "gravity":
@@ -312,10 +312,10 @@ for j in range(500):
                 u_exact_test = torch.Tensor(u_exact_test)
                 single_problem_loss_test.append(exact_loss_2d(u_test, u_exact_test))
             loss_test.append(single_problem_loss_test)
-            loss_test_2.append(single_problem_loss_test_2)
-        print(loss_test, loss_test_2)
+            #loss_test_2.append(single_problem_loss_test_2)
+        print(loss_test) #, loss_test_2)
         all_loss_test.append(loss_test)
-        all_loss_test_2.append(loss_test_2)
+        #all_loss_test_2.append(loss_test_2)
         # if np.max(np.array(all_loss_test)[:, :, 0][0,:] / np.array(all_loss_test)[:, :, 0][-1,:]) > bound:
         #     print("lr will be updated")
         #     optimizer.defaults['lr'] = optimizer.defaults['lr'] * 0.5
@@ -331,12 +331,12 @@ print("trained:", all_loss_test[:,:,0].min(axis=0))
 plt.plot(norm_losses)
 plt.show()
 
-plt.figure(2)
-all_loss_test_2 = np.array(all_loss_test_2)
-norm_losses=all_loss_test_2[:,:,0]/all_loss_test_2[:,:,0].max(axis=0)[None, :]
-print("trained:", all_loss_test_2[:,:,0].min(axis=0))
-plt.plot(norm_losses)
-plt.show()
+# plt.figure(2)
+# all_loss_test_2 = np.array(all_loss_test_2)
+# norm_losses=all_loss_test_2[:,:,0]/all_loss_test_2[:,:,0].max(axis=0)[None, :]
+# print("trained:", all_loss_test_2[:,:,0].min(axis=0))
+# plt.plot(norm_losses)
+# plt.show()
 
 #
 # plt.figure(2)
