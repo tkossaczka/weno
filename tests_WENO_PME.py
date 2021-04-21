@@ -11,13 +11,16 @@ from define_problem_heat_eq import heat_equation
 from define_problem_PME import PME
 from initial_condition_generator import init_PME
 import random
+from mpl_toolkits.axes_grid1.inset_locator import zoomed_inset_axes
+from mpl_toolkits.axes_grid1.inset_locator import mark_inset
+from mpl_toolkits.axes_grid1.inset_locator import inset_axes
 
 torch.set_default_dtype(torch.float64)
 
 #train_model = WENONetwork_2()
 # train_model = torch.load("C:/Users/Tatiana/Desktop/Research/Research_ML_WENO/PME_Test/Models/Model_41/690.pt") #41/690 for boxes
-# train_model = torch.load("C:/Users/Tatiana/Desktop/Research/Research_ML_WENO/PME_Test/Models_boxes/Model_16/3.pt") #5/999 for boxes
-train_model = torch.load("C:/Users/Tatiana/Desktop/Research/Research_ML_WENO/PME_Test/Models/Model_98/400.pt") #45/500 #46/650 # 47/999
+# train_model = torch.load("C:/Users/Tatiana/Desktop/Research/Research_ML_WENO/PME_Test/Models_boxes/Model_5/999.pt") #5/999 for boxes
+train_model = torch.load("C:/Users/Tatiana/Desktop/Research/Research_ML_WENO/PME_Test/Models/Model_103/60.pt") #45/500 #46/650 # 47/999
 
 def validation_problems(j):
     params_vld = []
@@ -36,7 +39,7 @@ c = random.uniform(2, 8)
 d = random.uniform(2, 8)
 e = random.uniform(2, 8)
 print(a,b,c,d,e)
-
+#
 # def validation_problems(j):
 #     params_vld = []
 #     params_vld.append({'T': 1.2, 'e': 1e-13, 'L': 6, 'power': a, 'd': 1})
@@ -85,9 +88,9 @@ u_exs = [u_ex_0[0:1024 + 1:16, :], u_ex_1[0:1024 + 1:16, :], u_ex_2[0:1024 + 1:1
 
 problem= PME
 # example = "boxes"
-rng = 5
+# rng = 1
 example = "Barenblatt"
-# rng = 7
+rng = 1
 err_nt_max_vec = np.zeros(rng)
 err_nt_mean_vec = np.zeros(rng)
 err_t_max_vec = np.zeros(rng)
@@ -109,12 +112,12 @@ for j in range(rng):
     # problem_main.initial_condition = torch.Tensor(problem_main.initial_condition)
     u_init, nn = train_model.init_run_weno(problem_main, vectorized=True, just_one_time_step=False)
     u_t = u_init
-    #plt.figure(1)
+    # plt.figure(1)
     with torch.no_grad():
         for k in range(nn):
             u_t = train_model.run_weno(problem_main, u_t, mweno=True, mapped=False, vectorized=True, trainable=True, k=k)
             V_t, _, _ = problem_main.transformation(u_t)
-            #plt.plot(V_t)
+            # plt.plot(u_t)
     u_nt = u_init
     #plt.figure(2)
     for k in range(nn):
@@ -150,8 +153,8 @@ for j in range(rng):
         err_t_max_vec[j] = error_t_max
         err_nt_mean_vec[j] = error_nt_mean
         err_t_mean_vec[j] = error_t_mean
-        # plt.figure(j + 1)
-        # plt.plot(S, V_nt, S, V_t, S, u_ex)
+        plt.figure(j + 1)
+        plt.plot(S, V_nt, S, V_t, S, u_ex)
 
 err_mat = np.zeros((4,rng))
 err_mat[0,:] = err_nt_max_vec
@@ -174,37 +177,78 @@ ratio_l2 = err_mat[2,:]/err_mat[3,:]
 # ax = fig.gca(projection='3d')
 # ax.plot_surface(X, Y, UU, cmap=cm.viridis)
 
-#
-# params = {'T': 2, 'e': 1e-13, 'L': 6, 'power': 6.248522955368744, 'd': 1}
-# problem_main = problem(sample_id=None, example=example, space_steps=64, time_steps=None, params=params)
-# u_init, nn = train_model.init_run_weno(problem_main, vectorized=True, just_one_time_step=False)
-# u_nt = torch.zeros((65,nn+1))
-# u_nt[:,0] = u_init
-# for k in range(nn):
-#     u_nt[:,k+1] = train_model.run_weno(problem_main, u_nt[:,k], mweno=True, mapped=False, vectorized=True, trainable=True, k=k)
-#
-# time = problem_main.time
-# u_ex = np.zeros((65,nn+1))
-# u_ex[:,0] = u_init
-# for k in range(nn):
-#     u_ex[:,k+1] = problem_main.exact(time[k+1])
-#
-# plt.figure(2)
-# plt.plot(u_nt.detach().numpy()[:,138])
-# plt.plot(u_ex[:,138])
-#
-# plt.figure(3)
-# plt.plot(u_ex)
-#
-# plt.figure(4)
-# plt.plot(u_nt.detach().numpy())
-#
-# plt.figure(5)
-# plt.plot(u_nt.detach().numpy()[:,0])
-# plt.plot(u_ex[:,0])
-# plt.plot(u_nt.detach().numpy()[:,100])
-# plt.plot(u_ex[:,100])
-# plt.plot(u_nt.detach().numpy()[:,200])
-# plt.plot(u_ex[:,200])
-# plt.plot(u_nt.detach().numpy()[:,300])
-# plt.plot(u_ex[:,300])
+V_nt = V_nt.detach().numpy()
+V_t = V_t.detach().numpy()
+
+## m = 2
+# fig, ax = plt.subplots()
+# ax.plot(S, V_nt , color='blue') #, marker='o')
+# ax.plot(S, V_t, color='red', marker='x')
+# ax.plot(S, u_ex, color='black')
+# ax.legend(('WENO', 'WENO-DS', 'ref. sol.'), loc=1)
+# ax.set_xlabel('x')
+# ax.set_ylabel('u')
+# #axins = zoomed_inset_axes(ax, 1.5, loc=1)  # zoom = 6
+# axins = inset_axes(ax, width=0.75, height=0.75, loc=6)
+# ax.plot(S, V_nt, color='blue') #, marker='o')
+# ax.plot(S, V_t, color='red', marker='x')
+# ax.plot(S, u_ex, color='black')
+# axins.set_xlim(-4.55, -4.25)  # Limit the region for zoom
+# axins.set_ylim(-0.001, 0.03)
+# plt.xticks(visible=False)  # Not present ticks
+# plt.yticks(visible=False)
+# axins2 = inset_axes(ax, width=0.75, height=0.75, loc=7)
+# ax.plot(S, V_nt, color='blue') #, marker='o')
+# ax.plot(S, V_t, color='red', marker='x')
+# ax.plot(S, u_ex, color='black')
+# axins2.set_xlim(4.25, 4.55)  # Limit the region for zoom
+# axins2.set_ylim(-0.001, 0.03)
+# plt.xticks(visible=False)  # Not present ticks
+# plt.yticks(visible=False)
+# mark_inset(ax, axins, loc1=3, loc2=4, fc="none", ec="0.5")
+# mark_inset(ax, axins2, loc1=3, loc2=4, fc="none", ec="0.5")
+# plt.draw()
+# plt.show()
+#plt.savefig("foo.pdf", bbox_inches='tight')
+
+fig, ax = plt.subplots()
+ax.plot(S, V_nt, color='blue') #, marker='o')
+ax.plot(S, V_t, color='red', marker='x')
+ax.plot(S, u_ex, color='black')
+ax.legend(('WENO-Z', 'WENO-DS', 'ref. sol.'), loc=1)
+ax.set_xlabel('x')
+ax.set_ylabel('u')
+axins = inset_axes(ax, width=1.5, height=1.5, loc=6)
+axins.plot(S, V_nt, color='blue')
+axins.plot(S, V_t, color='red', marker='x')
+axins.plot(S, u_ex, color='black')
+axins.set_xlim(-4.55, -4.25)  # Limit the region for zoom
+axins.set_ylim(-0.01, 0.03)
+plt.xticks(visible=False)  # Not present ticks
+plt.yticks(visible=False)
+axins2 = inset_axes(ax, width=1.5, height=1.5, loc=7)
+axins2.plot(S, V_nt, color='blue') #, marker='o')
+axins2.plot(S, V_t, color='red', marker='x')
+axins2.plot(S, u_ex, color='black')
+axins2.set_xlim(4.25, 4.55)  # Limit the region for zoom
+axins2.set_ylim(-0.01, 0.03)
+plt.xticks(visible=False)  # Not present ticks
+plt.yticks(visible=False)
+mark_inset(ax, axins, loc1=3, loc2=4, fc="none", ec="0.5")
+mark_inset(ax, axins2, loc1=3, loc2=4, fc="none", ec="0.5")
+plt.draw()
+plt.show()
+
+fig, (ax1, ax2) = plt.subplots(2)
+fig.suptitle('Vertically stacked subplots')
+ax1.plot(S, V_nt, color='blue')
+ax1.plot(S, V_t, color='red', marker='x')
+ax1.plot(S, u_ex, color='black')
+ax1.set_xlim(-4.55, -4.25)  # Limit the region for zoom
+ax1.set_ylim(-0.001, 0.022)
+ax2.plot(S, V_nt, color='blue')
+ax2.plot(S, V_t, color='red', marker='x')
+ax2.plot(S, u_ex, color='black')
+ax2.set_xlim(4.25, 4.55)  # Limit the region for zoom
+ax2.set_ylim(-0.001, 0.022)
+

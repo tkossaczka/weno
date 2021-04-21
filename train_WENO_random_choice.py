@@ -21,14 +21,14 @@ def monotonicity_loss(u):
     loss = monotonicity
     return loss
 
-def exact_loss(u, u_ex, power):
+def exact_loss(u, u_ex):
     error = train_model.compute_error(u, u_ex)
     # loss = error # PME boxes
     # if loss > 0.001:
     #     loss = loss/10
     loss = 10e4*error # PME Barenblatt
     if loss > 1:
-        loss = loss**(1/power)
+        loss = torch.sqrt(loss)
     # loss = error
     return loss
 
@@ -45,7 +45,7 @@ def exact_loss_2d(u, u_ex):
 
 # optimizer = optim.Adam(train_model.parameters(), lr=0.0001)   # Buckley-Leverett
 # optimizer = optim.Adam(train_model.parameters(), lr=0.0001) #, weight_decay=0.001)  # PME boxes
-optimizer = optim.Adam(train_model.parameters(), lr=0.1) #, weight_decay=0.1) # PME Barenblatt   # todo je lepsi lr 0.01?
+optimizer = optim.Adam(train_model.parameters(), lr=0.01) #, weight_decay=0.1) # PME Barenblatt   # todo je lepsi lr 0.01?
 # optimizer = optim.SGD(train_model.parameters(), lr=0.01, weight_decay=0.00001)
 bound = 1.15
 
@@ -175,6 +175,7 @@ def validation_problems_BL_3(j):
     params_vld.append({'T': 0.2, 'e': 1e-13, 'L': 0, 'R': 1, 'C': 0.5, 'G': 1})
     params_vld.append({'T': 0.2, 'e': 1e-13, 'L': 0, 'R': 1, 'C': 0.25, 'G': 4})
     return params_vld[j]
+
 all_loss_test = []
 #all_loss_test_2 = []
 
@@ -211,7 +212,7 @@ rng = 7
 # rng = 5
 
 phandler = ProblemHandler(problem_classes = current_problem_classes, max_num_open_problems=200)
-test_modulo=100
+test_modulo=10
 for j in range(500):
     loss_test = []
     #loss_test_2 = []
@@ -236,7 +237,7 @@ for j in range(500):
     if example == "Barenblatt_2d":
         loss = exact_loss_2d(u_new,u_exact)
     else:
-        loss_exact = exact_loss(u_new,u_exact, problem.params['power'])
+        loss_exact = exact_loss(u_new,u_exact)
         #loss_overflows = overflows_loss(u_new)
         print(loss_exact) #, loss_overflows)
         loss = loss_exact #+ loss_overflows
@@ -252,7 +253,7 @@ for j in range(500):
     phandler.update_problem(problem_id, u_new)
     if not (j % test_modulo):
         if example == "Barenblatt":
-            base_path = "C:/Users/Tatiana/Desktop/Research/Research_ML_WENO/PME_Test/Models/Model_99/"
+            base_path = "C:/Users/Tatiana/Desktop/Research/Research_ML_WENO/PME_Test/Models/Model_5/"
         elif example == "boxes":
             base_path = "C:/Users/Tatiana/Desktop/Research/Research_ML_WENO/PME_Test/Models_boxes/Model_19/"  # TODO model 18 je uz obsadeny!!!!!
         elif example == "Barenblatt_2d":
@@ -299,7 +300,7 @@ for j in range(500):
                 power_test = problem_test.params['power']
                 u_exact_test = problem_test.exact(T_test)
                 u_exact_test = torch.Tensor(u_exact_test)
-                single_problem_loss_test.append(exact_loss(u_test, u_exact_test, problem_test.params['power']))
+                single_problem_loss_test.append(exact_loss(u_test, u_exact_test))
                 #single_problem_loss_test_2.append(overflows_loss(u_test))
             elif example == "boxes":
                 single_problem_loss_test.append(exact_loss(u_test, u_exs[kk][0:1024 + 1:16, -1]))
