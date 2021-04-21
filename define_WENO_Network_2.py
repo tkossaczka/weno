@@ -42,7 +42,7 @@ class FancyNet(nn.Module):
     def __init__(self):
         self.num_inner_convs = 1
         super(FancyNet, self).__init__()
-        self.conv0 = nn.Conv1d(2, 5, kernel_size=5, stride=1, padding=2)
+        self.conv0 = nn.Conv1d(3, 5, kernel_size=5, stride=1, padding=2)
         self.convs = nn.ModuleList([nn.Conv1d(5, 5, kernel_size=5, stride=1, padding=2) for k in range(self.num_inner_convs)])
         self.conv_out = nn.Conv1d(5, 1, kernel_size=1, stride=1, padding=0)
 
@@ -134,6 +134,7 @@ class WENONetwork_2(WENONetwork):
 
     def run_weno(self, problem, u, mweno, mapped, vectorized, trainable, k):
         e = problem.params['e']
+        power = problem.params['power']
         n, t, h = problem.time_steps, problem.t, problem.h
         term_2 = problem.der_2()
         term_1 = problem.der_1()
@@ -152,7 +153,7 @@ class WENONetwork_2(WENONetwork):
         uu_conv = problem.funct_convection(uu)
         uu_diff = problem.funct_diffusion(uu)
         u1 = torch.zeros(uu.shape[0])
-        RHSd = self.WENO6(uu_diff, e, mweno=mweno, mapped=mapped, trainable=trainable)
+        RHSd = self.WENO6(uu_diff, power, e, mweno=mweno, mapped=mapped, trainable=trainable)
         if w5_minus=='both':
             RHSc_p = self.WENO5(uu_conv, e, w5_minus=False, mweno=mweno, mapped=mapped, trainable=trainable)
             RHSc_n= self.WENO5(uu_conv, e, w5_minus=True, mweno=mweno, mapped=mapped, trainable=trainable)
@@ -176,7 +177,7 @@ class WENONetwork_2(WENONetwork):
         uu1_conv = problem.funct_convection(u1)
         uu1_diff = problem.funct_diffusion(u1)
         u2 = torch.zeros(uu.shape[0])
-        RHS1d = self.WENO6(uu1_diff, e, mweno=mweno, mapped=mapped, trainable=trainable)
+        RHS1d = self.WENO6(uu1_diff,power, e, mweno=mweno, mapped=mapped, trainable=trainable)
         if w5_minus=='both':
             RHS1c_p = self.WENO5(uu1_conv, e, w5_minus=False, mweno=mweno, mapped=mapped, trainable=trainable)
             RHS1c_n = self.WENO5(uu1_conv, e, w5_minus=True, mweno=mweno, mapped=mapped, trainable=trainable)
@@ -200,7 +201,7 @@ class WENONetwork_2(WENONetwork):
         uu2_conv = problem.funct_convection(u2)
         uu2_diff = problem.funct_diffusion(u2)
         u_ret = torch.zeros(uu.shape[0])
-        RHS2d = self.WENO6(uu2_diff, e, mweno=mweno, mapped=mapped, trainable=trainable)
+        RHS2d = self.WENO6(uu2_diff,power, e, mweno=mweno, mapped=mapped, trainable=trainable)
         if w5_minus=='both':
             RHS2c_p = self.WENO5(uu2_conv, e, w5_minus=False, mweno=mweno, mapped=mapped, trainable=trainable)
             RHS2c_n = self.WENO5(uu2_conv, e, w5_minus=True, mweno=mweno, mapped=mapped, trainable=trainable)

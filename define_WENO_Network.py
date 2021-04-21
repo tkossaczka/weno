@@ -101,6 +101,7 @@ class WENONetwork(nn.Module):
             dif = self.__get_average_diff(uu)
             dif2 = self.__get_average_diff2(uu)
             dif12 = torch.stack([dif, dif2 ])
+            # dif12 = torch.stack([dif, dif2, dif**power, dif2**power]) #,dif**3,dif2**3,dif**2*dif2,dif2**2*dif])
             dif12 = self.prepare_dif(dif12)
 
             if w5_minus:
@@ -188,7 +189,7 @@ class WENONetwork(nn.Module):
 
         return RHS
 
-    def WENO6(self, uu, e, mweno, mapped, trainable=True):
+    def WENO6(self, uu, power, e, mweno, mapped, trainable=True):
         uu_left = uu[:-1]
         uu_right = uu[1:]
 
@@ -219,7 +220,9 @@ class WENONetwork(nn.Module):
         if trainable:
             dif = self.__get_average_diff(uu)
             dif2 = self.__get_average_diff2(uu)
-            dif12 = torch.stack([dif, dif2])
+            # dif12 = torch.stack([dif, dif2])
+            power_vec = power*torch.ones(dif.size())
+            dif12 = torch.stack([dif, dif2, power_vec])
             dif12 = self.prepare_dif(dif12)
             beta_multiplicators = self.inner_nn_weno6(dif12)[0, 0, :] + self.weno6_mult_bias
             # beta_multiplicators = beta_multiplicators**2

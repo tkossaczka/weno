@@ -26,8 +26,8 @@ def exact_loss(u, u_ex):
     # loss = error # PME boxes
     # if loss > 0.001:
     #     loss = loss/10
-    loss = 10e4*error # PME Barenblatt
-    if loss > 1:
+    loss = 10e2*error # PME Barenblatt
+    if loss > 0.1:
         loss = torch.sqrt(loss)
     # loss = error
     return loss
@@ -35,7 +35,7 @@ def exact_loss(u, u_ex):
 def overflows_loss(u):
     u_min = torch.Tensor([0.0])
     overflows = torch.sum(torch.abs(torch.min(u, u_min) - u_min))
-    loss = 10e3*overflows
+    loss = 10e4*overflows
     return loss
 
 def exact_loss_2d(u, u_ex):
@@ -45,7 +45,7 @@ def exact_loss_2d(u, u_ex):
 
 # optimizer = optim.Adam(train_model.parameters(), lr=0.0001)   # Buckley-Leverett
 # optimizer = optim.Adam(train_model.parameters(), lr=0.0001) #, weight_decay=0.001)  # PME boxes
-optimizer = optim.Adam(train_model.parameters(), lr=0.01) #, weight_decay=0.1) # PME Barenblatt   # todo je lepsi lr 0.01?
+optimizer = optim.Adam(train_model.parameters(), lr=0.1) #, weight_decay=0.1) # PME Barenblatt   # todo je lepsi lr 0.01?
 # optimizer = optim.SGD(train_model.parameters(), lr=0.01, weight_decay=0.00001)
 bound = 1.15
 
@@ -253,7 +253,7 @@ for j in range(500):
     phandler.update_problem(problem_id, u_new)
     if not (j % test_modulo):
         if example == "Barenblatt":
-            base_path = "C:/Users/Tatiana/Desktop/Research/Research_ML_WENO/PME_Test/Models/Model_5/"
+            base_path = "C:/Users/Tatiana/Desktop/Research/Research_ML_WENO/PME_Test/Models/Model_7/"
         elif example == "boxes":
             base_path = "C:/Users/Tatiana/Desktop/Research/Research_ML_WENO/PME_Test/Models_boxes/Model_19/"  # TODO model 18 je uz obsadeny!!!!!
         elif example == "Barenblatt_2d":
