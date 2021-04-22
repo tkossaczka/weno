@@ -98,8 +98,8 @@ class WENONetwork(nn.Module):
         old_betas_n = [betan0, betan1, betan2]
 
         if trainable:
-            dif = self.__get_average_diff(uu)
-            dif2 = self.__get_average_diff2(uu)
+            dif = self.get_average_diff(uu)
+            dif2 = self.get_average_diff2(uu)
             dif12 = torch.stack([dif, dif2 ])
             # dif12 = torch.stack([dif, dif2, dif**power, dif2**power]) #,dif**3,dif2**3,dif**2*dif2,dif2**2*dif])
             dif12 = self.prepare_dif(dif12)
@@ -189,7 +189,7 @@ class WENONetwork(nn.Module):
 
         return RHS
 
-    def WENO6(self, uu, power, e, mweno, mapped, trainable=True):
+    def WENO6(self, uu, e, mweno, mapped, trainable=True):
         uu_left = uu[:-1]
         uu_right = uu[1:]
 
@@ -218,16 +218,11 @@ class WENONetwork(nn.Module):
         old_betas_n = [betan0, betan1, betan2]
 
         if trainable:
-            dif = self.__get_average_diff(uu)
-            dif2 = self.__get_average_diff2(uu)
+            dif = self.get_average_diff(uu)
+            dif2 = self.get_average_diff2(uu)
             dif12 = torch.stack([dif, dif2])
-            # power_vec = power*torch.ones(dif.size())
-            # dif12 = torch.stack([dif, dif2, power_vec])
             dif12 = self.prepare_dif(dif12)
             beta_multiplicators = self.inner_nn_weno6(dif12)[0, 0, :] + self.weno6_mult_bias
-            # beta_multiplicators = beta_multiplicators**2
-            # beta_multiplicators_left = beta_multiplicators[:-1]
-            # beta_multiplicators_right = beta_multiplicators[1:]
 
             betap_corrected_list = []
             betan_corrected_list = []
@@ -315,7 +310,7 @@ class WENONetwork(nn.Module):
 
         return RHS
 
-    def __get_average_diff(self, uu):
+    def get_average_diff(self, uu):
         dif = uu[1:] - uu[:-1]
         dif_left = torch.zeros_like(uu)
         dif_right = torch.zeros_like(uu)
@@ -326,7 +321,7 @@ class WENONetwork(nn.Module):
         dif_final = 0.5 * dif_left + 0.5 * dif_right
         return dif_final
 
-    def __get_average_diff2(self, uu):
+    def get_average_diff2(self, uu):
         dif = uu[1:] - uu[:-1]
         dif_left = torch.zeros_like(uu)
         dif_right = torch.zeros_like(uu)

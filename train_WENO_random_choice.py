@@ -45,7 +45,7 @@ def exact_loss_2d(u, u_ex):
 
 # optimizer = optim.Adam(train_model.parameters(), lr=0.0001)   # Buckley-Leverett
 # optimizer = optim.Adam(train_model.parameters(), lr=0.0001) #, weight_decay=0.001)  # PME boxes
-optimizer = optim.Adam(train_model.parameters(), lr=0.01) #, weight_decay=0.1) # PME Barenblatt   # todo je lepsi lr 0.01?
+optimizer = optim.Adam(train_model.parameters(), lr=0.1) #, weight_decay=0.1) # PME Barenblatt   # todo je lepsi lr 0.01?
 # optimizer = optim.SGD(train_model.parameters(), lr=0.01, weight_decay=0.00001)
 bound = 1.15
 
@@ -225,7 +225,7 @@ rng = 13
 
 phandler = ProblemHandler(problem_classes = current_problem_classes, max_num_open_problems=200)
 test_modulo=10
-for j in range(500):
+for j in range(100):
     loss_test = []
     #loss_test_2 = []
     problem_specs, problem_id = phandler.get_random_problem(0.1)
@@ -265,7 +265,7 @@ for j in range(500):
     phandler.update_problem(problem_id, u_new)
     if not (j % test_modulo):
         if example == "Barenblatt":
-            base_path = "C:/Users/Tatiana/Desktop/Research/Research_ML_WENO/PME_Test/Models/Model_8/"
+            base_path = "C:/Users/Tatiana/Desktop/Research/Research_ML_WENO/PME_Test/Models/Model_13/"
         elif example == "boxes":
             base_path = "C:/Users/Tatiana/Desktop/Research/Research_ML_WENO/PME_Test/Models_boxes/Model_19/"  # TODO model 18 je uz obsadeny!!!!!
         elif example == "Barenblatt_2d":
