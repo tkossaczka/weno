@@ -42,7 +42,7 @@ class FancyNet(nn.Module):
     def __init__(self):
         self.num_inner_convs = 1
         super(FancyNet, self).__init__()
-        self.conv0 = nn.Conv1d(3, 5, kernel_size=5, stride=1, padding=2)
+        self.conv0 = nn.Conv1d(2, 5, kernel_size=5, stride=1, padding=2)
         self.convs = nn.ModuleList([nn.Conv1d(5, 5, kernel_size=5, stride=1, padding=2) for k in range(self.num_inner_convs)])
         self.conv_out = nn.Conv1d(5, 1, kernel_size=1, stride=1, padding=0)
 

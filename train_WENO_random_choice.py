@@ -27,7 +27,7 @@ def exact_loss(u, u_ex):
     # if loss > 0.001:
     #     loss = loss/10
     loss = 10e2*error # PME Barenblatt
-    if loss > 0.1:
+    if loss > 0.01:
         loss = torch.sqrt(loss)
     # loss = error
     return loss
@@ -45,7 +45,7 @@ def exact_loss_2d(u, u_ex):
 
 # optimizer = optim.Adam(train_model.parameters(), lr=0.0001)   # Buckley-Leverett
 # optimizer = optim.Adam(train_model.parameters(), lr=0.0001) #, weight_decay=0.001)  # PME boxes
-optimizer = optim.Adam(train_model.parameters(), lr=0.1) #, weight_decay=0.1) # PME Barenblatt   # todo je lepsi lr 0.01?
+optimizer = optim.Adam(train_model.parameters(), lr=0.01) #, weight_decay=0.1) # PME Barenblatt   # todo je lepsi lr 0.01?
 # optimizer = optim.SGD(train_model.parameters(), lr=0.01, weight_decay=0.00001)
 bound = 1.15
 
@@ -90,22 +90,34 @@ def validation_problems_barenblatt(j):
 # print(a,b,c,d,e,f,g,h)
 
 a = 2.157
+aa = 3.012
 b = 3.697
+bb = 3.987
 c = 4.158
+cc = 4.572
 d = 4.723
+dd = 5.041
 e = 5.568
+ee = 6.087
 f = 6.284
+ff = 7.124
 g = 7.958
 print(a,b,c,d,e,f,g)
 
 def validation_problems_barenblatt(j):
     params_vld = []
     params_vld.append({'T': 2, 'e': 1e-13, 'L': 6, 'power': a, 'd': 1})
+    params_vld.append({'T': 2, 'e': 1e-13, 'L': 6, 'power': aa, 'd': 1})
     params_vld.append({'T': 2, 'e': 1e-13, 'L': 6, 'power': b, 'd': 1})
+    params_vld.append({'T': 2, 'e': 1e-13, 'L': 6, 'power': bb, 'd': 1})
     params_vld.append({'T': 2, 'e': 1e-13, 'L': 6, 'power': c, 'd': 1})
+    params_vld.append({'T': 2, 'e': 1e-13, 'L': 6, 'power': cc, 'd': 1})
     params_vld.append({'T': 2, 'e': 1e-13, 'L': 6, 'power': d, 'd': 1})
+    params_vld.append({'T': 2, 'e': 1e-13, 'L': 6, 'power': dd, 'd': 1})
     params_vld.append({'T': 2, 'e': 1e-13, 'L': 6, 'power': e, 'd': 1})
+    params_vld.append({'T': 2, 'e': 1e-13, 'L': 6, 'power': ee, 'd': 1})
     params_vld.append({'T': 2, 'e': 1e-13, 'L': 6, 'power': f, 'd': 1})
+    params_vld.append({'T': 2, 'e': 1e-13, 'L': 6, 'power': ff, 'd': 1})
     params_vld.append({'T': 2, 'e': 1e-13, 'L': 6, 'power': g, 'd': 1})
     return params_vld[j]
 
@@ -187,7 +199,7 @@ problem_class = PME
 #
 current_problem_classes = [(PME, {"sample_id": None, "example": "Barenblatt", "space_steps": 64, "time_steps": None, "params": None})]
 example = "Barenblatt"
-rng = 7
+rng = 13
 
 # current_problem_classes = [(PME, {"sample_id": 0, "example": "boxes", "space_steps": 64, "time_steps": None, "params": 0})]
 # example = "boxes"
@@ -253,7 +265,7 @@ for j in range(500):
     phandler.update_problem(problem_id, u_new)
     if not (j % test_modulo):
         if example == "Barenblatt":
-            base_path = "C:/Users/Tatiana/Desktop/Research/Research_ML_WENO/PME_Test/Models/Model_7/"
+            base_path = "C:/Users/Tatiana/Desktop/Research/Research_ML_WENO/PME_Test/Models/Model_8/"
         elif example == "boxes":
             base_path = "C:/Users/Tatiana/Desktop/Research/Research_ML_WENO/PME_Test/Models_boxes/Model_19/"  # TODO model 18 je uz obsadeny!!!!!
         elif example == "Barenblatt_2d":

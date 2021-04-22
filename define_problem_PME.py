@@ -39,7 +39,7 @@ class PME():
         example = self.example
         if example == "Barenblatt":
             params["T"] = 1.4 #2 #1.4
-            params["power"] = random.uniform(2, 8)  # random.uniform(2,5) #random.uniform(2,8)
+            params["power"] = random.uniform(2,8) #(4.7,6.3)  # random.uniform(2,5) #random.uniform(2,8)
             params["d"] = 1
             params["L"] = 6
         elif example == "boxes":
