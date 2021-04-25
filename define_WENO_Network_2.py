@@ -40,16 +40,16 @@ class FancyNet(nn.Module):
 
 class MNet(nn.Module):
     def __init__(self):
-        self.num_inner_lins = 1
+        self.num_inner_lins = 2
         super(MNet, self).__init__()
-        self.lin0 = nn.Linear(1,5)
-        self.lins = nn.ModuleList([nn.Linear(5, 5) for k in range(self.num_inner_lins)])
-        self.lin_out = nn.Linear(5, 1)
+        self.lin0 = nn.Linear(1,32)
+        self.lins = nn.ModuleList([nn.Linear(32, 32) for k in range(self.num_inner_lins)])
+        self.lin_out = nn.Linear(32, 1)
 
     def forward(self, x):
         x = F.elu(self.lin0(x))
         for k in range(self.num_inner_lins):
-            x = F.elu(self.lins[k](x)) + x
+            x = F.elu(self.lins[k](x)) #+ x
         x = torch.sigmoid(self.lin_out(x))
         return x
 
@@ -71,9 +71,11 @@ class MNet(nn.Module):
 #     return net
 
 class WENONetwork_2(WENONetwork):
-    def __init__(self):
+    def __init__(self, train_with_coeff=False):
         super().__init__()
-        self.m_nn = self.get_m_nn()
+        self.train_with_coeff = train_with_coeff
+        if train_with_coeff == True:
+            self.m_nn = self.get_m_nn()
 
     def get_inner_nn_weno6(self):
         return FancyNet()
@@ -124,8 +126,9 @@ class WENONetwork_2(WENONetwork):
             dif12 = torch.stack([dif, dif2])
             dif12 = self.prepare_dif(dif12)
             beta_multiplicators = self.inner_nn_weno6(dif12)[0, 0, :] + self.weno6_mult_bias
-            train_coefficient = self.m_nn(power[None])
-            beta_multiplicators = torch.abs(beta_multiplicators)**train_coefficient
+            if self.train_with_coeff == True:
+                train_coefficient = self.m_nn((power[None]-5.0)/16)
+                beta_multiplicators = torch.abs(beta_multiplicators)**train_coefficient
 
             betap_corrected_list = []
             betan_corrected_list = []

@@ -224,8 +224,8 @@ rng = 13
 # rng = 5
 
 phandler = ProblemHandler(problem_classes = current_problem_classes, max_num_open_problems=200)
-test_modulo=10
-for j in range(100):
+test_modulo=20
+for j in range(200):
     loss_test = []
     #loss_test_2 = []
     problem_specs, problem_id = phandler.get_random_problem(0.1)
