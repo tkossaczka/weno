@@ -48,7 +48,7 @@ def exact_loss_2d(u, u_ex):
 # optimizer = optim.Adam(train_model.parameters(), lr=0.0001)   # Buckley-Leverett
 # optimizer = optim.Adam(train_model.parameters(), lr=0.0001) #, weight_decay=0.001)  # PME boxes
 optimizer = optim.Adam(train_model.parameters(), lr=0.1) #, weight_decay=0.1) # PME Barenblatt   # todo je lepsi lr 0.01?
-optimizer = optim.Adam([{'params': train_model.parameters(), 'lr': 0.1}, {'params': train_model2.parameters(), 'lr': 0.1}] ) #, weight_decay=0.1) # PME Barenblatt   # todo je lepsi lr 0.01?
+optimizer = optim.Adam([{'params': train_model.parameters(), 'lr': 0.1}, {'params': train_model2.parameters(), 'lr': 0.001}] ) #, weight_decay=0.1) # PME Barenblatt   # todo je lepsi lr 0.01?
 # optimizer = optim.SGD(train_model.parameters(), lr=0.01, weight_decay=0.00001)
 bound = 1.15
 
@@ -241,7 +241,7 @@ for j in range(200):
         u_new = train_model.forward(problem, u_last, step, mweno = True, mapped = False, dim =2)
     else:
         u_new = train_model.forward(problem, u_last, step, mweno = True, mapped = False)
-        u_new = train_model2.forward(problem, u_last, step, mweno = True, mapped = False)
+        # u_new = train_model2.forward(problem, u_last, step, mweno = True, mapped = False)
         # u_new_nt = train_model.run_weno(problem, u_last, mweno=True, mapped=False, vectorized=True, trainable=False, k=step)
         if example == 'Barenblatt':
             u_new[u_new<0]=0
@@ -267,11 +267,19 @@ for j in range(200):
     #     print("optimizer_step")
     optimizer.step()  # Optimize weights
         # optimizer.zero_grad()
+    if example == 'Barenblatt':
+        u_new = train_model2.forward(problem, u_last, step, mweno = True, mapped = False)
+        loss_exact = exact_loss(u_new,u_exact)
+        print(loss_exact)
+        loss = loss_exact
+    loss.backward()
+    optimizer.step()
+    ##############################
     u_new.detach_()
     phandler.update_problem(problem_id, u_new)
     if not (j % test_modulo):
         if example == "Barenblatt":
-            base_path = "C:/Users/Tatiana/Desktop/Research/Research_ML_WENO/PME_Test/Models/Model_14/"
+            base_path = "C:/Users/Tatiana/Desktop/Research/Research_ML_WENO/PME_Test/Models/Model_15/"
         elif example == "boxes":
             base_path = "C:/Users/Tatiana/Desktop/Research/Research_ML_WENO/PME_Test/Models_boxes/Model_19/"  # TODO model 18 je uz obsadeny!!!!!
         elif example == "Barenblatt_2d":
@@ -282,6 +290,8 @@ for j in range(200):
             os.mkdir(base_path)
         path = os.path.join(base_path, "{}.pt".format(j))
         torch.save(train_model, path)
+        path = os.path.join(base_path, "0{}.pt".format(j))
+        torch.save(train_model2, path)
     # TEST IF LOSS IS DECREASING WITH THE NUMBER OF ITERATIONS INCREASING
     if not (j % test_modulo):
         print("TESTING ON VALIDATION PROBLEMS")
