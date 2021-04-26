@@ -69,7 +69,7 @@ class sub_train(WENONetwork_2):
             dif12 = self.prepare_dif(dif12)
             beta_multiplicators = self.inner_nn_weno6(dif12)[0, 0, :] + self.weno6_mult_bias
             if self.train_with_coeff == True:
-                train_coefficient = self.m_nn((power[None] - 5.0) / 50)
+                train_coefficient = self.m_nn((power[None] - 5.0) )
                 beta_multiplicators = torch.abs(beta_multiplicators) ** train_coefficient
                 # print(train_coefficient)
 
