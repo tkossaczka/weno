@@ -1,4 +1,5 @@
 from define_WENO_Network_2 import WENONetwork_2
+from sub_train import sub_train
 from utils.problem_handler import ProblemHandler
 import torch
 from torch import optim
@@ -15,6 +16,7 @@ import random
 torch.set_default_dtype(torch.float64)
 
 train_model = WENONetwork_2()
+train_model2 = sub_train()
 
 def monotonicity_loss(u):
     monotonicity = torch.sum(torch.max(u[:-1]-u[1:], torch.Tensor([0.0])))
@@ -46,6 +48,7 @@ def exact_loss_2d(u, u_ex):
 # optimizer = optim.Adam(train_model.parameters(), lr=0.0001)   # Buckley-Leverett
 # optimizer = optim.Adam(train_model.parameters(), lr=0.0001) #, weight_decay=0.001)  # PME boxes
 optimizer = optim.Adam(train_model.parameters(), lr=0.1) #, weight_decay=0.1) # PME Barenblatt   # todo je lepsi lr 0.01?
+optimizer = optim.Adam([{'params': train_model.parameters(), 'lr': 0.1}, {'params': train_model2.parameters(), 'lr': 0.1}] ) #, weight_decay=0.1) # PME Barenblatt   # todo je lepsi lr 0.01?
 # optimizer = optim.SGD(train_model.parameters(), lr=0.01, weight_decay=0.00001)
 bound = 1.15
 
@@ -224,7 +227,7 @@ rng = 13
 # rng = 5
 
 phandler = ProblemHandler(problem_classes = current_problem_classes, max_num_open_problems=200)
-test_modulo=20
+test_modulo=40
 for j in range(200):
     loss_test = []
     #loss_test_2 = []
@@ -238,8 +241,11 @@ for j in range(200):
         u_new = train_model.forward(problem, u_last, step, mweno = True, mapped = False, dim =2)
     else:
         u_new = train_model.forward(problem, u_last, step, mweno = True, mapped = False)
+        u_new = train_model2.forward(problem, u_last, step, mweno = True, mapped = False)
+        # u_new_nt = train_model.run_weno(problem, u_last, mweno=True, mapped=False, vectorized=True, trainable=False, k=step)
         if example == 'Barenblatt':
             u_new[u_new<0]=0
+            # u_new_nt[u_new_nt<0]=0
     if example == "Barenblatt" or example == "Barenblatt_2d":
         u_exact = problem.exact(problem.time[step+1])
     elif example == "boxes" or example == "gravity":
@@ -265,7 +271,7 @@ for j in range(200):
     phandler.update_problem(problem_id, u_new)
     if not (j % test_modulo):
         if example == "Barenblatt":
-            base_path = "C:/Users/Tatiana/Desktop/Research/Research_ML_WENO/PME_Test/Models/Model_13/"
+            base_path = "C:/Users/Tatiana/Desktop/Research/Research_ML_WENO/PME_Test/Models/Model_14/"
         elif example == "boxes":
             base_path = "C:/Users/Tatiana/Desktop/Research/Research_ML_WENO/PME_Test/Models_boxes/Model_19/"  # TODO model 18 je uz obsadeny!!!!!
         elif example == "Barenblatt_2d":
@@ -301,10 +307,10 @@ for j in range(200):
                     for k in range(tt):
                         u_test = train_model.run_weno_2d(problem_test, u_test, mweno=True, mapped=False, trainable=True, vectorized=True, k=k)
                 else:
-                    u_init, tt = train_model.init_run_weno(problem_test, vectorized=True, just_one_time_step=False)
+                    u_init, tt = train_model2.init_run_weno(problem_test, vectorized=True, just_one_time_step=False)
                     u_test = u_init
                     for k in range(tt):
-                        u_test = train_model.run_weno(problem_test, u_test, mweno=True, mapped=False, trainable=True, vectorized=True, k=k)
+                        u_test = train_model2.run_weno(problem_test, u_test, mweno=True, mapped=False, trainable=True, vectorized=True, k=k)
                         if example == 'Barenblatt':
                             u_test[u_test < 0] = 0
             if example == "Barenblatt":
