@@ -18,7 +18,7 @@ class MNet(nn.Module):
         x = torch.sigmoid(self.lin_out(x))
         return x
 
-class sub_train(WENONetwork_2):
+class sub_WENO(WENONetwork_2):
     def __init__(self, train_with_coeff=True):
         super().__init__()
         self.train_with_coeff = train_with_coeff
