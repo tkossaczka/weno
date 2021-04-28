@@ -203,7 +203,7 @@ problem_class = PME
 current_problem_classes = [(PME, {"sample_id": None, "example": "Barenblatt", "space_steps": 64, "time_steps": None, "params": None})]
 example = "Barenblatt"
 rng = 13
-model = 16
+model = 17
 
 # current_problem_classes = [(PME, {"sample_id": 0, "example": "boxes", "space_steps": 64, "time_steps": None, "params": 0})]
 # example = "boxes"
@@ -377,7 +377,7 @@ def exact_compare_loss(u, u_nt, u_ex):
 all_loss_test = []
 train_model = torch.load(os.path.join(base_path,"{}.pt".format(j-test_modulo+1)))
 train_model.train_with_coeff = True
-optimizer = optim.Adam(train_model.m_nn.parameters(), lr=0.001)
+optimizer = optim.Adam(train_model.m_nn.parameters(), lr=0.01)
 train_model.train_with_coeff = True
 test_modulo=10
 for j in range(100):
@@ -390,12 +390,13 @@ for j in range(100):
     u_new = train_model.forward(problem, u_last, step, mweno=True, mapped=False)
     # u_new = train_model.run_weno(problem, u_last, mweno=True, mapped=False, vectorized=True, trainable=True, k=step)
     u_new[u_new<0]=0
-    u_new_nt = train_model.run_weno(problem, u_last, mweno=True, mapped=False, vectorized=True, trainable=False, k=step)
-    u_new_nt[u_new_nt<0]=0
+    # u_new_nt = train_model.run_weno(problem, u_last, mweno=True, mapped=False, vectorized=True, trainable=False, k=step)
+    # u_new_nt[u_new_nt<0]=0
     u_exact = problem.exact(problem.time[step+1])
     u_exact = torch.Tensor(u_exact)
     optimizer.zero_grad()
-    loss = exact_compare_loss(u_new,u_new_nt,u_exact)
+    # loss = exact_compare_loss(u_new,u_new_nt,u_exact)
+    loss = exact_loss(u_new, u_exact)
     print(loss)
     loss.backward()
     optimizer.step()
@@ -432,6 +433,7 @@ for j in range(100):
 all_loss_test = np.array(all_loss_test)
 norm_losses=all_loss_test[:,:,0]/all_loss_test[:,:,0].max(axis=0)[None, :]
 print("trained:", all_loss_test[:,:,0].min(axis=0))
+plt.figure(2)
 plt.plot(norm_losses)
 plt.show()
 
