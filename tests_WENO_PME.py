@@ -20,7 +20,7 @@ torch.set_default_dtype(torch.float64)
 #train_model = WENONetwork_2()
 # train_model = torch.load("C:/Users/Tatiana/Desktop/Research/Research_ML_WENO/PME_Test/Models/Model_41/690.pt") #41/690 for boxes
 # train_model = torch.load("C:/Users/Tatiana/Desktop/Research/Research_ML_WENO/PME_Test/Models_boxes/Model_5/999.pt") #5/999 for boxes
-train_model = torch.load("C:/Users/Tatiana/Desktop/Research/Research_ML_WENO/PME_Test/Models/Model_15/040.pt") #45/500 #46/650 # 47/999
+train_model = torch.load("C:/Users/Tatiana/Desktop/Research/Research_ML_WENO/PME_Test/Models/Model_16/090.pt") #45/500 #46/650 # 47/999
 
 def validation_problems(j):
     params_vld = []
@@ -33,13 +33,13 @@ def validation_problems(j):
     params_vld.append({'T': 1.2, 'e': 1e-13, 'L': 6, 'power': 8, 'd': 1})
     return params_vld[j]
 
-a = random.uniform(2, 8)
-b = random.uniform(2, 8)
-c = random.uniform(2, 8)
-d = random.uniform(2, 8)
-e = random.uniform(2, 8)
-print(a,b,c,d,e)
-
+# a = random.uniform(2, 8)
+# b = random.uniform(2, 8)
+# c = random.uniform(2, 8)
+# d = random.uniform(2, 8)
+# e = random.uniform(2, 8)
+# print(a,b,c,d,e)
+#
 a = 2.157
 aa = 3.012
 b = 3.697

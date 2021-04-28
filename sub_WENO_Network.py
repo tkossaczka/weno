@@ -19,11 +19,10 @@ class MNet(nn.Module):
         return x
 
 class sub_WENO(WENONetwork_2):
-    def __init__(self, train_with_coeff=True):
+    def __init__(self, train_with_coeff):
         super().__init__()
         self.train_with_coeff = train_with_coeff
-        if train_with_coeff == True:
-            self.m_nn = self.get_m_nn()
+        self.m_nn = self.get_m_nn()
 
     def get_m_nn(self):
         return MNet()
