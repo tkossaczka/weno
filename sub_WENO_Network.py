@@ -7,9 +7,9 @@ class MNet(nn.Module):
     def __init__(self):
         self.num_inner_lins = 1
         super(MNet, self).__init__()
-        self.lin0 = nn.Linear(1,32)
-        self.lins = nn.ModuleList([nn.Linear(32, 32) for k in range(self.num_inner_lins)])
-        self.lin_out = nn.Linear(32, 1)
+        self.lin0 = nn.Linear(1,5)
+        self.lins = nn.ModuleList([nn.Linear(5, 5) for k in range(self.num_inner_lins)])
+        self.lin_out = nn.Linear(5, 1)
 
     def forward(self, x):
         x = F.elu(self.lin0(x))

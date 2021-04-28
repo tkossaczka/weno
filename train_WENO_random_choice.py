@@ -203,7 +203,7 @@ problem_class = PME
 current_problem_classes = [(PME, {"sample_id": None, "example": "Barenblatt", "space_steps": 64, "time_steps": None, "params": None})]
 example = "Barenblatt"
 rng = 13
-model = 17
+model = 19
 
 # current_problem_classes = [(PME, {"sample_id": 0, "example": "boxes", "space_steps": 64, "time_steps": None, "params": 0})]
 # example = "boxes"
@@ -377,7 +377,7 @@ def exact_compare_loss(u, u_nt, u_ex):
 all_loss_test = []
 train_model = torch.load(os.path.join(base_path,"{}.pt".format(j-test_modulo+1)))
 train_model.train_with_coeff = True
-optimizer = optim.Adam(train_model.m_nn.parameters(), lr=0.01)
+optimizer = optim.Adam(train_model.m_nn.parameters(), lr=0.001)
 train_model.train_with_coeff = True
 test_modulo=10
 for j in range(100):
