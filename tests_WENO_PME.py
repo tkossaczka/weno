@@ -2,6 +2,7 @@ import torch
 import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
+from validation_problems import validation_problems
 from matplotlib import cm
 from mpl_toolkits.mplot3d import Axes3D
 from define_problem_Digital import Digital_option
@@ -20,89 +21,14 @@ torch.set_default_dtype(torch.float64)
 #train_model = WENONetwork_2()
 # train_model = torch.load("C:/Users/Tatiana/Desktop/Research/Research_ML_WENO/PME_Test/Models/Model_41/690.pt") #41/690 for boxes
 # train_model = torch.load("C:/Users/Tatiana/Desktop/Research/Research_ML_WENO/PME_Test/Models_boxes/Model_5/999.pt") #5/999 for boxes
-train_model = torch.load("C:/Users/Tatiana/Desktop/Research/Research_ML_WENO/PME_Test/Models/Model_13/40.pt") #45/500 #46/650 # 47/999
+train_model = torch.load("C:/Users/Tatiana/Desktop/Research/Research_ML_WENO/PME_Test/Models/Model_18/100.pt") #45/500 #46/650 # 47/999
 
-def validation_problems(j):
-    params_vld = []
-    params_vld.append({'T': 2, 'e': 1e-13, 'L': 6, 'power': 2, 'd': 1})
-    params_vld.append({'T': 2, 'e': 1e-13, 'L': 6, 'power': 3, 'd': 1})
-    params_vld.append({'T': 2, 'e': 1e-13, 'L': 6, 'power': 4, 'd': 1})
-    params_vld.append({'T': 2, 'e': 1e-13, 'L': 6, 'power': 5, 'd': 1})
-    params_vld.append({'T': 2, 'e': 1e-13, 'L': 6, 'power': 6, 'd': 1})
-    params_vld.append({'T': 1.2, 'e': 1e-13, 'L': 6, 'power': 7, 'd': 1})
-    params_vld.append({'T': 1.2, 'e': 1e-13, 'L': 6, 'power': 8, 'd': 1})
-    return params_vld[j]
-
-# a = random.uniform(2, 8)
-# b = random.uniform(2, 8)
-# c = random.uniform(2, 8)
-# d = random.uniform(2, 8)
-# e = random.uniform(2, 8)
-# print(a,b,c,d,e)
-#
-a = 2.157
-aa = 3.012
-b = 3.697
-bb = 3.987
-c = 4.158
-cc = 4.572
-d = 4.723
-dd = 5.041
-e = 5.568
-ee = 6.087
-f = 6.284
-ff = 7.124
-g = 7.958
-print(a,b,c,d,e,f,g)
-
-# def validation_problems(j):
-#     params_vld = []
-#     params_vld.append({'T': 2, 'e': 1e-13, 'L': 6, 'power': a, 'd': 1})
-#     params_vld.append({'T': 2, 'e': 1e-13, 'L': 6, 'power': aa, 'd': 1})
-#     params_vld.append({'T': 2, 'e': 1e-13, 'L': 6, 'power': b, 'd': 1})
-#     params_vld.append({'T': 2, 'e': 1e-13, 'L': 6, 'power': bb, 'd': 1})
-#     params_vld.append({'T': 2, 'e': 1e-13, 'L': 6, 'power': c, 'd': 1})
-#     params_vld.append({'T': 2, 'e': 1e-13, 'L': 6, 'power': cc, 'd': 1})
-#     params_vld.append({'T': 2, 'e': 1e-13, 'L': 6, 'power': d, 'd': 1})
-#     params_vld.append({'T': 2, 'e': 1e-13, 'L': 6, 'power': dd, 'd': 1})
-#     params_vld.append({'T': 2, 'e': 1e-13, 'L': 6, 'power': e, 'd': 1})
-#     params_vld.append({'T': 2, 'e': 1e-13, 'L': 6, 'power': ee, 'd': 1})
-#     params_vld.append({'T': 2, 'e': 1e-13, 'L': 6, 'power': f, 'd': 1})
-#     params_vld.append({'T': 2, 'e': 1e-13, 'L': 6, 'power': ff, 'd': 1})
-#     params_vld.append({'T': 2, 'e': 1e-13, 'L': 6, 'power': g, 'd': 1})
-#     return params_vld[j]
-
-# def validation_problems(j):
-#     params_vld = []
-#     params_vld.append({'T': 2, 'e': 1e-13, 'L': 6, 'power': a, 'd': 1})
-#     params_vld.append({'T': 2, 'e': 1e-13, 'L': 6, 'power': b, 'd': 1})
-#     params_vld.append({'T': 2, 'e': 1e-13, 'L': 6, 'power': c, 'd': 1})
-#     params_vld.append({'T': 2, 'e': 1e-13, 'L': 6, 'power': d, 'd': 1})
-#     params_vld.append({'T': 2, 'e': 1e-13, 'L': 6, 'power': e, 'd': 1})
-#     return params_vld[j]
-
-# def validation_problems(j):
-#     params_vld = []
-#     params_vld.append({'T': 2, 'e': 1e-13, 'L': 6, 'power': 2.4, 'd': 1})
-#     params_vld.append({'T': 2, 'e': 1e-13, 'L': 6, 'power': 3.8, 'd': 1})
-#     params_vld.append({'T': 2, 'e': 1e-13, 'L': 6, 'power': 4.2, 'd': 1})
-#     params_vld.append({'T': 2, 'e': 1e-13, 'L': 6, 'power': 5.7, 'd': 1})
-#     return params_vld[j]
-
-def validation_problems_boxes(j):
-    params_vld = []
-    params_vld.append({'T': 0.5, 'e': 1e-13, 'L': 6, 'power': 2, 'd': 1})
-    params_vld.append({'T': 0.5, 'e': 1e-13, 'L': 6, 'power': 3, 'd': 1})
-    params_vld.append({'T': 0.5, 'e': 1e-13, 'L': 6, 'power': 4, 'd': 1})
-    params_vld.append({'T': 0.5, 'e': 1e-13, 'L': 6, 'power': 5, 'd': 1})
-    params_vld.append({'T': 0.5, 'e': 1e-13, 'L': 6, 'power': 6, 'd': 1})
-    return params_vld[j]
-u_ex_0 = torch.load("C:/Users/Tatiana/Desktop/Research/Research_ML_WENO/PME_Test/PME_Data_1024/Basic_test_set/u_ex_0")
-u_ex_1 = torch.load("C:/Users/Tatiana/Desktop/Research/Research_ML_WENO/PME_Test/PME_Data_1024/Basic_test_set/u_ex_1")
-u_ex_2 = torch.load("C:/Users/Tatiana/Desktop/Research/Research_ML_WENO/PME_Test/PME_Data_1024/Basic_test_set/u_ex_2")
-u_ex_3 = torch.load("C:/Users/Tatiana/Desktop/Research/Research_ML_WENO/PME_Test/PME_Data_1024/Basic_test_set/u_ex_3")
-u_ex_4 = torch.load("C:/Users/Tatiana/Desktop/Research/Research_ML_WENO/PME_Test/PME_Data_1024/Basic_test_set/u_ex_4")
-u_exs = [u_ex_0[0:1024 + 1:16, :], u_ex_1[0:1024 + 1:16, :], u_ex_2[0:1024 + 1:16, :], u_ex_3[0:1024 + 1:16, :], u_ex_4[0:1024 + 1:16, :]]
+# u_ex_0 = torch.load("C:/Users/Tatiana/Desktop/Research/Research_ML_WENO/PME_Test/PME_Data_1024/Basic_test_set/u_ex_0")
+# u_ex_1 = torch.load("C:/Users/Tatiana/Desktop/Research/Research_ML_WENO/PME_Test/PME_Data_1024/Basic_test_set/u_ex_1")
+# u_ex_2 = torch.load("C:/Users/Tatiana/Desktop/Research/Research_ML_WENO/PME_Test/PME_Data_1024/Basic_test_set/u_ex_2")
+# u_ex_3 = torch.load("C:/Users/Tatiana/Desktop/Research/Research_ML_WENO/PME_Test/PME_Data_1024/Basic_test_set/u_ex_3")
+# u_ex_4 = torch.load("C:/Users/Tatiana/Desktop/Research/Research_ML_WENO/PME_Test/PME_Data_1024/Basic_test_set/u_ex_4")
+# u_exs = [u_ex_0[0:1024 + 1:16, :], u_ex_1[0:1024 + 1:16, :], u_ex_2[0:1024 + 1:16, :], u_ex_3[0:1024 + 1:16, :], u_ex_4[0:1024 + 1:16, :]]
 
 # df=pd.read_csv("C:/Users/Tatiana/Desktop/Research/Research_ML_WENO/PME_Test/PME_Data_1024/Test_set/parameters.txt")
 # def validation_problems_boxes(j):
@@ -122,7 +48,7 @@ problem= PME
 # example = "boxes"
 # rng = 1
 example = "Barenblatt"
-rng = 5
+_, rng = validation_problems.validation_problems_barenblatt_default(1)
 err_nt_max_vec = np.zeros(rng)
 err_nt_mean_vec = np.zeros(rng)
 err_t_max_vec = np.zeros(rng)
@@ -131,10 +57,10 @@ err_t_mean_vec = np.zeros(rng)
 for j in range(rng):
     print(j)
     if example == "Barenblatt":
-        params = validation_problems(j)
+        params, rng = validation_problems.validation_problems_barenblatt_default(j)
         problem_main = problem(sample_id = None, example=example, space_steps=64, time_steps=None, params=params)
     else:
-        params = validation_problems_boxes(j)
+        params, rng = validation_problems.validation_problems_boxes(j)
         problem_main = problem(sample_id = None, example=example, space_steps=64, time_steps=None, params=params)
     # params = {'T': 2, 'e': 1e-13, 'L': 6, 'power': 8, 'd': 1}
     # problem_main = problem(example=example, space_steps=64, time_steps=None, params = params)

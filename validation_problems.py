@@ -2,7 +2,7 @@ import random
 
 class validation_problems():
 
-    def validation_problems_barenblatt(j):
+    def validation_problems_barenblatt_default(j):
         params_vld = []
         params_vld.append({'T': 2, 'e': 1e-13, 'L': 6, 'power': 2, 'd': 1})
         params_vld.append({'T': 2, 'e': 1e-13, 'L': 6, 'power': 3, 'd': 1})
@@ -76,7 +76,7 @@ class validation_problems():
         rng = 13
         return params_vld[j], rng
 
-    def validation_problems_barenblatt_2d(j):
+    def validation_problems_barenblatt_2d_default(j):
         params_vld = []
         params_vld.append({'T': 2, 'e': 1e-13, 'L': 10, 'power': 2, 'd': 2})
         params_vld.append({'T': 2, 'e': 1e-13, 'L': 10, 'power': 3, 'd': 2})

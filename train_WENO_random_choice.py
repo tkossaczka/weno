@@ -63,7 +63,6 @@ problem_class = PME
 #
 current_problem_classes = [(PME, {"sample_id": None, "example": "Barenblatt", "space_steps": 64, "time_steps": None, "params": None})]
 example = "Barenblatt"
-model = 13
 _, rng = validation_problems.validation_problems_barenblatt(1)
 
 # current_problem_classes = [(PME, {"sample_id": 0, "example": "boxes", "space_steps": 64, "time_steps": None, "params": 0})]
@@ -88,9 +87,10 @@ _, rng = validation_problems.validation_problems_barenblatt(1)
 # u_exs = [u_ex_0, u_ex_1, u_ex_2, u_ex_3, u_ex_4]
 # rng = 5
 
+model = 18
 phandler = ProblemHandler(problem_classes = current_problem_classes, max_num_open_problems=200)
 test_modulo=10
-for j in range(200):
+for j in range(300):
     loss_test = []
     #loss_test_2 = []
     problem_specs, problem_id = phandler.get_random_problem(0.1)
