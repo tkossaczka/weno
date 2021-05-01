@@ -17,7 +17,7 @@ import random
 torch.set_default_dtype(torch.float64)
 
 train_model = WENONetwork_2()
-train_model = sub_WENO(train_with_coeff=False)
+# train_model = sub_WENO(train_with_coeff=False)
 
 def monotonicity_loss(u):
     monotonicity = torch.sum(torch.max(u[:-1]-u[1:], torch.Tensor([0.0])))
@@ -87,7 +87,7 @@ _, rng = validation_problems.validation_problems_barenblatt(1)
 # u_exs = [u_ex_0, u_ex_1, u_ex_2, u_ex_3, u_ex_4]
 # rng = 5
 
-model = 22
+model = 30
 phandler = ProblemHandler(problem_classes = current_problem_classes, max_num_open_problems=200)
 test_modulo=10
 for j in range(200):

@@ -16,13 +16,13 @@ class validation_problems():
 
     def validation_problems_barenblatt_default_2(j):
         params_vld = []
-        params_vld.append({'T': 1.6, 'e': 1e-13, 'L': 6, 'power': 2, 'd': 1})
-        params_vld.append({'T': 1.6, 'e': 1e-13, 'L': 6, 'power': 3, 'd': 1})
-        params_vld.append({'T': 1.6, 'e': 1e-13, 'L': 6, 'power': 4, 'd': 1})
-        params_vld.append({'T': 1.6, 'e': 1e-13, 'L': 6, 'power': 5, 'd': 1})
-        params_vld.append({'T': 1.6, 'e': 1e-13, 'L': 6, 'power': 6, 'd': 1})
-        params_vld.append({'T': 1.6, 'e': 1e-13, 'L': 6, 'power': 7, 'd': 1})
-        params_vld.append({'T': 1.6, 'e': 1e-13, 'L': 6, 'power': 8, 'd': 1})
+        params_vld.append({'T': 1.2, 'e': 1e-13, 'L': 6, 'power': 2, 'd': 1})
+        params_vld.append({'T': 1.2, 'e': 1e-13, 'L': 6, 'power': 3, 'd': 1})
+        params_vld.append({'T': 1.2, 'e': 1e-13, 'L': 6, 'power': 4, 'd': 1})
+        params_vld.append({'T': 1.2, 'e': 1e-13, 'L': 6, 'power': 5, 'd': 1})
+        params_vld.append({'T': 1.2, 'e': 1e-13, 'L': 6, 'power': 6, 'd': 1})
+        params_vld.append({'T': 1.2, 'e': 1e-13, 'L': 6, 'power': 7, 'd': 1})
+        params_vld.append({'T': 1.2, 'e': 1e-13, 'L': 6, 'power': 8, 'd': 1})
         rng = 7
         return params_vld[j], rng
 

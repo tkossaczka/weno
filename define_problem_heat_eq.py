@@ -127,6 +127,14 @@ class heat_equation():
         xmaxerr = np.max(xerr)
         return xmaxerr
 
+    def err_l2(self, u_last):
+        u_ex = self.exact()
+        u_last = u_last.detach().numpy()
+        L = self.params['L']
+        sp_st = self.space_steps
+        err = np.sqrt(2*L / sp_st) * (np.sqrt(np.sum((u_last - u_ex) ** 2)))
+        return err
+
     def transformation(self, u):
         u = u
         t = self.time

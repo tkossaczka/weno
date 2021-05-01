@@ -514,15 +514,19 @@ class WENONetwork_2(WENONetwork):
 
     def order_compute(self, iterations, initial_space_steps, initial_time_steps, params, problem_class, trainable):
         problem = problem_class(space_steps=initial_space_steps, time_steps=initial_time_steps, params=params)
-        vecerr = np.zeros((iterations))[:, None]
-        order = np.zeros((iterations - 1))[:, None]
+        vecerr_max = np.zeros((iterations))[:, None]
+        vecerr_l2 = np.zeros((iterations))[:, None]
+        order_max = np.zeros((iterations - 1))[:, None]
+        order_l2 = np.zeros((iterations - 1))[:, None]
         u_init, nn = self.init_run_weno(problem, vectorized=True, just_one_time_step=False)
         u = u_init
         for k in range(nn):
             u = self.run_weno(problem,u,mweno=True, mapped=False, trainable=trainable, vectorized=True,k=k)
         u_last = u
         xmaxerr = problem.err(u_last) #, first_step=False)
-        vecerr[0] = xmaxerr
+        l2_err = problem.err_l2(u_last)
+        vecerr_max[0] = xmaxerr
+        vecerr_l2[0] = l2_err
         print(problem.space_steps, problem.time_steps)
         for i in range(1, iterations):
             if initial_time_steps is None:
@@ -535,10 +539,13 @@ class WENONetwork_2(WENONetwork):
                 u = self.run_weno(problem,u,mweno=True, mapped=False, trainable=trainable, vectorized=True, k=k)
             u_last = u
             xmaxerr = problem.err(u_last) #, first_step=False)
-            vecerr[i] = xmaxerr
-            order[i - 1] = np.log(vecerr[i - 1] / vecerr[i]) / np.log(2)
+            vecerr_max[i] = xmaxerr
+            order_max[i - 1] = np.log(vecerr_max[i - 1] / vecerr_max[i]) / np.log(2)
+            l2_err = problem.err_l2(u_last)
+            vecerr_l2[i] = l2_err
+            order_l2[i - 1] = np.log(vecerr_l2[i - 1] / vecerr_l2[i]) / np.log(2)
             print(problem.space_steps, problem.time_steps)
-        return vecerr, order
+        return vecerr_max, order_max, vecerr_l2, order_l2
 
     def compute_exact(self, problem_class, problem, space_steps, time_steps, just_one_time_step, trainable):
         if hasattr(problem_class, 'exact'):
