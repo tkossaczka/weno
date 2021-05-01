@@ -48,7 +48,8 @@ problem= PME
 # example = "boxes"
 # rng = 1
 example = "Barenblatt"
-_, rng = validation_problems.validation_problems_barenblatt_default(1)
+valid_problems = validation_problems.validation_problems_barenblatt
+_, rng = valid_problems(1)
 err_nt_max_vec = np.zeros(rng)
 err_nt_mean_vec = np.zeros(rng)
 err_t_max_vec = np.zeros(rng)
@@ -57,7 +58,7 @@ err_t_mean_vec = np.zeros(rng)
 for j in range(rng):
     print(j)
     if example == "Barenblatt":
-        params, rng = validation_problems.validation_problems_barenblatt_default(j)
+        params, rng = valid_problems(j)
         problem_main = problem(sample_id = None, example=example, space_steps=64, time_steps=None, params=params)
     else:
         params, rng = validation_problems.validation_problems_boxes(j)

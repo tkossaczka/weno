@@ -14,6 +14,18 @@ class validation_problems():
         rng = 7
         return params_vld[j], rng
 
+    def validation_problems_barenblatt_default_2(j):
+        params_vld = []
+        params_vld.append({'T': 1.6, 'e': 1e-13, 'L': 6, 'power': 2, 'd': 1})
+        params_vld.append({'T': 1.6, 'e': 1e-13, 'L': 6, 'power': 3, 'd': 1})
+        params_vld.append({'T': 1.6, 'e': 1e-13, 'L': 6, 'power': 4, 'd': 1})
+        params_vld.append({'T': 1.6, 'e': 1e-13, 'L': 6, 'power': 5, 'd': 1})
+        params_vld.append({'T': 1.6, 'e': 1e-13, 'L': 6, 'power': 6, 'd': 1})
+        params_vld.append({'T': 1.6, 'e': 1e-13, 'L': 6, 'power': 7, 'd': 1})
+        params_vld.append({'T': 1.6, 'e': 1e-13, 'L': 6, 'power': 8, 'd': 1})
+        rng = 7
+        return params_vld[j], rng
+
     # def validation_problems_barenblatt(j):
     #     params_vld = []
     #     params_vld.append({'T': 2, 'e': 1e-13, 'L': 6, 'power': 2.5, 'd': 1})
@@ -26,14 +38,14 @@ class validation_problems():
     #     rng = 7
     #     return params_vld[j], rng
 
-    # def validation_problems_barenblatt(j):  # tieto boli dobre, model 62
-    #     params_vld = []
-    #     params_vld.append({'T': 2, 'e': 1e-13, 'L': 6, 'power': 2.2, 'd': 1})
-    #     params_vld.append({'T': 2, 'e': 1e-13, 'L': 6, 'power': 3.9, 'd': 1})
-    #     params_vld.append({'T': 2, 'e': 1e-13, 'L': 6, 'power': 4.4, 'd': 1})
-    #     params_vld.append({'T': 2, 'e': 1e-13, 'L': 6, 'power': 5.1, 'd': 1})
-    #     rng = 4
-    #     return params_vld[j], rng
+    def validation_problems_barenblatt_fract(j):  # tieto boli dobre, model 62
+        params_vld = []
+        params_vld.append({'T': 2, 'e': 1e-13, 'L': 6, 'power': 2.2, 'd': 1})
+        params_vld.append({'T': 2, 'e': 1e-13, 'L': 6, 'power': 3.9, 'd': 1})
+        params_vld.append({'T': 2, 'e': 1e-13, 'L': 6, 'power': 4.4, 'd': 1})
+        params_vld.append({'T': 2, 'e': 1e-13, 'L': 6, 'power': 5.1, 'd': 1})
+        rng = 4
+        return params_vld[j], rng
 
     # a = random.uniform(2, 8)
     # b = random.uniform(2, 8)

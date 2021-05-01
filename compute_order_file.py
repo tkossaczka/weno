@@ -11,13 +11,13 @@ from define_problem_Digital_GS import Digital_option_GS
 from define_problem_Buckley_Leverett import Buckley_Leverett
 
 with torch.no_grad():
-    # train_model = torch.load("C:/Users/Tatiana/Desktop/Research/Research_ML_WENO/PME_Test/Models/Model_41/690.pt")
+    train_model = torch.load("C:/Users/Tatiana/Desktop/Research/Research_ML_WENO/PME_Test/Models/Model_18/100.pt")
     #train_model = torch.load('C:/Users/Tatiana/Desktop/Research/Research_ML_WENO/Buckley_Leverett_Test/Models/Model_18/46')
     #train_model = torch.load("C:/Users/Tatiana/Desktop/Research/Research_ML_WENO/Burgers_Equation_Test/Models/Model_16/37")
-    train_model = torch.load("C:/Users/Tatiana/Desktop/Research/Research_ML_WENO/Digital_Option_Test/Models/Model_21/3390.pt")
+    # train_model = torch.load("C:/Users/Tatiana/Desktop/Research/Research_ML_WENO/Digital_Option_Test/Models/Model_21/3390.pt")
     #train_model = WENONetwork()
-    # problem = heat_equation
-    problem = transport_equation
+    problem = heat_equation
+    # problem = transport_equation
     #problem = heat_equation
     #problem = Call_option
     #problem = Digital_option
