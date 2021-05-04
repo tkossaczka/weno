@@ -22,14 +22,14 @@ train_model = torch.load("C:/Users/Tatiana/Desktop/Research/Research_ML_WENO/PME
 
 problem= PME
 example = "Barenblatt"
-valid_problems = validation_problems.validation_problems_barenblatt_default
+valid_problems = validation_problems.validation_problems_barenblatt_fract_2
 _, rng = valid_problems(1)
 err_nt_max_vec = np.zeros(rng)
 err_nt_mean_vec = np.zeros(rng)
 err_t_max_vec = np.zeros(rng)
 err_t_mean_vec = np.zeros(rng)
 
-for j in range(1):
+for j in range(rng):
     print(j)
     params, rng = valid_problems(j)
     problem_main = problem(sample_id = None, example=example, space_steps=64, time_steps=None, params=params)
@@ -69,10 +69,10 @@ err_mat[:,3] = err_t_mean_vec
 
 ratio_inf = np.zeros((rng))
 for i in range(rng):
-    ratio_inf[i] = min(err_mat[i,0],err_mat[i,1])/err_mat[i,2]
+    ratio_inf[i] = err_mat[i,0]/err_mat[i,1]
 ratio_l2 = np.zeros((rng))
 for i in range(rng):
-    ratio_l2[i] = min(err_mat[i,3],err_mat[i,4])/err_mat[i,5]
+    ratio_l2[i] = err_mat[i,2]/err_mat[i,3]
 
 err_mat_ratios = np.zeros((rng,6))
 err_mat_ratios[:,0] = err_nt_max_vec
@@ -84,7 +84,7 @@ err_mat_ratios[:,5] = ratio_l2
 
 import pandas as pd
 # pd.DataFrame(err_mat).to_csv("err_mat.csv")
-pd.DataFrame(err_mat).to_latex()
+pd.DataFrame(err_mat_ratios).to_latex()
 
 
 V_nt = V_nt.detach().numpy()
@@ -169,33 +169,87 @@ V_t = V_t.detach().numpy()
 # # ax2.set_yticks([])
 # plt.savefig("PME_2_cut.pdf", bbox_inches='tight')
 
-fig3 = plt.figure(constrained_layout=True, figsize=(7.0, 5.0))
-gs = fig3.add_gridspec(2,2, width_ratios=[2,2], height_ratios=[1,1])
-f3_ax1 = fig3.add_subplot(gs[0, :])
-f3_ax2 = fig3.add_subplot(gs[1, 0])
-f3_ax3 = fig3.add_subplot(gs[1, 1])
-f3_ax1.plot(S, V_nt, color='blue')
-f3_ax1.plot(S, V_t, color='red', marker='x')
-f3_ax1.plot(S, u_ex, color='black')
-f3_ax1.legend(('MWENO', 'WENO-DS', 'ref. sol.'), loc=1)
-f3_ax1.set_xlabel('x')
-f3_ax1.set_ylabel('u')
-f3_ax2.plot(S, V_nt, color='blue')
-f3_ax2.plot(S, V_t, color='red', marker='x')
-f3_ax2.plot(S, u_ex, color='black')
-f3_ax2.set_xlim(-4.55, -4.25)  # Limit the region for zoom
-f3_ax2.set_ylim(-0.001, 0.022)
-f3_ax2.set_xlabel('x')
-f3_ax2.set_ylabel('u')
-# ax1.set_yticks([])
-f3_ax3.plot(S, V_nt, color='blue')
-f3_ax3.plot(S, V_t, color='red', marker='x')
-f3_ax3.plot(S, u_ex, color='black')
-f3_ax3.set_xlim(4.25, 4.55)  # Limit the region for zoom
-f3_ax3.set_ylim(-0.001, 0.022)
-f3_ax3.set_xlabel('x')
-f3_ax3.set_ylabel('u')
-# ax2.set_yticks([])
-plt.savefig("PME_2_cut.pdf", bbox_inches='tight')
+# # m = 2
+# fig3 = plt.figure(constrained_layout=True, figsize=(7.0, 5.0))
+# gs = fig3.add_gridspec(2,2, width_ratios=[2,2], height_ratios=[1,1])
+# f3_ax1 = fig3.add_subplot(gs[0, :])
+# f3_ax2 = fig3.add_subplot(gs[1, 0])
+# f3_ax3 = fig3.add_subplot(gs[1, 1])
+# f3_ax1.plot(S, V_nt, color='blue')
+# f3_ax1.plot(S, V_t, color='red', marker='x')
+# f3_ax1.plot(S, u_ex, color='black')
+# f3_ax1.legend(('MWENO', 'WENO-DS', 'ref. sol.'), loc=1)
+# f3_ax1.set_xlabel('x')
+# f3_ax1.set_ylabel('u')
+# f3_ax2.plot(S, V_nt, color='blue')
+# f3_ax2.plot(S, V_t, color='red', marker='x')
+# f3_ax2.plot(S, u_ex, color='black')
+# f3_ax2.set_xlim(-4.55, -4.25)  # Limit the region for zoom
+# f3_ax2.set_ylim(-0.001, 0.022)
+# f3_ax2.set_xlabel('x')
+# f3_ax2.set_ylabel('u')
+# f3_ax3.plot(S, V_nt, color='blue')
+# f3_ax3.plot(S, V_t, color='red', marker='x')
+# f3_ax3.plot(S, u_ex, color='black')
+# f3_ax3.set_xlim(4.25, 4.55)  # Limit the region for zoom
+# f3_ax3.set_ylim(-0.001, 0.022)
+# f3_ax3.set_xlabel('x')
+# f3_ax3.set_ylabel('u')
+# plt.savefig("PME_2.pdf", bbox_inches='tight')
 
+# # m = 3
+# fig3 = plt.figure(constrained_layout=True, figsize=(7.0, 5.0))
+# gs = fig3.add_gridspec(2,2, width_ratios=[2,2], height_ratios=[1,1])
+# f3_ax1 = fig3.add_subplot(gs[0, :])
+# f3_ax2 = fig3.add_subplot(gs[1, 0])
+# f3_ax3 = fig3.add_subplot(gs[1, 1])
+# f3_ax1.plot(S, V_nt, color='blue')
+# f3_ax1.plot(S, V_t, color='red', marker='x')
+# f3_ax1.plot(S, u_ex, color='black')
+# f3_ax1.legend(('MWENO', 'WENO-DS', 'ref. sol.'), loc=1)
+# f3_ax1.set_xlabel('x')
+# f3_ax1.set_ylabel('u')
+# f3_ax2.plot(S, V_nt, color='blue')
+# f3_ax2.plot(S, V_t, color='red', marker='x')
+# f3_ax2.plot(S, u_ex, color='black')
+# f3_ax2.set_xlim(-4.35, -4.05)  # Limit the region for zoom
+# f3_ax2.set_ylim(-0.001, 0.075)
+# f3_ax2.set_xlabel('x')
+# f3_ax2.set_ylabel('u')
+# f3_ax3.plot(S, V_nt, color='blue')
+# f3_ax3.plot(S, V_t, color='red', marker='x')
+# f3_ax3.plot(S, u_ex, color='black')
+# f3_ax3.set_xlim(4.05, 4.35)  # Limit the region for zoom
+# f3_ax3.set_ylim(-0.001, 0.075)
+# f3_ax3.set_xlabel('x')
+# f3_ax3.set_ylabel('u')
+# plt.savefig("PME_3.pdf", bbox_inches='tight')
+#
+# # m = 4
+# fig3 = plt.figure(constrained_layout=True, figsize=(7.0, 5.0))
+# gs = fig3.add_gridspec(2,2, width_ratios=[2,2], height_ratios=[1,1])
+# f3_ax1 = fig3.add_subplot(gs[0, :])
+# f3_ax2 = fig3.add_subplot(gs[1, 0])
+# f3_ax3 = fig3.add_subplot(gs[1, 1])
+# f3_ax1.plot(S, V_nt, color='blue')
+# f3_ax1.plot(S, V_t, color='red', marker='x')
+# f3_ax1.plot(S, u_ex, color='black')
+# f3_ax1.legend(('MWENO', 'WENO-DS', 'ref. sol.'), loc=1)
+# f3_ax1.set_xlabel('x')
+# f3_ax1.set_ylabel('u')
+# f3_ax2.plot(S, V_nt, color='blue')
+# f3_ax2.plot(S, V_t, color='red', marker='x')
+# f3_ax2.plot(S, u_ex, color='black')
+# f3_ax2.set_xlim(-4.5, -4.275)  # Limit the region for zoom
+# f3_ax2.set_ylim(-0.001, 0.02)
+# f3_ax2.set_xlabel('x')
+# f3_ax2.set_ylabel('u')
+# f3_ax3.plot(S, V_nt, color='blue')
+# f3_ax3.plot(S, V_t, color='red', marker='x')
+# f3_ax3.plot(S, u_ex, color='black')
+# f3_ax3.set_xlim(4.275, 4.5)  # Limit the region for zoom
+# f3_ax3.set_ylim(-0.001, 0.02)
+# f3_ax3.set_xlabel('x')
+# f3_ax3.set_ylabel('u')
+# plt.savefig("PME_4.pdf", bbox_inches='tight')
 

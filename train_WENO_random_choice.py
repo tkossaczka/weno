@@ -43,7 +43,9 @@ def overflows_loss(u):
 
 def exact_loss_2d(u, u_ex):
     error = torch.mean((u_ex - u) ** 2)
-    loss = 10e4*error
+    loss = 10e2 * error  # PME Barenblatt
+    if loss > 0.01:
+        loss = torch.sqrt(loss)
     return loss
 
 # optimizer = optim.Adam(train_model.parameters(), lr=0.0001)   # Buckley-Leverett
@@ -57,13 +59,15 @@ all_loss_test = []
 
 problem_class = PME
 
-# current_problem_classes = [(PME, {"sample_id": None, "example": "Barenblatt_2d", "space_steps": 32, "time_steps": None, "params": None})]
-# example = "Barenblatt_2d"
-# rng = 4
-#
-current_problem_classes = [(PME, {"sample_id": None, "example": "Barenblatt", "space_steps": 64, "time_steps": None, "params": None})]
-example = "Barenblatt"
-_, rng = validation_problems.validation_problems_barenblatt(1)
+valid_problems = validation_problems.validation_problems_barenblatt
+current_problem_classes = [(PME, {"sample_id": None, "example": "Barenblatt_2d", "space_steps": 32, "time_steps": None, "params": None})]
+example = "Barenblatt_2d"
+_, rng = valid_problems(1)
+
+# valid_problems = validation_problems.validation_problems_barenblatt
+# current_problem_classes = [(PME, {"sample_id": None, "example": "Barenblatt", "space_steps": 64, "time_steps": None, "params": None})]
+# example = "Barenblatt"
+# _, rng = valid_problems(1)
 
 # current_problem_classes = [(PME, {"sample_id": 0, "example": "boxes", "space_steps": 64, "time_steps": None, "params": 0})]
 # example = "boxes"
@@ -87,9 +91,9 @@ _, rng = validation_problems.validation_problems_barenblatt(1)
 # u_exs = [u_ex_0, u_ex_1, u_ex_2, u_ex_3, u_ex_4]
 # rng = 5
 
-model = 30
+model = 9
 phandler = ProblemHandler(problem_classes = current_problem_classes, max_num_open_problems=200)
-test_modulo=10
+test_modulo=50
 for j in range(200):
     loss_test = []
     #loss_test_2 = []
@@ -105,7 +109,7 @@ for j in range(200):
         u_new = train_model.forward(problem, u_last, step, mweno = True, mapped = False)
         # u_new = train_model2.forward(problem, u_last, step, mweno = True, mapped = False)
         # u_new_nt = train_model.run_weno(problem, u_last, mweno=True, mapped=False, vectorized=True, trainable=False, k=step)
-        if example == 'Barenblatt':
+        if example == 'Barenblatt'or example == "Barenblatt_2d":
             u_new[u_new<0]=0
             # u_new_nt[u_new_nt<0]=0
     if example == "Barenblatt" or example == "Barenblatt_2d":
@@ -138,7 +142,7 @@ for j in range(200):
         elif example == "boxes":
             base_path = "C:/Users/Tatiana/Desktop/Research/Research_ML_WENO/PME_Test/Models_boxes/Model_19/"  # TODO model 18 je uz obsadeny!!!!!
         elif example == "Barenblatt_2d":
-            base_path = "C:/Users/Tatiana/Desktop/Research/Research_ML_WENO/PME_Test/Models_2d/Model_8/"
+            base_path = "C:/Users/Tatiana/Desktop/Research/Research_ML_WENO/PME_Test/Models_2d/Model_{}/".format(model)
         elif example == "gravity":
             base_path = "C:/Users/Tatiana/Desktop/Research/Research_ML_WENO/Buckley_Leverett_CD_Test/Models/Model_17/"
         if not os.path.exists(base_path):
@@ -152,16 +156,16 @@ for j in range(200):
             single_problem_loss_test = []
             #single_problem_loss_test_2 = []
             if example == "Barenblatt":
-                params_test,_ = validation_problems.validation_problems_barenblatt(kk)
+                params_test,_ = valid_problems(kk)
                 problem_test = problem_class(sample_id=None, example="Barenblatt", space_steps=64, time_steps=None, params=params_test)
             elif example == "Barenblatt_2d":
-                params_test,_  = validation_problems.validation_problems_barenblatt_2d(kk)
+                params_test,_  = valid_problems(kk)
                 problem_test = problem_class(sample_id=None, example="Barenblatt_2d", space_steps=32, time_steps=None, params=params_test)
             elif example == "boxes":
-                params_test,_  = validation_problems.validation_problems_boxes(kk)
+                params_test,_  = valid_problems(kk)
                 problem_test = problem_class(sample_id=None, example="boxes", space_steps=64, time_steps=None, params=params_test)
             elif example == "gravity":
-                params_test,_  = validation_problems.validation_problems_BL(kk)
+                params_test,_  = valid_problems(kk)
                 problem_test = problem_class(sample_id=None, example="gravity", space_steps=64, time_steps=None, params=params_test)
             with torch.no_grad():
                 if example == "Barenblatt_2d":
@@ -169,6 +173,7 @@ for j in range(200):
                     u_test = u_init
                     for k in range(tt):
                         u_test = train_model.run_weno_2d(problem_test, u_test, mweno=True, mapped=False, trainable=True, vectorized=True, k=k)
+                        u_test[u_test < 0] = 0
                 else:
                     u_init, tt = train_model.init_run_weno(problem_test, vectorized=True, just_one_time_step=False)
                     u_test = u_init
@@ -211,7 +216,7 @@ all_loss_test = np.array(all_loss_test)
 norm_losses=all_loss_test[:,:,0]/all_loss_test[:,:,0].max(axis=0)[None, :]
 print("trained:", all_loss_test[:,:,0].min(axis=0))
 plt.plot(norm_losses)
-plt.legend(['2.157', '3.012', '3.697', '3.987', '4.158', '4.572', '4.723', '5.041', '5.568', '6.087', '6.284', '7.124', '7.958'])
+plt.legend(['2.157', '3.012', '3.697', '3.987', '4.158',  '4.723', '5.041', '5.568', '6.087', '6.284', '7.124', '7.958'])
 
 
 # plt.figure(2)
@@ -296,5 +301,5 @@ plt.legend(['2.157', '3.012', '3.697', '3.987', '4.158', '4.572', '4.723', '5.04
 # print("trained:", all_loss_test_2[:,:,0].min(axis=0))
 # plt.figure(2)
 # plt.plot(norm_losses_2)
-# plt.legend(['2.157', '3.012', '3.697', '3.987', '4.158', '4.572', '4.723', '5.041', '5.568', '6.087', '6.284', '7.124', '7.958'])
+# plt.legend(['2.157', '3.012', '3.697', '3.987', '4.158', '4.723', '5.041', '5.568', '6.087', '6.284', '7.124', '7.958'])
 #

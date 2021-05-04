@@ -86,7 +86,10 @@ class PME():
             t = (T-1) / n
             time = np.linspace(1, T, n + 1)
         elif example == "Barenblatt_2d":
-            n = np.ceil(25 * (T-1) / (h ** 2)) #15 pre m=2,3,4,5; 25 pre m = 6,7,8
+            dif = (power*uu**(power-1))
+            CFL = torch.max(dif)
+            n =  np.ceil(((CFL/(h**2) + CFL/(h**2))*(T-1))/0.4)
+            # n = np.ceil(25 * (T-1) / (h ** 2)) #15 pre m=2,3,4,5; 25 pre m = 6,7,8
             n = int(n)
             t = (T-1) / n
             time = np.linspace(1, T, n + 1)

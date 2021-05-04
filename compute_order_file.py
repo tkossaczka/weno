@@ -49,7 +49,13 @@ order_mat_l2[1:,1] = order_not_trained_l2[:,0]
 order_mat_l2[:,2] = err_trained_l2[:,0]
 order_mat_l2[1:,3] = order_trained_l2[:,0]
 
+order_mat_max_l2 = np.zeros((nb,4))
+order_mat_max_l2[:,0] = err_trained_max[:,0]
+order_mat_max_l2[1:,1] = order_trained_max[:,0]
+order_mat_max_l2[:,2] = err_trained_l2[:,0]
+order_mat_max_l2[1:,3] = order_trained_l2[:,0]
 
-# import pandas as pd
-# # pd.DataFrame(order_mat).to_csv("err_mat.csv")
-# pd.DataFrame(order_mat).to_latex()
+
+import pandas as pd
+# pd.DataFrame(order_mat).to_csv("err_mat.csv")
+pd.DataFrame(order_mat_max_l2).to_latex()
