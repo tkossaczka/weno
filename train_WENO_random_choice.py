@@ -67,7 +67,7 @@ problem_class = PME
 valid_problems = validation_problems.validation_problems_barenblatt
 current_problem_classes = [(PME, {"sample_id": None, "example": "Barenblatt", "space_steps": 64, "time_steps": None, "params": None})]
 example = "Barenblatt"
-_, rng = valid_problems(1)
+_, rng = valid_problems(0)
 
 # current_problem_classes = [(PME, {"sample_id": 0, "example": "boxes", "space_steps": 64, "time_steps": None, "params": 0})]
 # example = "boxes"
@@ -91,7 +91,7 @@ _, rng = valid_problems(1)
 # u_exs = [u_ex_0, u_ex_1, u_ex_2, u_ex_3, u_ex_4]
 # rng = 5
 
-model = 49
+model = 59
 phandler = ProblemHandler(problem_classes = current_problem_classes, max_num_open_problems=200)
 test_modulo=20
 for j in range(200):
@@ -136,19 +136,18 @@ for j in range(200):
     ##############################
     u_new.detach_()
     phandler.update_problem(problem_id, u_new)
-    if not (j % test_modulo):
-        if example == "Barenblatt":
-            base_path = "C:/Users/Tatiana/Desktop/Research/Research_ML_WENO/PME_Test/Models/Model_{}/".format(model)
-        elif example == "boxes":
-            base_path = "C:/Users/Tatiana/Desktop/Research/Research_ML_WENO/PME_Test/Models_boxes/Model_19/"  # TODO model 18 je uz obsadeny!!!!!
-        elif example == "Barenblatt_2d":
-            base_path = "C:/Users/Tatiana/Desktop/Research/Research_ML_WENO/PME_Test/Models_2d/Model_{}/".format(model)
-        elif example == "gravity":
-            base_path = "C:/Users/Tatiana/Desktop/Research/Research_ML_WENO/Buckley_Leverett_CD_Test/Models/Model_17/"
-        if not os.path.exists(base_path):
-            os.mkdir(base_path)
-        path = os.path.join(base_path, "{}.pt".format(j))
-        torch.save(train_model, path)
+    if example == "Barenblatt":
+        base_path = "C:/Users/Tatiana/Desktop/Research/Research_ML_WENO/PME_Test/Models/Model_{}/".format(model)
+    elif example == "boxes":
+        base_path = "C:/Users/Tatiana/Desktop/Research/Research_ML_WENO/PME_Test/Models_boxes/Model_19/"  # TODO model 18 je uz obsadeny!!!!!
+    elif example == "Barenblatt_2d":
+        base_path = "C:/Users/Tatiana/Desktop/Research/Research_ML_WENO/PME_Test/Models_2d/Model_{}/".format(model)
+    elif example == "gravity":
+        base_path = "C:/Users/Tatiana/Desktop/Research/Research_ML_WENO/Buckley_Leverett_CD_Test/Models/Model_17/"
+    if not os.path.exists(base_path):
+        os.mkdir(base_path)
+    path = os.path.join(base_path, "{}.pt".format(j))
+    torch.save(train_model, path)
     # TEST IF LOSS IS DECREASING WITH THE NUMBER OF ITERATIONS INCREASING
     if not (j % test_modulo):
         print("TESTING ON VALIDATION PROBLEMS")

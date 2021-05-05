@@ -18,11 +18,11 @@ from mpl_toolkits.axes_grid1.inset_locator import inset_axes
 
 torch.set_default_dtype(torch.float64)
 
-train_model = torch.load("C:/Users/Tatiana/Desktop/Research/Research_ML_WENO/PME_Test/Models/Model_47/180.pt") #45/500 #46/650 # 47/999
+train_model = torch.load("C:/Users/Tatiana/Desktop/Research/Research_ML_WENO/PME_Test/Models/Model_58/190.pt") #45/500 #46/650 # 47/999
 
 problem= PME
 example = "Barenblatt"
-valid_problems = validation_problems.validation_problems_barenblatt_default
+valid_problems = validation_problems.validation_problems_barenblatt_fract
 _, rng = valid_problems(1)
 err_nt_max_vec = np.zeros(rng)
 err_nt_mean_vec = np.zeros(rng)

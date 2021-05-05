@@ -85,7 +85,7 @@ class validation_problems():
     # print(a,b,c,d,e,f,g,h)
 
     def validation_problems_barenblatt(j):
-        a0 = 2
+        a0 = 2.0
         a = 2.157
         aa = 3.012
         b = 3.697

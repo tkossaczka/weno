@@ -53,11 +53,11 @@ problem = PME
 all_loss_test = []
 example = "Barenblatt"
 
-test_modulo=10
+test_modulo=5
 for i in range(200):
     if not (i % test_modulo):
         print(i)
-        train_model = torch.load('C:/Users/Tatiana/Desktop/Research/Research_ML_WENO/PME_Test/Models/Model_26/{}.pt'.format(i))
+        train_model = torch.load('C:/Users/Tatiana/Desktop/Research/Research_ML_WENO/PME_Test/Models/Model_58/{}.pt'.format(i))
         loss_test = []
         for kk in range(rng):
             single_problem_loss_test = []
@@ -91,6 +91,7 @@ plt.figure(figsize=(20.0, 10.0))
 plt.xlabel('number of training steps')
 plt.ylabel('LOSS')
 my_xticks = [0,10,20,30,40,50,60,70,80,90,100,110,120,130,140,150,160,170,180,190]
+my_xticks = [0,20,40,60,80,100,120,140,160,180]
 plt.xticks(my_xticks)
 plt.plot(my_xticks, norm_losses)
 # plt.savefig("PME_validation.pdf", bbox_inches='tight')
