@@ -93,6 +93,6 @@ plt.ylabel('LOSS')
 my_xticks = [0,10,20,30,40,50,60,70,80,90,100,110,120,130,140,150,160,170,180,190]
 plt.xticks(my_xticks)
 plt.plot(my_xticks, norm_losses)
-plt.savefig("PME_validation.pdf", bbox_inches='tight')
+# plt.savefig("PME_validation.pdf", bbox_inches='tight')
 
 # np.save("C:/Users/Tatiana/Desktop/Research/Research_ML_WENO/PME_Test/Models/Model_37/all_loss_test.npy",all_loss_test)

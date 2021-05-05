@@ -27,7 +27,7 @@ with torch.no_grad():
     #problem = Buckley_Leverett
     torch.set_default_dtype(torch.float64)
 
-    nb = 7
+    nb = 6
     params = None
     #params = {'T': 0.4, 'e': 1e-13, 'L': 1, 'R': 1, 'C': 0.25}
     #params = {'T': 0.2, 'e': 1e-13, 'L': 1, 'R': 1, 'C': 0.3}
