@@ -8,6 +8,7 @@ from define_WENO_Network_2 import WENONetwork_2
 from scipy.stats import norm
 from define_problem_PME import PME
 from initial_condition_generator import init_PME
+from validation_problems import validation_problems
 
 torch.set_default_dtype(torch.float64)
 
@@ -24,10 +25,12 @@ def validation_problems_barenblatt_2d(j):
 
 train_model = WENONetwork_2()
 # train_model = torch.load("C:/Users/Tatiana/Desktop/Research/Research_ML_WENO/PME_Test/Models/Model_47/999.pt")
-train_model = torch.load("C:/Users/Tatiana/Desktop/Research/Research_ML_WENO/PME_Test/Models_2d/Model_6/180.pt")   # 4/200 # 5/400
+train_model = torch.load("C:/Users/Tatiana/Desktop/Research/Research_ML_WENO/PME_Test/Models_2d/Model_10/180.pt")   # 4/200 # 5/400
+# train_model = torch.load("C:/Users/Tatiana/Desktop/Research/Research_ML_WENO/PME_Test/Models/Model_58/195.pt")   # 4/200 # 5/400
 problem= PME
 example = "Barenblatt_2d"
-rng = 4
+valid_problems = validation_problems.validation_problems_barenblatt_2d_default
+_, rng = valid_problems(1)
 err_nt_max_vec = np.zeros(rng)
 err_nt_mean_vec = np.zeros(rng)
 err_t_max_vec = np.zeros(rng)
@@ -48,8 +51,8 @@ for j in range(rng):
             for k in range(nn):
                 u_t = train_model.run_weno_2d(problem_main, u_t, mweno=True, mapped=False, vectorized=True, trainable=True, k=k)
     elif example == "Barenblatt_2d":
-        params = validation_problems_barenblatt_2d(j)
-        problem_main = problem(sample_id=None, example=example, space_steps=32, time_steps=None, params=params)
+        params, rng = valid_problems(j)
+        problem_main = problem(sample_id=None, example=example, space_steps=64, time_steps=None, params=params)
         print(problem_main.params)
         u_init, nn = train_model.init_run_weno(problem_main, vectorized=True, just_one_time_step=False, dim=2)
         u_nt = u_init

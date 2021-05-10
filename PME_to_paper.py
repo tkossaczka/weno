@@ -18,33 +18,50 @@ from mpl_toolkits.axes_grid1.inset_locator import inset_axes
 
 torch.set_default_dtype(torch.float64)
 
-train_model = torch.load("C:/Users/Tatiana/Desktop/Research/Research_ML_WENO/PME_Test/Models/Model_58/195.pt") #45/500 #46/650 # 47/999
-
+train_model = torch.load("C:/Users/Tatiana/Desktop/Research/Research_ML_WENO/PME_Test/Models/Model_78/380.pt") #45/500 #46/650 # 47/999
 problem= PME
 example = "Barenblatt"
 valid_problems = validation_problems.validation_problems_barenblatt_default
-_, rng = valid_problems(1)
+
+# train_model = torch.load("C:/Users/Tatiana/Desktop/Research/Research_ML_WENO/PME_Test/Models_2d/Model_10/180.pt") #45/500 #46/650 # 47/999
+# problem= PME
+# example = "Barenblatt_2d"
+# valid_problems = validation_problems.validation_problems_barenblatt_2d_default
+
+_, rng = valid_problems(0)
 err_nt_max_vec = np.zeros(rng)
 err_nt_mean_vec = np.zeros(rng)
 err_t_max_vec = np.zeros(rng)
 err_t_mean_vec = np.zeros(rng)
 
-for j in range(2,3):
+for j in range(rng):
     print(j)
     params, rng = valid_problems(j)
     problem_main = problem(sample_id = None, example=example, space_steps=64, time_steps=None, params=params)
     params = problem_main.get_params()
     print(params)
-    u_init, nn = train_model.init_run_weno(problem_main, vectorized=True, just_one_time_step=False)
-    u_t = u_init
-    with torch.no_grad():
+    if example == "Barenblatt":
+        u_init, nn = train_model.init_run_weno(problem_main, vectorized=True, just_one_time_step=False)
+        u_t = u_init
+        with torch.no_grad():
+            for k in range(nn):
+                u_t = train_model.run_weno(problem_main, u_t, mweno=True, mapped=False, vectorized=True, trainable=True, k=k)
+                V_t, _, _ = problem_main.transformation(u_t)
+        u_nt = u_init
         for k in range(nn):
-            u_t = train_model.run_weno(problem_main, u_t, mweno=True, mapped=False, vectorized=True, trainable=True, k=k)
-            V_t, _, _ = problem_main.transformation(u_t)
-    u_nt = u_init
-    for k in range(nn):
-        u_nt = train_model.run_weno(problem_main, u_nt, mweno=True, mapped=False, vectorized=True, trainable=False, k=k)
-        V_nt, S, _ = problem_main.transformation(u_nt)
+            u_nt = train_model.run_weno(problem_main, u_nt, mweno=True, mapped=False, vectorized=True, trainable=False, k=k)
+            V_nt, S, _ = problem_main.transformation(u_nt)
+    elif example == "Barenblatt_2d":
+        u_init, nn = train_model.init_run_weno(problem_main, vectorized=True, just_one_time_step=False, dim=2)
+        u_nt = u_init
+        for k in range(nn):
+            u_nt = train_model.run_weno_2d(problem_main, u_nt, mweno=True, mapped=False, vectorized=True, trainable=False, k=k)
+            V_nt, S, _ = problem_main.transformation(u_nt)
+        with torch.no_grad():
+            u_t = u_init
+            for k in range(nn):
+                u_t = train_model.run_weno_2d(problem_main, u_t, mweno=True, mapped=False, vectorized=True, trainable=True, k=k)
+                V_t, _, _ = problem_main.transformation(u_t)
     params_main = problem_main.params
     T = params_main['T']
     L = params_main['L']
@@ -226,30 +243,30 @@ V_t = V_t.detach().numpy()
 # plt.savefig("PME_3.pdf", bbox_inches='tight')
 #
 # # m = 4
-fig3 = plt.figure(constrained_layout=True, figsize=(7.0, 5.0))
-gs = fig3.add_gridspec(2,2, width_ratios=[2,2], height_ratios=[1,1])
-f3_ax1 = fig3.add_subplot(gs[0, :])
-f3_ax2 = fig3.add_subplot(gs[1, 0])
-f3_ax3 = fig3.add_subplot(gs[1, 1])
-f3_ax1.plot(S, V_nt, color='blue')
-f3_ax1.plot(S, V_t, color='red', marker='x')
-f3_ax1.plot(S, u_ex, color='black')
-f3_ax1.legend(('MWENO', 'WENO-DS', 'ref. sol.'), loc=1)
-f3_ax1.set_xlabel('x')
-f3_ax1.set_ylabel('u')
-f3_ax2.plot(S, V_nt, color='blue')
-f3_ax2.plot(S, V_t, color='red', marker='x')
-f3_ax2.plot(S, u_ex, color='black')
-f3_ax2.set_xlim(-4.5, -4.275)  # Limit the region for zoom
-f3_ax2.set_ylim(-0.001, 0.02)
-f3_ax2.set_xlabel('x')
-f3_ax2.set_ylabel('u')
-f3_ax3.plot(S, V_nt, color='blue')
-f3_ax3.plot(S, V_t, color='red', marker='x')
-f3_ax3.plot(S, u_ex, color='black')
-f3_ax3.set_xlim(4.275, 4.5)  # Limit the region for zoom
-f3_ax3.set_ylim(-0.001, 0.02)
-f3_ax3.set_xlabel('x')
-f3_ax3.set_ylabel('u')
-plt.savefig("PME_4.pdf", bbox_inches='tight')
+# fig3 = plt.figure(constrained_layout=True, figsize=(7.0, 5.0))
+# gs = fig3.add_gridspec(2,2, width_ratios=[2,2], height_ratios=[1,1])
+# f3_ax1 = fig3.add_subplot(gs[0, :])
+# f3_ax2 = fig3.add_subplot(gs[1, 0])
+# f3_ax3 = fig3.add_subplot(gs[1, 1])
+# f3_ax1.plot(S, V_nt, color='blue')
+# f3_ax1.plot(S, V_t, color='red', marker='x')
+# f3_ax1.plot(S, u_ex, color='black')
+# f3_ax1.legend(('MWENO', 'WENO-DS', 'ref. sol.'), loc=1)
+# f3_ax1.set_xlabel('x')
+# f3_ax1.set_ylabel('u')
+# f3_ax2.plot(S, V_nt, color='blue')
+# f3_ax2.plot(S, V_t, color='red', marker='x')
+# f3_ax2.plot(S, u_ex, color='black')
+# f3_ax2.set_xlim(-4.5, -4.275)  # Limit the region for zoom
+# f3_ax2.set_ylim(-0.001, 0.02)
+# f3_ax2.set_xlabel('x')
+# f3_ax2.set_ylabel('u')
+# f3_ax3.plot(S, V_nt, color='blue')
+# f3_ax3.plot(S, V_t, color='red', marker='x')
+# f3_ax3.plot(S, u_ex, color='black')
+# f3_ax3.set_xlim(4.275, 4.5)  # Limit the region for zoom
+# f3_ax3.set_ylim(-0.001, 0.02)
+# f3_ax3.set_xlabel('x')
+# f3_ax3.set_ylabel('u')
+# plt.savefig("PME_4.pdf", bbox_inches='tight')
 

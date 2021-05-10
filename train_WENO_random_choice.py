@@ -29,10 +29,12 @@ def exact_loss(u, u_ex):
     # loss = error # PME boxes
     # if loss > 0.001:
     #     loss = loss/10
-    loss = 10e2*error # PME Barenblatt
-    if loss > 0.01:
-        loss = torch.sqrt(loss)
-    # loss = error
+    # loss = 10e2*error # PME Barenblatt
+    # if loss > 0.01:
+    #     loss = torch.sqrt(loss)
+    loss = error
+    # if loss > 0.0001:
+    #     loss = loss/100
     return loss
 
 def overflows_loss(u):
@@ -43,9 +45,9 @@ def overflows_loss(u):
 
 def exact_loss_2d(u, u_ex):
     error = torch.mean((u_ex - u) ** 2)
-    loss = 10e2*error  # PME Barenblatt
-    if loss > 0.01:
-        loss = torch.sqrt(loss)
+    loss = error  # PME Barenblatt
+    # if loss > 0.01:
+    #     loss = torch.sqrt(loss)
     return loss
 
 # optimizer = optim.Adam(train_model.parameters(), lr=0.0001)   # Buckley-Leverett
@@ -62,7 +64,7 @@ problem_class = PME
 # valid_problems = validation_problems.validation_problems_barenblatt_2d
 # current_problem_classes = [(PME, {"sample_id": None, "example": "Barenblatt_2d", "space_steps": 64, "time_steps": None, "params": None})]
 # example = "Barenblatt_2d"
-# _, rng = valid_problems(1)
+# _, rng = valid_problems(0)
 
 valid_problems = validation_problems.validation_problems_barenblatt
 current_problem_classes = [(PME, {"sample_id": None, "example": "Barenblatt", "space_steps": 64, "time_steps": None, "params": None})]
@@ -91,10 +93,10 @@ _, rng = valid_problems(0)
 # u_exs = [u_ex_0, u_ex_1, u_ex_2, u_ex_3, u_ex_4]
 # rng = 5
 
-model = 59
+model = 89
 phandler = ProblemHandler(problem_classes = current_problem_classes, max_num_open_problems=200)
 test_modulo=20
-for j in range(200):
+for j in range(400):
     loss_test = []
     #loss_test_2 = []
     problem_specs, problem_id = phandler.get_random_problem(0.1)
