@@ -29,10 +29,10 @@ def exact_loss(u, u_ex):
     # loss = error # PME boxes
     # if loss > 0.001:
     #     loss = loss/10
-    # loss = 10e2*error # PME Barenblatt
-    # if loss > 0.01:
-    #     loss = torch.sqrt(loss)
-    loss = error
+    loss = 10e2*error # PME Barenblatt
+    if loss > 0.01:
+        loss = torch.sqrt(loss)
+    # loss = error
     # if loss > 0.0001:
     #     loss = loss/100
     return loss
@@ -45,9 +45,10 @@ def overflows_loss(u):
 
 def exact_loss_2d(u, u_ex):
     error = torch.mean((u_ex - u) ** 2)
-    loss = error  # PME Barenblatt
+    # loss = 10e2*error  # PME Barenblatt
     # if loss > 0.01:
     #     loss = torch.sqrt(loss)
+    loss = error
     return loss
 
 # optimizer = optim.Adam(train_model.parameters(), lr=0.0001)   # Buckley-Leverett
@@ -61,15 +62,15 @@ all_loss_test = []
 
 problem_class = PME
 
-# valid_problems = validation_problems.validation_problems_barenblatt_2d
-# current_problem_classes = [(PME, {"sample_id": None, "example": "Barenblatt_2d", "space_steps": 64, "time_steps": None, "params": None})]
-# example = "Barenblatt_2d"
-# _, rng = valid_problems(0)
-
-valid_problems = validation_problems.validation_problems_barenblatt
-current_problem_classes = [(PME, {"sample_id": None, "example": "Barenblatt", "space_steps": 64, "time_steps": None, "params": None})]
-example = "Barenblatt"
+valid_problems = validation_problems.validation_problems_barenblatt_2d
+current_problem_classes = [(PME, {"sample_id": None, "example": "Barenblatt_2d", "space_steps": 64, "time_steps": None, "params": None})]
+example = "Barenblatt_2d"
 _, rng = valid_problems(0)
+
+# valid_problems = validation_problems.validation_problems_barenblatt
+# current_problem_classes = [(PME, {"sample_id": None, "example": "Barenblatt", "space_steps": 64, "time_steps": None, "params": None})]
+# example = "Barenblatt"
+# _, rng = valid_problems(0)
 
 # current_problem_classes = [(PME, {"sample_id": 0, "example": "boxes", "space_steps": 64, "time_steps": None, "params": 0})]
 # example = "boxes"
@@ -93,10 +94,10 @@ _, rng = valid_problems(0)
 # u_exs = [u_ex_0, u_ex_1, u_ex_2, u_ex_3, u_ex_4]
 # rng = 5
 
-model = 89
+model = 14
 phandler = ProblemHandler(problem_classes = current_problem_classes, max_num_open_problems=200)
 test_modulo=20
-for j in range(400):
+for j in range(200):
     loss_test = []
     #loss_test_2 = []
     problem_specs, problem_id = phandler.get_random_problem(0.1)
@@ -161,7 +162,7 @@ for j in range(400):
                 problem_test = problem_class(sample_id=None, example="Barenblatt", space_steps=64, time_steps=None, params=params_test)
             elif example == "Barenblatt_2d":
                 params_test,_  = valid_problems(kk)
-                problem_test = problem_class(sample_id=None, example="Barenblatt_2d", space_steps=32, time_steps=None, params=params_test)
+                problem_test = problem_class(sample_id=None, example="Barenblatt_2d", space_steps=64, time_steps=None, params=params_test)
             elif example == "boxes":
                 params_test,_  = valid_problems(kk)
                 problem_test = problem_class(sample_id=None, example="boxes", space_steps=64, time_steps=None, params=params_test)

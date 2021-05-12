@@ -18,15 +18,15 @@ from mpl_toolkits.axes_grid1.inset_locator import inset_axes
 
 torch.set_default_dtype(torch.float64)
 
-train_model = torch.load("C:/Users/Tatiana/Desktop/Research/Research_ML_WENO/PME_Test/Models/Model_78/380.pt") #45/500 #46/650 # 47/999
-problem= PME
-example = "Barenblatt"
-valid_problems = validation_problems.validation_problems_barenblatt_default
-
-# train_model = torch.load("C:/Users/Tatiana/Desktop/Research/Research_ML_WENO/PME_Test/Models_2d/Model_10/180.pt") #45/500 #46/650 # 47/999
+train_model = torch.load("C:/Users/Tatiana/Desktop/Research/Research_ML_WENO/PME_Test/Models/Model_58/195.pt") #45/500 #46/650 # 47/999
 # problem= PME
-# example = "Barenblatt_2d"
-# valid_problems = validation_problems.validation_problems_barenblatt_2d_default
+# example = "Barenblatt"
+# valid_problems = validation_problems.validation_problems_barenblatt_default_3
+
+train_model = torch.load("C:/Users/Tatiana/Desktop/Research/Research_ML_WENO/PME_Test/Models_2d/Model_11/30.pt") #45/500 #46/650 # 47/999
+problem= PME
+example = "Barenblatt_2d"
+valid_problems = validation_problems.validation_problems_barenblatt_2d_default
 
 _, rng = valid_problems(0)
 err_nt_max_vec = np.zeros(rng)
@@ -67,16 +67,22 @@ for j in range(rng):
     L = params_main['L']
     sp_st = problem_main.space_steps
     u_ex = problem_main.exact(T)
-    error_t_mean = np.sqrt(2*L / sp_st) * (np.sqrt(np.sum((V_t.detach().numpy() - u_ex) ** 2)))
-    error_nt_mean = np.sqrt(2*L / sp_st) * (np.sqrt(np.sum((V_nt.detach().numpy() - u_ex) ** 2)))
-    error_nt_max = np.max(np.absolute(u_ex - V_nt.detach().numpy()))
-    error_t_max = np.max(np.absolute(u_ex - V_t.detach().numpy()))
+    if example == "Barenblatt":
+        error_t_mean = np.sqrt(1 / sp_st) * (np.sqrt(np.sum((V_t.detach().numpy() - u_ex) ** 2)))
+        error_nt_mean = np.sqrt(1 / sp_st) * (np.sqrt(np.sum((V_nt.detach().numpy() - u_ex) ** 2)))
+        error_nt_max = np.max(np.absolute(u_ex - V_nt.detach().numpy()))
+        error_t_max = np.max(np.absolute(u_ex - V_t.detach().numpy()))
+    elif example == "Barenblatt_2d":
+        error_nt_max = np.max(np.max(np.abs(u_ex - V_nt.detach().numpy())))
+        error_t_max = np.max(np.max(np.abs(u_ex - V_t.detach().numpy())))
+        error_nt_mean = (1 / sp_st) * (np.sqrt(np.sum((u_ex - V_nt.detach().numpy()) ** 2)))
+        error_t_mean = (1 / sp_st) * (np.sqrt(np.sum((u_ex - V_t.detach().numpy()) ** 2)))
     err_nt_max_vec[j] = error_nt_max
     err_t_max_vec[j] = error_t_max
     err_nt_mean_vec[j] = error_nt_mean
     err_t_mean_vec[j] = error_t_mean
-    plt.figure(j + 1)
-    plt.plot(S, V_nt, S, V_t, S, u_ex)
+    # plt.figure(j + 1)
+    # plt.plot(S, V_nt, S, V_t, S, u_ex)
 
 err_mat = np.zeros((rng,4))
 err_mat[:,0] = err_nt_max_vec
@@ -106,6 +112,26 @@ pd.DataFrame(err_mat_ratios).to_latex()
 
 V_nt = V_nt.detach().numpy()
 V_t = V_t.detach().numpy()
+
+# X, Y = np.meshgrid(S, S, indexing="ij")
+# fig = plt.figure()
+# ax = fig.gca(projection='3d')
+# ax.set_xlabel('x')
+# ax.set_ylabel('y')
+# ax.set_zlabel('u')
+# ax.plot_surface(X, Y, V_t, cmap=cm.viridis)
+# plt.savefig("PME_2d_2.pdf", bbox_inches='tight')
+
+# plt.figure(2)
+# plt.contour(X,Y,V_t, 20)
+
+# X, Y = np.meshgrid(S, S, indexing="ij")
+# fig = plt.figure()
+# ax = fig.gca(projection='3d')
+# ax.plot_surface(X, Y, V_nt, cmap=cm.viridis)
+# plt.figure(4)
+# plt.contour(X,Y,V_nt, 20)
+
 
 # fig, ax = plt.subplots(figsize=(5.0, 5.0))
 # ax.plot(S, V_nt, color='blue') #, marker='o')

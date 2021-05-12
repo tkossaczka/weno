@@ -112,7 +112,7 @@ class validation_problems():
         params_vld.append({'T': 2, 'e': 1e-13, 'L': 6, 'power': f, 'd': 1})
         params_vld.append({'T': 2, 'e': 1e-13, 'L': 6, 'power': ff, 'd': 1})
         params_vld.append({'T': 2, 'e': 1e-13, 'L': 6, 'power': g, 'd': 1})
-        rng = 1
+        rng = 13
         return params_vld[j], rng
 
     def validation_problems_barenblatt_2d_default(j):
@@ -164,7 +164,7 @@ class validation_problems():
         return params_vld[j], rng
 
     def validation_problems_barenblatt_2d(j):
-        a0 =2.0
+        a0 =2.012
         a = 2.157
         aa = 3.012
         b = 3.697

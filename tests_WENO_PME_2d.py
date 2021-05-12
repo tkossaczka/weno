@@ -24,9 +24,8 @@ def validation_problems_barenblatt_2d(j):
     return params_vld[j]
 
 train_model = WENONetwork_2()
-# train_model = torch.load("C:/Users/Tatiana/Desktop/Research/Research_ML_WENO/PME_Test/Models/Model_47/999.pt")
-train_model = torch.load("C:/Users/Tatiana/Desktop/Research/Research_ML_WENO/PME_Test/Models_2d/Model_10/180.pt")   # 4/200 # 5/400
-# train_model = torch.load("C:/Users/Tatiana/Desktop/Research/Research_ML_WENO/PME_Test/Models/Model_58/195.pt")   # 4/200 # 5/400
+# train_model = torch.load("C:/Users/Tatiana/Desktop/Research/Research_ML_WENO/PME_Test/Models_2d/Model_10/180.pt")   # 4/200 # 5/400
+train_model = torch.load("C:/Users/Tatiana/Desktop/Research/Research_ML_WENO/PME_Test/Models/Model_58/195.pt") #45/500 #46/650 # 47/999
 problem= PME
 example = "Barenblatt_2d"
 valid_problems = validation_problems.validation_problems_barenblatt_2d_default
@@ -36,7 +35,7 @@ err_nt_mean_vec = np.zeros(rng)
 err_t_max_vec = np.zeros(rng)
 err_t_mean_vec = np.zeros(rng)
 
-for j in range(rng):
+for j in range(6,7):
     if example == "boxes_2d":
         params = {'T': 0.5, 'power': 2, 'd': 2, 'L': 10, 'e': 1e-13}
         problem_main = problem(sample_id=None, example=example, space_steps=80, time_steps=None, params=params)
@@ -83,13 +82,13 @@ err_mat[3,:] = err_t_mean_vec
 ratio_max = err_mat[0,:]/err_mat[1,:]
 ratio_l2 = err_mat[2,:]/err_mat[3,:]
 
-# UU = u_nt.detach().numpy()
-# X, Y = np.meshgrid(x, x, indexing="ij")
-# fig = plt.figure()
-# ax = fig.gca(projection='3d')
-# ax.plot_surface(X, Y, UU, cmap=cm.viridis)
-# plt.figure(2)
-# plt.contour(X,Y,UU, 20)
+UU = u_nt.detach().numpy()
+X, Y = np.meshgrid(x, x, indexing="ij")
+fig = plt.figure()
+ax = fig.gca(projection='3d')
+ax.plot_surface(X, Y, UU, cmap=cm.viridis)
+plt.figure(2)
+plt.contour(X,Y,UU, 20)
 #
 # UU2 = u_t.detach().numpy()
 # X, Y = np.meshgrid(x, x, indexing="ij")
