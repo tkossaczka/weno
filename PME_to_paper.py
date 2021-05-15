@@ -26,7 +26,7 @@ train_model = torch.load("C:/Users/Tatiana/Desktop/Research/Research_ML_WENO/PME
 train_model = torch.load("C:/Users/Tatiana/Desktop/Research/Research_ML_WENO/PME_Test/Models_2d/Model_11/30.pt") #45/500 #46/650 # 47/999
 problem= PME
 example = "Barenblatt_2d"
-valid_problems = validation_problems.validation_problems_barenblatt_2d_default
+valid_problems = validation_problems.validation_problems_barenblatt_2d_default_3
 
 _, rng = valid_problems(0)
 err_nt_max_vec = np.zeros(rng)

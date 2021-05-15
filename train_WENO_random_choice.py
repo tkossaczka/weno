@@ -45,10 +45,10 @@ def overflows_loss(u):
 
 def exact_loss_2d(u, u_ex):
     error = torch.mean((u_ex - u) ** 2)
-    # loss = 10e2*error  # PME Barenblatt
-    # if loss > 0.01:
-    #     loss = torch.sqrt(loss)
-    loss = error
+    loss = 10e2*error  # PME Barenblatt
+    if loss > 0.01:
+        loss = torch.sqrt(loss)
+    # loss = error
     return loss
 
 # optimizer = optim.Adam(train_model.parameters(), lr=0.0001)   # Buckley-Leverett
