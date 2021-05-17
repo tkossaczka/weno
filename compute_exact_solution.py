@@ -10,8 +10,8 @@ import matplotlib.pyplot as plt
 
 torch.set_default_dtype(torch.float64)
 
-problem = PME
-# problem = Buckley_Leverett
+# problem = PME
+problem = Buckley_Leverett
 
 train_model = WENONetwork_2()
 parameters = []
@@ -26,12 +26,12 @@ parameters = []
 
 def save_problem_and_solution(save_path, sample_id):
     print("{},".format(sample_id))
-    problem_ex = problem(sample_id = None, example= "boxes", space_steps=64 * 2 * 2 * 2 * 2, time_steps=None, params=None)
-    power = problem_ex.params['power']
+    # problem_ex = problem(sample_id = None, example= "boxes", space_steps=64 * 2 * 2 * 2 * 2, time_steps=None, params=None)
+    # power = problem_ex.params['power']
     # height = problem_ex.height
-    # problem_ex = problem(sample_id=None, example="gravity", space_steps=64 * 2 * 2 * 2 * 2, time_steps=None, params=None)
-    # C = problem_ex.params['C']
-    # G = problem_ex.params['G']
+    problem_ex = problem(sample_id=None, example="gravity", space_steps=64 * 2 * 2 * 2 * 2, time_steps=None, params=None)
+    C = problem_ex.params['C']
+    G = problem_ex.params['G']
     # u_exact, u_exact_64 = train_model.compute_exact(problem, problem_ex, 64, 41, just_one_time_step=False, trainable=False)
     u_exact = train_model.compute_exact(problem, problem_ex, 64, 41, just_one_time_step=False, trainable=False)
     u_exact = u_exact.detach().numpy()
@@ -43,17 +43,17 @@ def save_problem_and_solution(save_path, sample_id):
     np.save(os.path.join(save_path, "u_exact_{}".format(sample_id)), u_exact)
     # np.save(os.path.join(save_path, "u_exact64_{}".format(sample_id)), u_exact_64)
 
-    if not os.path.exists(os.path.join(save_path, "parameters.txt")):
-        with open(os.path.join(save_path, "parameters.txt"), "a") as f:
-            f.write("{},{}\n".format("sample_id","power"))
-    with open(os.path.join(save_path, "parameters.txt"), "a") as f:
-        f.write("{},{}\n".format(sample_id, power))
-
     # if not os.path.exists(os.path.join(save_path, "parameters.txt")):
     #     with open(os.path.join(save_path, "parameters.txt"), "a") as f:
-    #         f.write("{},{},{}\n".format("sample_id","C","G"))
+    #         f.write("{},{}\n".format("sample_id","power"))
     # with open(os.path.join(save_path, "parameters.txt"), "a") as f:
-    #     f.write("{},{},{}\n".format(sample_id, C, G))
+    #     f.write("{},{}\n".format(sample_id, power))
+
+    if not os.path.exists(os.path.join(save_path, "parameters.txt")):
+        with open(os.path.join(save_path, "parameters.txt"), "a") as f:
+            f.write("{},{},{}\n".format("sample_id","C","G"))
+    with open(os.path.join(save_path, "parameters.txt"), "a") as f:
+        f.write("{},{},{}\n".format(sample_id, C, G))
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description='Generate exact solutions with given sample number for filename')
@@ -64,7 +64,7 @@ if __name__ == "__main__":
     save_problem_and_solution(args.save_path, args.sample_number)
 
 # seq 174 400 | xargs -i{} -P6 python compute_exact_solution.py C:\Users\Tatiana\Desktop\Research\Research_ML_WENO\PME_Test\PME_Data_1024 {}
-# seq 101 300 | xargs -i{} -P6 python compute_exact_solution.py C:\Users\Tatiana\Desktop\Research\Research_ML_WENO\Buckley_Leverett_CD_Test\Buckley_Leverett_CD_Data_1024 {}
+# seq 0 6 | xargs -i{} -P6 python compute_exact_solution.py C:\Users\Tatiana\Desktop\Research\Research_ML_WENO\Buckley_Leverett_CD_Test\Buckley_Leverett_CD_Data_1024 {}
 
 # def validation_problems(j):
 #     params_vld = []

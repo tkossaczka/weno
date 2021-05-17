@@ -273,9 +273,9 @@ class Buckley_Leverett():
         u_der = - ( (2*C+2)*G*u**5 + (-8*C-2)*G*u**4 + 12*C*G*u**3 + (2*C-8*C*G)*u**2 + (2*C*G-2*C)*u )/( (u**2+C*(1-u)**2)**2 )
         return u_der
 
-    def exact(self, k):
-        u_ex = self.u_ex[:,k]
-        return u_ex
+    # def exact(self, k):
+    #     u_ex = self.u_ex[:,k]
+    #     return u_ex
 
     # def err(self, u_last):
     #     u_ex = self.exact()
