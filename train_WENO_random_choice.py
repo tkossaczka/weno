@@ -29,12 +29,10 @@ def exact_loss(u, u_ex):
     # loss = error # PME boxes
     # if loss > 0.001:
     #     loss = loss/10
-    loss = 10e2*error # PME Barenblatt
-    if loss > 0.01:
-        loss = torch.sqrt(loss)
-    # loss = error
-    # if loss > 0.0001:
-    #     loss = loss/100
+    # loss = 10e2*error # PME Barenblatt
+    # if loss > 0.01:
+    #     loss = torch.sqrt(loss)
+    loss = error
     return loss
 
 def overflows_loss(u):
@@ -51,21 +49,21 @@ def exact_loss_2d(u, u_ex):
     # loss = error
     return loss
 
-# optimizer = optim.Adam(train_model.parameters(), lr=0.0001)   # Buckley-Leverett
+optimizer = optim.Adam(train_model.parameters(), lr=0.0001)   # Buckley-Leverett
 # optimizer = optim.Adam(train_model.parameters(), lr=0.0001) #, weight_decay=0.001)  # PME boxes
-optimizer = optim.Adam(train_model.inner_nn_weno6.parameters(), lr=0.1) #, weight_decay=0.1) # PME Barenblatt   # todo je lepsi lr 0.01?
+# optimizer = optim.Adam(train_model.inner_nn_weno6.parameters(), lr=0.1) #, weight_decay=0.1) # PME Barenblatt   # todo je lepsi lr 0.01?
 # optimizer = optim.Adam([{'params': train_model.parameters(), 'lr': 0.1}, {'params': train_model2.parameters(), 'lr': 0.001}] ) #, weight_decay=0.1) # PME Barenblatt   # todo je lepsi lr 0.01?
 # optimizer = optim.SGD(train_model.parameters(), lr=0.01, weight_decay=0.00001)
 
 all_loss_test = []
 #all_loss_test_2 = []
 
-problem_class = PME
+# problem_class = PME
 
-valid_problems = validation_problems.validation_problems_barenblatt_2d
-current_problem_classes = [(PME, {"sample_id": None, "example": "Barenblatt_2d", "space_steps": 64, "time_steps": None, "params": None})]
-example = "Barenblatt_2d"
-_, rng = valid_problems(0)
+# valid_problems = validation_problems.validation_problems_barenblatt_2d
+# current_problem_classes = [(PME, {"sample_id": None, "example": "Barenblatt_2d", "space_steps": 64, "time_steps": None, "params": None})]
+# example = "Barenblatt_2d"
+# _, rng = valid_problems(0)
 
 # valid_problems = validation_problems.validation_problems_barenblatt
 # current_problem_classes = [(PME, {"sample_id": None, "example": "Barenblatt", "space_steps": 64, "time_steps": None, "params": None})]
@@ -82,22 +80,23 @@ _, rng = valid_problems(0)
 # u_exs = [u_ex_0, u_ex_1, u_ex_2, u_ex_3, u_ex_4]
 # rng = 4
 
-# problem_class = Buckley_Leverett
-# current_problem_classes = [(Buckley_Leverett, {"sample_id": 1, "example": "gravity", "space_steps": 64, "time_steps": None, "params": 0})]
-# example = "gravity"
-# folder = 1
-# u_ex_0 = torch.load("C:/Users/Tatiana/Desktop/Research/Research_ML_WENO/Buckley_Leverett_CD_Test/Buckley_Leverett_CD_Data_1024/Basic_test_set_{}/u_ex64_0".format(folder))
-# u_ex_1 = torch.load("C:/Users/Tatiana/Desktop/Research/Research_ML_WENO/Buckley_Leverett_CD_Test/Buckley_Leverett_CD_Data_1024/Basic_test_set_{}/u_ex64_1".format(folder))
-# u_ex_2 = torch.load("C:/Users/Tatiana/Desktop/Research/Research_ML_WENO/Buckley_Leverett_CD_Test/Buckley_Leverett_CD_Data_1024/Basic_test_set_{}/u_ex64_2".format(folder))
-# u_ex_3 = torch.load("C:/Users/Tatiana/Desktop/Research/Research_ML_WENO/Buckley_Leverett_CD_Test/Buckley_Leverett_CD_Data_1024/Basic_test_set_{}/u_ex64_3".format(folder))
-# u_ex_4 = torch.load("C:/Users/Tatiana/Desktop/Research/Research_ML_WENO/Buckley_Leverett_CD_Test/Buckley_Leverett_CD_Data_1024/Basic_test_set_{}/u_ex64_4".format(folder))
-# u_exs = [u_ex_0, u_ex_1, u_ex_2, u_ex_3, u_ex_4]
-# rng = 5
+valid_problems = validation_problems.validation_problems_BL
+problem_class = Buckley_Leverett
+current_problem_classes = [(Buckley_Leverett, {"sample_id": 1, "example": "gravity", "space_steps": 64, "time_steps": None, "params": 0})]
+example = "gravity"
+folder = 1
+u_ex_0 = torch.load("C:/Users/Tatiana/Desktop/Research/Research_ML_WENO/Buckley_Leverett_CD_Test/Buckley_Leverett_CD_Data_1024/Basic_test_set_{}/u_ex64_0".format(folder))
+u_ex_1 = torch.load("C:/Users/Tatiana/Desktop/Research/Research_ML_WENO/Buckley_Leverett_CD_Test/Buckley_Leverett_CD_Data_1024/Basic_test_set_{}/u_ex64_1".format(folder))
+u_ex_2 = torch.load("C:/Users/Tatiana/Desktop/Research/Research_ML_WENO/Buckley_Leverett_CD_Test/Buckley_Leverett_CD_Data_1024/Basic_test_set_{}/u_ex64_2".format(folder))
+u_ex_3 = torch.load("C:/Users/Tatiana/Desktop/Research/Research_ML_WENO/Buckley_Leverett_CD_Test/Buckley_Leverett_CD_Data_1024/Basic_test_set_{}/u_ex64_3".format(folder))
+u_ex_4 = torch.load("C:/Users/Tatiana/Desktop/Research/Research_ML_WENO/Buckley_Leverett_CD_Test/Buckley_Leverett_CD_Data_1024/Basic_test_set_{}/u_ex64_4".format(folder))
+u_exs = [u_ex_0, u_ex_1, u_ex_2, u_ex_3, u_ex_4]
+_, rng = valid_problems(0)
 
-model = 14
+model = 16
 phandler = ProblemHandler(problem_classes = current_problem_classes, max_num_open_problems=200)
-test_modulo=20
-for j in range(200):
+test_modulo=100
+for j in range(1000):
     loss_test = []
     #loss_test_2 = []
     problem_specs, problem_id = phandler.get_random_problem(0.1)
@@ -146,7 +145,7 @@ for j in range(200):
     elif example == "Barenblatt_2d":
         base_path = "C:/Users/Tatiana/Desktop/Research/Research_ML_WENO/PME_Test/Models_2d/Model_{}/".format(model)
     elif example == "gravity":
-        base_path = "C:/Users/Tatiana/Desktop/Research/Research_ML_WENO/Buckley_Leverett_CD_Test/Models/Model_17/"
+        base_path = "C:/Users/Tatiana/Desktop/Research/Research_ML_WENO/Buckley_Leverett_CD_Test/Models/Model_{}/".format(model)
     if not os.path.exists(base_path):
         os.mkdir(base_path)
     path = os.path.join(base_path, "{}.pt".format(j))
@@ -218,7 +217,7 @@ all_loss_test = np.array(all_loss_test)
 norm_losses=all_loss_test[:,:,0]/all_loss_test[:,:,0].max(axis=0)[None, :]
 print("trained:", all_loss_test[:,:,0].min(axis=0))
 plt.plot(norm_losses)
-plt.legend(['2.157', '3.012', '3.697', '3.987', '4.158',  '4.723', '5.041', '5.568', '6.087', '6.284', '7.124', '7.958'])
+# plt.legend(['2.157', '3.012', '3.697', '3.987', '4.158',  '4.723', '5.041', '5.568', '6.087', '6.284', '7.124', '7.958'])
 
 
 # plt.figure(2)

@@ -38,18 +38,6 @@ class validation_problems():
         rng = 7
         return params_vld[j], rng
 
-    # def validation_problems_barenblatt(j):
-    #     params_vld = []
-    #     params_vld.append({'T': 2, 'e': 1e-13, 'L': 6, 'power': 2.5, 'd': 1})
-    #     params_vld.append({'T': 2, 'e': 1e-13, 'L': 6, 'power': 3.5, 'd': 1})
-    #     params_vld.append({'T': 2, 'e': 1e-13, 'L': 6, 'power': 4.5, 'd': 1})
-    #     params_vld.append({'T': 2, 'e': 1e-13, 'L': 6, 'power': 5.5, 'd': 1})
-    #     params_vld.append({'T': 2, 'e': 1e-13, 'L': 6, 'power': 6.5, 'd': 1})
-    #     params_vld.append({'T': 2, 'e': 1e-13, 'L': 6, 'power': 7.5, 'd': 1})
-    #     params_vld.append({'T': 2, 'e': 1e-13, 'L': 6, 'power': 8.5, 'd': 1})
-    #     rng = 7
-    #     return params_vld[j], rng
-
     def validation_problems_barenblatt_fract(j):  # tieto boli dobre, model 62
         params_vld = []
         params_vld.append({'T': 2, 'e': 1e-13, 'L': 6, 'power': 2.2, 'd': 1})
@@ -73,16 +61,6 @@ class validation_problems():
         params_vld.append({'T': 1.2, 'e': 1e-13, 'L': 6, 'power': 7.1, 'd': 1})
         rng = 7
         return params_vld[j], rng
-
-    # a = random.uniform(2, 8)
-    # b = random.uniform(2, 8)
-    # c = random.uniform(2, 8)
-    # d = random.uniform(2, 8)
-    # e = random.uniform(2, 8)
-    # f = random.uniform(2, 8)
-    # g = random.uniform(2, 8)
-    # h = random.uniform(2, 8)
-    # print(a,b,c,d,e,f,g,h)
 
     def validation_problems_barenblatt(j):
         a0 = 2.0
@@ -231,5 +209,15 @@ class validation_problems():
         params_vld.append({'T': 0.2, 'e': 1e-13, 'L': 0, 'R': 1, 'C': 0.5, 'G': 2})
         params_vld.append({'T': 0.2, 'e': 1e-13, 'L': 0, 'R': 1, 'C': 0.5, 'G': 1})
         params_vld.append({'T': 0.2, 'e': 1e-13, 'L': 0, 'R': 1, 'C': 0.25, 'G': 4})
+        rng = 5
+        return params_vld[j], rng
+
+    def validation_problems_BL_4(j):
+        params_vld = []
+        params_vld.append({'T': 0.05, 'e': 1e-13, 'L': 0, 'R': 1, 'C': 1, 'G': 5})
+        params_vld.append({'T': 0.05, 'e': 1e-13, 'L': 0, 'R': 1, 'C': 1, 'G': 0})
+        params_vld.append({'T': 0.05, 'e': 1e-13, 'L': 0, 'R': 1, 'C': 0.5, 'G': 2})
+        params_vld.append({'T': 0.05, 'e': 1e-13, 'L': 0, 'R': 1, 'C': 0.5, 'G': 1})
+        params_vld.append({'T': 0.05, 'e': 1e-13, 'L': 0, 'R': 1, 'C': 0.25, 'G': 4})
         rng = 5
         return params_vld[j], rng
