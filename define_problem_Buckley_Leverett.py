@@ -83,7 +83,7 @@ class Buckley_Leverett():
             CFL_conv = conv_der / h
             CFL_diff = 0.01 / h ** 2
             CFL = 0.4 / (CFL_conv + CFL_diff)
-            #n1 = np.ceil(0.1*T / (h ** 2))
+            n1 = np.ceil(0.1*T / (h ** 2))
             n = np.ceil(T / CFL)
         if example == "degenerate":
             n = np.ceil(0.4 * T / (h ** 2))
