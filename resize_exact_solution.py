@@ -13,7 +13,16 @@ torch.set_default_dtype(torch.float64)
 problem = Buckley_Leverett
 train_model = WENONetwork_2()
 
-for j in range(6):
+def validation_problems(j):
+    params_vld = []
+    params_vld.append({'T': 0.1, 'e': 1e-13, 'L': 0, 'R': 1, 'C': 1, 'G': 3})
+    params_vld.append({'T': 0.1, 'e': 1e-13, 'L': 0, 'R': 1, 'C': 0.4, 'G': 0})
+    params_vld.append({'T': 0.1, 'e': 1e-13, 'L': 0, 'R': 1, 'C': 0.5, 'G': 5})
+    params_vld.append({'T': 0.1, 'e': 1e-13, 'L': 0, 'R': 1, 'C': 0.3, 'G': 3})
+    params_vld.append({'T': 0.1, 'e': 1e-13, 'L': 0, 'R': 1, 'C': 0.25, 'G': 1})
+    return params_vld[j]
+
+for j in range(5):
 
     # df = pd.read_csv("C:/Users/Tatiana/Desktop/Research/Research_ML_WENO/PME_Test/PME_Data_1024/Basic_test_set/parameters.txt")
     # u_ex = torch.load("C:/Users/Tatiana/Desktop/Research/Research_ML_WENO/PME_Test/PME_Data_1024/Basic_test_set/u_ex_{}".format(j))
@@ -21,12 +30,20 @@ for j in range(6):
     # params = {'T': 0.5, 'e': 1e-13, 'L': 6, 'power': power, 'd': 1}
     # problem_main = problem(sample_id=None, example="boxes", space_steps=64, time_steps=None, params=params)
 
-    df = pd.read_csv("C:/Users/Tatiana/Desktop/Research/Research_ML_WENO/Buckley_Leverett_CD_Test/Buckley_Leverett_CD_Data_1024/parameters.txt")
-    u_ex = np.load("C:/Users/Tatiana/Desktop/Research/Research_ML_WENO/Buckley_Leverett_CD_Test/Buckley_Leverett_CD_Data_1024/u_exact_{}.npy".format(j))
-    C = float(df[df.sample_id == j]["C"])
-    G = float(df[df.sample_id == j]["G"])
+    # df = pd.read_csv("C:/Users/Tatiana/Desktop/Research/Research_ML_WENO/Buckley_Leverett_CD_Test/Buckley_Leverett_CD_Data_1024/parameters.txt")
+    # u_ex = np.load("C:/Users/Tatiana/Desktop/Research/Research_ML_WENO/Buckley_Leverett_CD_Test/Buckley_Leverett_CD_Data_1024/u_exact_{}.npy".format(j))
+    # C = float(df[df.sample_id == j]["C"])
+    # G = float(df[df.sample_id == j]["G"])
+    # params =  {'T': 0.1, 'e': 1e-13, 'L': 0, 'R': 1, 'C': C, 'G': G}
+    # problem_main = problem(sample_id=None, example="gravity", space_steps=64, time_steps=None, params=params)
+
+    u_ex = torch.load("C:/Users/Tatiana/Desktop/Research/Research_ML_WENO/Buckley_Leverett_CD_Test/Buckley_Leverett_CD_Data_1024/Basic_test_set_2/u_ex_{}".format(j))
+    params_test = validation_problems(j)
+    C = params_test["C"]
+    G = params_test["G"]
     params =  {'T': 0.1, 'e': 1e-13, 'L': 0, 'R': 1, 'C': C, 'G': G}
     problem_main = problem(sample_id=None, example="gravity", space_steps=64, time_steps=None, params=params)
+    u_ex = u_ex.detach().numpy()
 
     space_steps_exact = u_ex.shape[0]
     time_steps_exact = u_ex.shape[1]
@@ -40,8 +57,12 @@ for j in range(6):
     # u_ex = u_ex.detach().numpy()
     # np.save(os.path.join(save_path, "u_exact64_{}".format(j)), u_ex)
 
-    save_path = "C:/Users/Tatiana/Desktop/Research/Research_ML_WENO/Buckley_Leverett_CD_Test/Buckley_Leverett_CD_Data_1024"
-    np.save(os.path.join(save_path, "u_exact64_{}.npy".format(j)), u_ex)
+    # save_path = "C:/Users/Tatiana/Desktop/Research/Research_ML_WENO/Buckley_Leverett_CD_Test/Buckley_Leverett_CD_Data_1024"
+    # np.save(os.path.join(save_path, "u_exact64_{}.npy".format(j)), u_ex)
+
+    u_ex = torch.Tensor(u_ex)
+    save_path = "C:/Users/Tatiana/Desktop/Research/Research_ML_WENO/Buckley_Leverett_CD_Test/Buckley_Leverett_CD_Data_1024/Basic_test_set_2"
+    torch.save(u_ex, os.path.join(save_path, "u_ex64_{}".format(j)))
 
 
 

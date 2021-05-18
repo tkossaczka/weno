@@ -80,11 +80,11 @@ all_loss_test = []
 # u_exs = [u_ex_0, u_ex_1, u_ex_2, u_ex_3, u_ex_4]
 # rng = 4
 
-valid_problems = validation_problems.validation_problems_BL
+valid_problems = validation_problems.validation_problems_BL_2
 problem_class = Buckley_Leverett
 current_problem_classes = [(Buckley_Leverett, {"sample_id": 1, "example": "gravity", "space_steps": 64, "time_steps": None, "params": 0})]
 example = "gravity"
-folder = 1
+folder = 2
 u_ex_0 = torch.load("C:/Users/Tatiana/Desktop/Research/Research_ML_WENO/Buckley_Leverett_CD_Test/Buckley_Leverett_CD_Data_1024/Basic_test_set_{}/u_ex64_0".format(folder))
 u_ex_1 = torch.load("C:/Users/Tatiana/Desktop/Research/Research_ML_WENO/Buckley_Leverett_CD_Test/Buckley_Leverett_CD_Data_1024/Basic_test_set_{}/u_ex64_1".format(folder))
 u_ex_2 = torch.load("C:/Users/Tatiana/Desktop/Research/Research_ML_WENO/Buckley_Leverett_CD_Test/Buckley_Leverett_CD_Data_1024/Basic_test_set_{}/u_ex64_2".format(folder))
@@ -93,10 +93,10 @@ u_ex_4 = torch.load("C:/Users/Tatiana/Desktop/Research/Research_ML_WENO/Buckley_
 u_exs = [u_ex_0, u_ex_1, u_ex_2, u_ex_3, u_ex_4]
 _, rng = valid_problems(0)
 
-model = 16
+model = 21
 phandler = ProblemHandler(problem_classes = current_problem_classes, max_num_open_problems=200)
-test_modulo=100
-for j in range(1000):
+test_modulo=200
+for j in range(2000):
     loss_test = []
     #loss_test_2 = []
     problem_specs, problem_id = phandler.get_random_problem(0.1)

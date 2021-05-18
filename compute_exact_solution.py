@@ -80,7 +80,6 @@ if __name__ == "__main__":
 # torch.save(u_ex, "C:/Users/Tatiana/Desktop/Research/Research_ML_WENO/PME_Test/PME_Data_1024/Basic_test_set/u_ex_4")
 #torch.save(u_ex64, "C:/Users/Tatiana/Desktop/Research/Research_ML_WENO/PME_Test/PME_Data_1024/Basic_test_set/u_ex64_3")
 
-
 # def validation_problems(j):
 #     params_vld = []
 #     params_vld.append({'T': 0.1, 'e': 1e-13, 'L': 0, 'R': 1, 'C': 1, 'G': 5})
@@ -90,10 +89,10 @@ if __name__ == "__main__":
 #     params_vld.append({'T': 0.1, 'e': 1e-13, 'L': 0, 'R': 1, 'C': 0.25, 'G': 4})
 #     return params_vld[j]
 #
-params = {'T': 0.1, 'e': 1e-13, 'L': 0, 'R': 1, 'C': 0.25, 'G': 4}
-problem_ex_test = problem(sample_id=None, example= "gravity", space_steps=64 * 2 * 2 * 2 * 2 , time_steps=None, params=params)
-u_ex = train_model.compute_exact(Buckley_Leverett, problem_ex_test, 64, 41, just_one_time_step=False, trainable=False)
-torch.save(u_ex, "C:/Users/Tatiana/Desktop/Research/Research_ML_WENO/Buckley_Leverett_CD_Test/Buckley_Leverett_CD_Data_1024/Basic_test_set_1/u_ex_4")
+# params = {'T': 0.1, 'e': 1e-13, 'L': 0, 'R': 1, 'C': 0.25, 'G': 4}
+# problem_ex_test = problem(sample_id=None, example= "gravity", space_steps=64 * 2 * 2 * 2 * 2 , time_steps=None, params=params)
+# u_ex = train_model.compute_exact(Buckley_Leverett, problem_ex_test, 64, 41, just_one_time_step=False, trainable=False)
+# torch.save(u_ex, "C:/Users/Tatiana/Desktop/Research/Research_ML_WENO/Buckley_Leverett_CD_Test/Buckley_Leverett_CD_Data_1024/Basic_test_set_1/u_ex_4")
 # torch.save(u_ex64, "C:/Users/Tatiana/Desktop/Research/Research_ML_WENO/Buckley_Leverett_CD_Test/Buckley_Leverett_CD_Data_1024/Basic_test_set/u_ex64_4")
 
 # def validation_problems(j):
@@ -135,9 +134,9 @@ torch.save(u_ex, "C:/Users/Tatiana/Desktop/Research/Research_ML_WENO/Buckley_Lev
 #     params_vld.append({'T': 0.1, 'e': 1e-13, 'L': 0, 'R': 1, 'C': 0.25, 'G': 1})
 #     return params_vld[j]
 #
-# params = {'T': 0.1, 'e': 1e-13, 'L': 0, 'R': 1, 'C': 0.25, 'G': 1}
+# params ={'T': 0.1, 'e': 1e-13, 'L': 0, 'R': 1, 'C': 0.25, 'G': 1}
 # problem_ex_test = problem(sample_id=None, example= "gravity", space_steps=64 * 2 * 2 * 2 * 2 , time_steps=None, params=params)
-# u_ex, u_ex64 = train_model.compute_exact(Buckley_Leverett, problem_ex_test, 64, 41, just_one_time_step=False, trainable=False)
+# u_ex = train_model.compute_exact(Buckley_Leverett, problem_ex_test, 64, 41, just_one_time_step=False, trainable=False)
 # torch.save(u_ex, "C:/Users/Tatiana/Desktop/Research/Research_ML_WENO/Buckley_Leverett_CD_Test/Buckley_Leverett_CD_Data_1024/Basic_test_set_2/u_ex_4")
 # torch.save(u_ex64, "C:/Users/Tatiana/Desktop/Research/Research_ML_WENO/Buckley_Leverett_CD_Test/Buckley_Leverett_CD_Data_1024/Basic_test_set_2/u_ex64_4")
 
