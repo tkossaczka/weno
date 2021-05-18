@@ -32,7 +32,7 @@ def exact_loss(u, u_ex):
     # loss = 10e2*error # PME Barenblatt
     # if loss > 0.01:
     #     loss = torch.sqrt(loss)
-    loss = error
+    loss = 10*error
     return loss
 
 def overflows_loss(u):
@@ -106,10 +106,10 @@ u_ex_4 = torch.load("C:/Users/Tatiana/Desktop/Research/Research_ML_WENO/Buckley_
 u_exs = [u_ex_0, u_ex_1, u_ex_2, u_ex_3, u_ex_4]
 _, rng = valid_problems(0)
 
-model = 27
+model = 28
 phandler = ProblemHandler(problem_classes = current_problem_classes, max_num_open_problems=200)
 test_modulo=200
-for j in range(4000):
+for j in range(2000):
     loss_test = []
     #loss_test_2 = []
     problem_specs, problem_id = phandler.get_random_problem(0.1)
