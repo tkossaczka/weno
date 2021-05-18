@@ -11,7 +11,7 @@ from define_problem_Buckley_Leverett import Buckley_Leverett
 torch.set_default_dtype(torch.float64)
 
 train_model = WENONetwork_2()
-train_model = torch.load("C:/Users/Tatiana/Desktop/Research/Research_ML_WENO/Buckley_Leverett_CD_Test/Models/Model_21/700.pt")
+train_model = torch.load("C:/Users/Tatiana/Desktop/Research/Research_ML_WENO/Buckley_Leverett_CD_Test/Models/Model_27/2600.pt")
 
 problem= Buckley_Leverett
 
@@ -52,7 +52,7 @@ def validation_problems_BL_4(j):
     return params_vld[j]
 if problem == Buckley_Leverett:
     example = "gravity"
-    folder = 1
+    folder = 2
     u_ex_0 = torch.load("C:/Users/Tatiana/Desktop/Research/Research_ML_WENO/Buckley_Leverett_CD_Test/Buckley_Leverett_CD_Data_1024/Basic_test_set_{}/u_ex128_0".format(folder))
     u_ex_1 = torch.load("C:/Users/Tatiana/Desktop/Research/Research_ML_WENO/Buckley_Leverett_CD_Test/Buckley_Leverett_CD_Data_1024/Basic_test_set_{}/u_ex128_1".format(folder))
     u_ex_2 = torch.load("C:/Users/Tatiana/Desktop/Research/Research_ML_WENO/Buckley_Leverett_CD_Test/Buckley_Leverett_CD_Data_1024/Basic_test_set_{}/u_ex128_2".format(folder))
@@ -73,7 +73,7 @@ err_t_max_vec = np.zeros(rng)
 err_t_mean_vec = np.zeros(rng)
 
 for j in range(rng):
-    params = validation_problems_BL(j)
+    params = validation_problems_BL_2(j)
     problem_main = problem(sample_id=None, example = example, space_steps=128, time_steps=None, params=params)
     print(problem_main.params)
     u_init, nn = train_model.init_run_weno(problem_main, vectorized=True, just_one_time_step=False)
