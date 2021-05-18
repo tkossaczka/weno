@@ -15,7 +15,7 @@ class Buckley_Leverett():
             else:
                 self.sample_id = sample_id
             self.df = pd.read_csv("C:/Users/Tatiana/Desktop/Research/Research_ML_WENO/Buckley_Leverett_CD_Test/Buckley_Leverett_CD_Data_1024/parameters.txt")
-            self.u_ex = np.load("C:/Users/Tatiana/Desktop/Research/Research_ML_WENO/Buckley_Leverett_CD_Test/Buckley_Leverett_CD_Data_1024/u_exact64_{}.npy".format(self.sample_id))
+            self.u_ex = np.load("C:/Users/Tatiana/Desktop/Research/Research_ML_WENO/Buckley_Leverett_CD_Test/Buckley_Leverett_CD_Data_1024/u_exact128_{}.npy".format(self.sample_id))
             self.u_ex = torch.Tensor(self.u_ex)
             C = float(self.df[self.df.sample_id == self.sample_id]["C"])
             G = float(self.df[self.df.sample_id == self.sample_id]["G"])
