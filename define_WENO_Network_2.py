@@ -19,7 +19,7 @@ class FancyNet(nn.Module):
     def forward(self, x):
         x = F.elu(self.conv0(x))
         for k in range(self.num_inner_convs):
-            x = F.elu(self.convs[k](x)) #+ x
+            x = F.elu(self.convs[k](x)) + x
         x = torch.sigmoid(self.conv_out(x))
         return x
 

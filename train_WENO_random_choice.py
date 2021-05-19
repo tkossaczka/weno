@@ -106,7 +106,7 @@ u_ex_4 = torch.load("C:/Users/Tatiana/Desktop/Research/Research_ML_WENO/Buckley_
 u_exs = [u_ex_0, u_ex_1, u_ex_2, u_ex_3, u_ex_4]
 _, rng = valid_problems(0)
 
-model = 31
+model = 35
 phandler = ProblemHandler(problem_classes = current_problem_classes, max_num_open_problems=200)
 test_modulo=400
 for j in range(8000):
