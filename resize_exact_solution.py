@@ -31,7 +31,7 @@ def validation_problems(j):
     params_vld.append({'T': 0.1, 'e': 1e-13, 'L': 0, 'R': 1, 'C': 0.25, 'G': 4})
     return params_vld[j]
 
-for j in range(251):
+for j in range(257,263):
 
     # df = pd.read_csv("C:/Users/Tatiana/Desktop/Research/Research_ML_WENO/PME_Test/PME_Data_1024/Basic_test_set/parameters.txt")
     # u_ex = torch.load("C:/Users/Tatiana/Desktop/Research/Research_ML_WENO/PME_Test/PME_Data_1024/Basic_test_set/u_ex_{}".format(j))

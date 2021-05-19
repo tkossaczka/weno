@@ -7,70 +7,46 @@ from mpl_toolkits.mplot3d import Axes3D
 from define_WENO_Network_2 import WENONetwork_2
 from scipy.stats import norm
 from define_problem_Buckley_Leverett import Buckley_Leverett
+from validation_problems import validation_problems
 
 torch.set_default_dtype(torch.float64)
 
 train_model = WENONetwork_2()
-train_model = torch.load("C:/Users/Tatiana/Desktop/Research/Research_ML_WENO/Buckley_Leverett_CD_Test/Models/Model_34/4800.pt")
+train_model = torch.load("C:/Users/Tatiana/Desktop/Research/Research_ML_WENO/Buckley_Leverett_CD_Test/Models/Model_34/4400.pt")
 
 problem= Buckley_Leverett
 
 example = "gravity"
 # example = "degenerate"
 
-def validation_problems_BL(j):
-    params_vld = []
-    params_vld.append({'T': 0.1, 'e': 1e-13, 'L': 0, 'R': 1, 'C': 1, 'G': 5})
-    params_vld.append({'T': 0.1, 'e': 1e-13, 'L': 0, 'R': 1, 'C': 1, 'G': 0})
-    params_vld.append({'T': 0.1, 'e': 1e-13, 'L': 0, 'R': 1, 'C': 0.5, 'G': 2})
-    params_vld.append({'T': 0.1, 'e': 1e-13, 'L': 0, 'R': 1, 'C': 0.5, 'G': 1})
-    params_vld.append({'T': 0.1, 'e': 1e-13, 'L': 0, 'R': 1, 'C': 0.25, 'G': 4})
-    return params_vld[j]
-def validation_problems_BL_2(j):
-    params_vld = []
-    params_vld.append({'T': 0.1, 'e': 1e-13, 'L': 0, 'R': 1, 'C': 1, 'G': 3})
-    params_vld.append({'T': 0.1, 'e': 1e-13, 'L': 0, 'R': 1, 'C': 0.4, 'G': 0})
-    params_vld.append({'T': 0.1, 'e': 1e-13, 'L': 0, 'R': 1, 'C': 0.5, 'G': 5})
-    params_vld.append({'T': 0.1, 'e': 1e-13, 'L': 0, 'R': 1, 'C': 0.3, 'G': 3})
-    params_vld.append({'T': 0.1, 'e': 1e-13, 'L': 0, 'R': 1, 'C': 0.25, 'G': 1})
-    return params_vld[j]
-def validation_problems_BL_3(j):
-    params_vld = []
-    params_vld.append({'T': 0.2, 'e': 1e-13, 'L': 0, 'R': 1, 'C': 1, 'G': 5})
-    params_vld.append({'T': 0.2, 'e': 1e-13, 'L': 0, 'R': 1, 'C': 1, 'G': 0})
-    params_vld.append({'T': 0.2, 'e': 1e-13, 'L': 0, 'R': 1, 'C': 0.5, 'G': 2})
-    params_vld.append({'T': 0.2, 'e': 1e-13, 'L': 0, 'R': 1, 'C': 0.5, 'G': 1})
-    params_vld.append({'T': 0.2, 'e': 1e-13, 'L': 0, 'R': 1, 'C': 0.25, 'G': 4})
-    return params_vld[j]
-def validation_problems_BL_4(j):
-    params_vld = []
-    params_vld.append({'T': 0.05, 'e': 1e-13, 'L': 0, 'R': 1, 'C': 1, 'G': 5})
-    params_vld.append({'T': 0.05, 'e': 1e-13, 'L': 0, 'R': 1, 'C': 1, 'G': 0})
-    params_vld.append({'T': 0.05, 'e': 1e-13, 'L': 0, 'R': 1, 'C': 0.5, 'G': 2})
-    params_vld.append({'T': 0.05, 'e': 1e-13, 'L': 0, 'R': 1, 'C': 0.5, 'G': 1})
-    params_vld.append({'T': 0.05, 'e': 1e-13, 'L': 0, 'R': 1, 'C': 0.25, 'G': 4})
-    return params_vld[j]
 if problem == Buckley_Leverett:
     example = "gravity"
     folder = 2
-    u_ex_0 = torch.load("C:/Users/Tatiana/Desktop/Research/Research_ML_WENO/Buckley_Leverett_CD_Test/Buckley_Leverett_CD_Data_1024/Basic_test_set_{}/u_ex128_0".format(folder))
-    u_ex_1 = torch.load("C:/Users/Tatiana/Desktop/Research/Research_ML_WENO/Buckley_Leverett_CD_Test/Buckley_Leverett_CD_Data_1024/Basic_test_set_{}/u_ex128_1".format(folder))
-    u_ex_2 = torch.load("C:/Users/Tatiana/Desktop/Research/Research_ML_WENO/Buckley_Leverett_CD_Test/Buckley_Leverett_CD_Data_1024/Basic_test_set_{}/u_ex128_2".format(folder))
-    u_ex_3 = torch.load("C:/Users/Tatiana/Desktop/Research/Research_ML_WENO/Buckley_Leverett_CD_Test/Buckley_Leverett_CD_Data_1024/Basic_test_set_{}/u_ex128_3".format(folder))
-    u_ex_4 = torch.load("C:/Users/Tatiana/Desktop/Research/Research_ML_WENO/Buckley_Leverett_CD_Test/Buckley_Leverett_CD_Data_1024/Basic_test_set_{}/u_ex128_4".format(folder))
+    # u_ex_0 = torch.load("C:/Users/Tatiana/Desktop/Research/Research_ML_WENO/Buckley_Leverett_CD_Test/Buckley_Leverett_CD_Data_1024/Basic_test_set_{}/u_ex128_0".format(folder))
+    # u_ex_1 = torch.load("C:/Users/Tatiana/Desktop/Research/Research_ML_WENO/Buckley_Leverett_CD_Test/Buckley_Leverett_CD_Data_1024/Basic_test_set_{}/u_ex128_1".format(folder))
+    # u_ex_2 = torch.load("C:/Users/Tatiana/Desktop/Research/Research_ML_WENO/Buckley_Leverett_CD_Test/Buckley_Leverett_CD_Data_1024/Basic_test_set_{}/u_ex128_2".format(folder))
+    # u_ex_3 = torch.load("C:/Users/Tatiana/Desktop/Research/Research_ML_WENO/Buckley_Leverett_CD_Test/Buckley_Leverett_CD_Data_1024/Basic_test_set_{}/u_ex128_3".format(folder))
+    # u_ex_4 = torch.load("C:/Users/Tatiana/Desktop/Research/Research_ML_WENO/Buckley_Leverett_CD_Test/Buckley_Leverett_CD_Data_1024/Basic_test_set_{}/u_ex128_4".format(folder))
     # u_ex_0 = torch.load("C:/Users/Tatiana/Desktop/Research/Research_ML_WENO/Buckley_Leverett_CD_Test/Buckley_Leverett_CD_Data_1024/Basic_test_set_{}/u_ex64_0".format(folder))
     # u_ex_1 = torch.load("C:/Users/Tatiana/Desktop/Research/Research_ML_WENO/Buckley_Leverett_CD_Test/Buckley_Leverett_CD_Data_1024/Basic_test_set_{}/u_ex64_1".format(folder))
     # u_ex_2 = torch.load("C:/Users/Tatiana/Desktop/Research/Research_ML_WENO/Buckley_Leverett_CD_Test/Buckley_Leverett_CD_Data_1024/Basic_test_set_{}/u_ex64_2".format(folder))
     # u_ex_3 = torch.load("C:/Users/Tatiana/Desktop/Research/Research_ML_WENO/Buckley_Leverett_CD_Test/Buckley_Leverett_CD_Data_1024/Basic_test_set_{}/u_ex64_3".format(folder))
     # u_ex_4 = torch.load("C:/Users/Tatiana/Desktop/Research/Research_ML_WENO/Buckley_Leverett_CD_Test/Buckley_Leverett_CD_Data_1024/Basic_test_set_{}/u_ex64_4".format(folder))
-    u_ex_w_0 = torch.load("C:/Users/Tatiana/Desktop/Research/Research_ML_WENO/Buckley_Leverett_CD_Test/Buckley_Leverett_CD_Data_1024/Basic_test_set_{}/u_ex_0".format(folder))
-    u_ex_w_1 = torch.load("C:/Users/Tatiana/Desktop/Research/Research_ML_WENO/Buckley_Leverett_CD_Test/Buckley_Leverett_CD_Data_1024/Basic_test_set_{}/u_ex_1".format(folder))
-    u_ex_w_2 = torch.load("C:/Users/Tatiana/Desktop/Research/Research_ML_WENO/Buckley_Leverett_CD_Test/Buckley_Leverett_CD_Data_1024/Basic_test_set_{}/u_ex_2".format(folder))
-    u_ex_w_3 = torch.load("C:/Users/Tatiana/Desktop/Research/Research_ML_WENO/Buckley_Leverett_CD_Test/Buckley_Leverett_CD_Data_1024/Basic_test_set_{}/u_ex_3".format(folder))
-    u_ex_w_4 = torch.load("C:/Users/Tatiana/Desktop/Research/Research_ML_WENO/Buckley_Leverett_CD_Test/Buckley_Leverett_CD_Data_1024/Basic_test_set_{}/u_ex_4".format(folder))
+    u_ex_0 = torch.Tensor(np.load("C:/Users/Tatiana/Desktop/Research/Research_ML_WENO/Buckley_Leverett_CD_Test/Buckley_Leverett_CD_Data_1024/Validation_set_{}/u_exact128_0.npy".format(folder)))
+    u_ex_1 = torch.Tensor(np.load("C:/Users/Tatiana/Desktop/Research/Research_ML_WENO/Buckley_Leverett_CD_Test/Buckley_Leverett_CD_Data_1024/Validation_set_{}/u_exact128_1.npy".format(folder)))
+    u_ex_2 = torch.Tensor(np.load("C:/Users/Tatiana/Desktop/Research/Research_ML_WENO/Buckley_Leverett_CD_Test/Buckley_Leverett_CD_Data_1024/Validation_set_{}/u_exact128_2.npy".format(folder)))
+    u_ex_3 = torch.Tensor(np.load("C:/Users/Tatiana/Desktop/Research/Research_ML_WENO/Buckley_Leverett_CD_Test/Buckley_Leverett_CD_Data_1024/Validation_set_{}/u_exact128_3.npy".format(folder)))
+    u_ex_4 = torch.Tensor(np.load("C:/Users/Tatiana/Desktop/Research/Research_ML_WENO/Buckley_Leverett_CD_Test/Buckley_Leverett_CD_Data_1024/Validation_set_{}/u_exact128_4.npy".format(folder)))
+    # u_ex_w_0 = torch.load("C:/Users/Tatiana/Desktop/Research/Research_ML_WENO/Buckley_Leverett_CD_Test/Buckley_Leverett_CD_Data_1024/Basic_test_set_{}/u_ex_0".format(folder))
+    # u_ex_w_1 = torch.load("C:/Users/Tatiana/Desktop/Research/Research_ML_WENO/Buckley_Leverett_CD_Test/Buckley_Leverett_CD_Data_1024/Basic_test_set_{}/u_ex_1".format(folder))
+    # u_ex_w_2 = torch.load("C:/Users/Tatiana/Desktop/Research/Research_ML_WENO/Buckley_Leverett_CD_Test/Buckley_Leverett_CD_Data_1024/Basic_test_set_{}/u_ex_2".format(folder))
+    # u_ex_w_3 = torch.load("C:/Users/Tatiana/Desktop/Research/Research_ML_WENO/Buckley_Leverett_CD_Test/Buckley_Leverett_CD_Data_1024/Basic_test_set_{}/u_ex_3".format(folder))
+    # u_ex_w_4 = torch.load("C:/Users/Tatiana/Desktop/Research/Research_ML_WENO/Buckley_Leverett_CD_Test/Buckley_Leverett_CD_Data_1024/Basic_test_set_{}/u_ex_4".format(folder))
     u_exs = [u_ex_0, u_ex_1, u_ex_2, u_ex_3, u_ex_4]
     # u_exs = [u_ex_w_0[0:1024 + 1: 8], u_ex_w_1[0:1024 + 1: 8], u_ex_w_2[0:1024 + 1: 8], u_ex_w_3[0:1024 + 1: 8], u_ex_w_4[0:1024 + 1: 8]]
-    rng = 5
+
+valid_problems = validation_problems.validation_problems_BL
+_, rng = valid_problems(0)
 
 err_nt_max_vec = np.zeros(rng)
 err_nt_mean_vec = np.zeros(rng)
@@ -78,7 +54,11 @@ err_t_max_vec = np.zeros(rng)
 err_t_mean_vec = np.zeros(rng)
 
 for j in range(rng):
-    params = validation_problems_BL_2(j)
+    # params, _ = valid_problems(j)
+    df = pd.read_csv("C:/Users/Tatiana/Desktop/Research/Research_ML_WENO/Buckley_Leverett_CD_Test/Buckley_Leverett_CD_Data_1024/Validation_set_{}/parameters.txt".format(folder))
+    C = float(df[df.sample_id == j]["C"])
+    G = float(df[df.sample_id == j]["G"])
+    params = {'T': 0.1, 'e': 1e-13, 'L': 0, 'R': 1, 'C': C, 'G': G}
     problem_main = problem(sample_id=None, example = example, space_steps=128, time_steps=None, params=params)
     print(problem_main.params)
     u_init, nn = train_model.init_run_weno(problem_main, vectorized=True, just_one_time_step=False)
