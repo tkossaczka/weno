@@ -32,7 +32,7 @@ def exact_loss(u, u_ex):
     # loss = 10e2*error # PME Barenblatt
     # if loss > 0.01:
     #     loss = torch.sqrt(loss)
-    loss = 10*error
+    loss = error
     return loss
 
 def overflows_loss(u):
@@ -49,7 +49,7 @@ def exact_loss_2d(u, u_ex):
     # loss = error
     return loss
 
-optimizer = optim.Adam(train_model.parameters(), lr=0.0001)   # Buckley-Leverett
+optimizer = optim.Adam(train_model.parameters(), lr=0.00001)   # Buckley-Leverett
 # optimizer = optim.Adam(train_model.parameters(), lr=0.0001) #, weight_decay=0.001)  # PME boxes
 # optimizer = optim.Adam(train_model.inner_nn_weno6.parameters(), lr=0.1) #, weight_decay=0.1) # PME Barenblatt   # todo je lepsi lr 0.01?
 # optimizer = optim.Adam([{'params': train_model.parameters(), 'lr': 0.1}, {'params': train_model2.parameters(), 'lr': 0.001}] ) #, weight_decay=0.1) # PME Barenblatt   # todo je lepsi lr 0.01?
@@ -106,10 +106,10 @@ u_ex_4 = torch.load("C:/Users/Tatiana/Desktop/Research/Research_ML_WENO/Buckley_
 u_exs = [u_ex_0, u_ex_1, u_ex_2, u_ex_3, u_ex_4]
 _, rng = valid_problems(0)
 
-model = 29
+model = 31
 phandler = ProblemHandler(problem_classes = current_problem_classes, max_num_open_problems=200)
-test_modulo=200
-for j in range(2000):
+test_modulo=400
+for j in range(8000):
     loss_test = []
     #loss_test_2 = []
     problem_specs, problem_id = phandler.get_random_problem(0.1)
