@@ -10,7 +10,7 @@ from define_WENO_Network import WENONetwork
 class FancyNet(nn.Module):
     # STRUCTURE FOR BUCKLEY-LEVERETT
     def __init__(self):
-        self.num_inner_convs = 2
+        self.num_inner_convs = 3
         super(FancyNet, self).__init__()
         self.conv0 = nn.Conv1d(2, 10, kernel_size=5, stride=1, padding=2)
         self.convs = nn.ModuleList([nn.Conv1d(10, 10, kernel_size=5, stride=1, padding=2) for k in range(self.num_inner_convs)])
