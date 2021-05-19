@@ -12,14 +12,14 @@ from validation_problems import validation_problems
 torch.set_default_dtype(torch.float64)
 
 train_model = WENONetwork_2()
-train_model = torch.load("C:/Users/Tatiana/Desktop/Research/Research_ML_WENO/Buckley_Leverett_CD_Test/Models/Model_35/4000.pt")
+train_model = torch.load("C:/Users/Tatiana/Desktop/Research/Research_ML_WENO/Buckley_Leverett_CD_Test/Models/Model_37/5600.pt")
 
 problem= Buckley_Leverett
 
 example = "gravity"
 # example = "degenerate"
 
-valid_problems = validation_problems.validation_problems_BL
+valid_problems = validation_problems.validation_problems_BL_2
 _, rng, folder = valid_problems(0)
 u_exs = validation_problems.exacts_test_BL(folder)
 

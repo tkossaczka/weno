@@ -230,7 +230,7 @@ class validation_problems():
         return params_vld[j], rng, folder
 
     def validation_problems_BL_5(j):
-        rng = 5
+        rng = 12
         folder = 1
         params_vld = []
         for k in range(rng):
@@ -265,5 +265,12 @@ class validation_problems():
         u_ex_2 = torch.Tensor(np.load("C:/Users/Tatiana/Desktop/Research/Research_ML_WENO/Buckley_Leverett_CD_Test/Buckley_Leverett_CD_Data_1024/Validation_set_{}/u_exact128_2.npy".format(folder)))
         u_ex_3 = torch.Tensor(np.load("C:/Users/Tatiana/Desktop/Research/Research_ML_WENO/Buckley_Leverett_CD_Test/Buckley_Leverett_CD_Data_1024/Validation_set_{}/u_exact128_3.npy".format(folder)))
         u_ex_4 = torch.Tensor(np.load("C:/Users/Tatiana/Desktop/Research/Research_ML_WENO/Buckley_Leverett_CD_Test/Buckley_Leverett_CD_Data_1024/Validation_set_{}/u_exact128_4.npy".format(folder)))
-        u_exs = [u_ex_0, u_ex_1, u_ex_2, u_ex_3, u_ex_4]
+        u_ex_5 = torch.Tensor(np.load("C:/Users/Tatiana/Desktop/Research/Research_ML_WENO/Buckley_Leverett_CD_Test/Buckley_Leverett_CD_Data_1024/Validation_set_{}/u_exact128_5.npy".format(folder)))
+        u_ex_6 = torch.Tensor(np.load("C:/Users/Tatiana/Desktop/Research/Research_ML_WENO/Buckley_Leverett_CD_Test/Buckley_Leverett_CD_Data_1024/Validation_set_{}/u_exact128_6.npy".format(folder)))
+        u_ex_7 = torch.Tensor(np.load("C:/Users/Tatiana/Desktop/Research/Research_ML_WENO/Buckley_Leverett_CD_Test/Buckley_Leverett_CD_Data_1024/Validation_set_{}/u_exact128_7.npy".format(folder)))
+        u_ex_8 = torch.Tensor(np.load("C:/Users/Tatiana/Desktop/Research/Research_ML_WENO/Buckley_Leverett_CD_Test/Buckley_Leverett_CD_Data_1024/Validation_set_{}/u_exact128_8.npy".format(folder)))
+        u_ex_9 = torch.Tensor(np.load("C:/Users/Tatiana/Desktop/Research/Research_ML_WENO/Buckley_Leverett_CD_Test/Buckley_Leverett_CD_Data_1024/Validation_set_{}/u_exact128_9.npy".format(folder)))
+        u_ex_10 = torch.Tensor(np.load("C:/Users/Tatiana/Desktop/Research/Research_ML_WENO/Buckley_Leverett_CD_Test/Buckley_Leverett_CD_Data_1024/Validation_set_{}/u_exact128_10.npy".format(folder)))
+        u_ex_11 = torch.Tensor(np.load("C:/Users/Tatiana/Desktop/Research/Research_ML_WENO/Buckley_Leverett_CD_Test/Buckley_Leverett_CD_Data_1024/Validation_set_{}/u_exact128_11.npy".format(folder)))
+        u_exs = [u_ex_0, u_ex_1, u_ex_2, u_ex_3, u_ex_4, u_ex_5, u_ex_6, u_ex_7, u_ex_8, u_ex_9, u_ex_10, u_ex_11]
         return u_exs
