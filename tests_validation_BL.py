@@ -22,15 +22,15 @@ problem = Buckley_Leverett
 all_loss_test = []
 example = "gravity"
 
-valid_problems = validation_problems.validation_problems_BL_5
+valid_problems = validation_problems.validation_problems_BL_2
 _, rng, folder = valid_problems(0)
-u_exs = validation_problems.exacts_validation_BL(folder)
+u_exs = validation_problems.exacts_test_BL(folder)
 
 test_modulo=400
 for i in range(8000):
     if not (i % test_modulo):
         print(i)
-        train_model = torch.load('C:/Users/Tatiana/Desktop/Research/Research_ML_WENO/Buckley_Leverett_CD_Test/Models/Model_37/{}.pt'.format(i))
+        train_model = torch.load('C:/Users/Tatiana/Desktop/Research/Research_ML_WENO/Buckley_Leverett_CD_Test/Models/Model_38/{}.pt'.format(i))
         loss_test = []
         for kk in range(rng):
             single_problem_loss_test = []

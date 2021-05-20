@@ -88,7 +88,7 @@ example = "gravity"
 _, rng, folder = valid_problems(0)
 u_exs = validation_problems.exacts_validation_BL(folder)
 
-model = 37
+model = 42
 phandler = ProblemHandler(problem_classes = current_problem_classes, max_num_open_problems=200)
 test_modulo=400
 for j in range(8000):
@@ -222,8 +222,8 @@ plt.plot(norm_losses)
 # plt.plot(norm_losses)
 # plt.show()
 
-# plt.figure(2)
-# plt.plot(all_loss_test[:,:,0])
+plt.figure(2)
+plt.plot(all_loss_test[:,:,0])
 
 # np.save("C:/Users/Tatiana/Desktop/Research/Research_ML_WENO/Buckley_Leverett_CD_Test/Models/Model_8/all_loss_test.npy",all_loss_test)
 
