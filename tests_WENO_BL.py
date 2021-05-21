@@ -19,9 +19,9 @@ problem= Buckley_Leverett
 example = "gravity"
 # example = "degenerate"
 
-valid_problems = validation_problems.validation_problems_BL_5
+valid_problems = validation_problems.validation_problems_BL_6
 _, rng, folder = valid_problems(0)
-u_exs = validation_problems.exacts_validation_BL(folder)
+u_exs = validation_problems.exacts_test_BL(folder)
 
 err_nt_max_vec = np.zeros(rng)
 err_nt_mean_vec = np.zeros(rng)
@@ -56,11 +56,23 @@ for j in range(rng):
     plt.figure(j + 1)
     plt.plot(S, V_nt, S, V_t, S, u_ex)
 
-err_mat = np.zeros((4,rng))
-err_mat[0,:] = err_nt_max_vec
-err_mat[1,:] = err_t_max_vec
-err_mat[2,:] = err_nt_mean_vec
-err_mat[3,:] = err_t_mean_vec
+err_mat = np.zeros((rng,4))
+err_mat[:,0] = err_nt_max_vec
+err_mat[:,2] = err_nt_mean_vec
+err_mat[:,1] = err_t_max_vec
+err_mat[:,3] = err_t_mean_vec
 
-ratio_max = err_mat[0,:]/err_mat[1,:]
-ratio_l2 = err_mat[2,:]/err_mat[3,:]
+ratio_inf = np.zeros((rng))
+for i in range(rng):
+    ratio_inf[i] = err_mat[i,0]/err_mat[i,1]
+ratio_l2 = np.zeros((rng))
+for i in range(rng):
+    ratio_l2[i] = err_mat[i,2]/err_mat[i,3]
+
+err_mat_ratios = np.zeros((rng,6))
+err_mat_ratios[:,0] = err_nt_max_vec
+err_mat_ratios[:,3] = err_nt_mean_vec
+err_mat_ratios[:,1] = err_t_max_vec
+err_mat_ratios[:,4] = err_t_mean_vec
+err_mat_ratios[:,2] = ratio_inf
+err_mat_ratios[:,5] = ratio_l2

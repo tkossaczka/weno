@@ -88,7 +88,7 @@ example = "gravity"
 _, rng, folder = valid_problems(0)
 u_exs = validation_problems.exacts_validation_BL(folder)
 
-model = 42
+model = 43
 phandler = ProblemHandler(problem_classes = current_problem_classes, max_num_open_problems=200)
 test_modulo=400
 for j in range(8000):

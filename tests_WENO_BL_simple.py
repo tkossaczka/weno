@@ -12,12 +12,13 @@ torch.set_default_dtype(torch.float64)
 
 train_model = WENONetwork_2()
 problem= Buckley_Leverett
-example = "gravity"
+# example = "gravity"
+example = "degenerate"
 
 if example == "degenerate":
-    train_model = torch.load("C:/Users/Tatiana/Desktop/Research/Research_ML_WENO/Buckley_Leverett_CD_Test/Models/Model_8/660.pt")
-    u_ex = torch.load("C:/Users/Tatiana/Desktop/Research/Research_ML_WENO/Buckley_Leverett_CD_Test/Buckley_Leverett_CD_Data_1024/Basic_test_set_1/u_ex64_5")
-    problem_main = problem(sample_id=None, example = example, space_steps=64, time_steps=None, params=None)
+    train_model = torch.load("C:/Users/Tatiana/Desktop/Research/Research_ML_WENO/Buckley_Leverett_CD_Test/Models/Model_42/4800.pt")
+    u_ex = torch.load("C:/Users/Tatiana/Desktop/Research/Research_ML_WENO/Buckley_Leverett_CD_Test/Buckley_Leverett_CD_Data_1024/Basic_test_set_1/u_ex128_5")
+    problem_main = problem(sample_id=None, example = example, space_steps=128, time_steps=None, params=None)
     print(problem_main.params)
     u_init, nn = train_model.init_run_weno(problem_main, vectorized=True, just_one_time_step=False)
     u_nt = u_init

@@ -45,7 +45,7 @@ class Buckley_Leverett():
         params = dict()
         example = self.example
         if example == "degenerate":
-            params["T"] = 0.5 #0.2
+            params["T"] = 0.7 #0.2
             params["L"] = -2 # 0
             params["R"] = 2 #1
         if example == "gravity":
@@ -83,10 +83,15 @@ class Buckley_Leverett():
             CFL_conv = conv_der / h
             CFL_diff = 0.01 / h ** 2
             CFL = 0.4 / (CFL_conv + CFL_diff)
-            n1 = np.ceil(0.1*T / (h ** 2))
+            # n1 = np.ceil(0.1*T / (h ** 2))
             n = np.ceil(T / CFL)
         if example == "degenerate":
-            n = np.ceil(0.4 * T / (h ** 2))
+            conv_der = np.max(self.funct_derivative(uu))
+            CFL_conv = conv_der / h
+            CFL_diff = 0.1 / h ** 2
+            CFL = 0.4 / (CFL_conv + CFL_diff)
+            n = np.ceil(T / CFL)
+            # n1 = np.ceil(0.4 * T / (h ** 2))
         if example == "gravity_2d":
             n = np.ceil(0.5 * T / (h ** 2))
         n = int(n)
@@ -273,9 +278,9 @@ class Buckley_Leverett():
         u_der = - ( (2*C+2)*G*u**5 + (-8*C-2)*G*u**4 + 12*C*G*u**3 + (2*C-8*C*G)*u**2 + (2*C*G-2*C)*u )/( (u**2+C*(1-u)**2)**2 )
         return u_der
 
-    def exact(self, k):
-        u_ex = self.u_ex[:,k]
-        return u_ex
+    # def exact(self, k):
+    #     u_ex = self.u_ex[:,k]
+    #     return u_ex
 
     # def err(self, u_last):
     #     u_ex = self.exact()

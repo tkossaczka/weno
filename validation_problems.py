@@ -240,6 +240,17 @@ class validation_problems():
             params_vld.append({'T': 0.1, 'e': 1e-13, 'L': 0, 'R': 1, 'C': C, 'G': G})
         return params_vld[j], rng, folder
 
+    def validation_problems_BL_6(j):
+        params_vld = []
+        params_vld.append({'T': 0.1, 'e': 1e-13, 'L': 0, 'R': 1, 'C': 1, 'G': 7})
+        params_vld.append({'T': 0.1, 'e': 1e-13, 'L': 0, 'R': 1, 'C': 1, 'G': 6.5})
+        params_vld.append({'T': 0.1, 'e': 1e-13, 'L': 0, 'R': 1, 'C': 0.25, 'G': 7})
+        params_vld.append({'T': 0.1, 'e': 1e-13, 'L': 0, 'R': 1, 'C': 0.1, 'G': 8})
+        params_vld.append({'T': 0.1, 'e': 1e-13, 'L': 0, 'R': 1, 'C': 0.25, 'G': 9})
+        folder = 6
+        rng = 5
+        return params_vld[j], rng, folder
+
     def exacts_test_BL(folder):
         u_ex_0 = torch.load("C:/Users/Tatiana/Desktop/Research/Research_ML_WENO/Buckley_Leverett_CD_Test/Buckley_Leverett_CD_Data_1024/Basic_test_set_{}/u_ex128_0".format(folder))
         u_ex_1 = torch.load("C:/Users/Tatiana/Desktop/Research/Research_ML_WENO/Buckley_Leverett_CD_Test/Buckley_Leverett_CD_Data_1024/Basic_test_set_{}/u_ex128_1".format(folder))
