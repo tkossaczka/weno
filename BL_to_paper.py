@@ -8,6 +8,9 @@ from define_WENO_Network_2 import WENONetwork_2
 from scipy.stats import norm
 from define_problem_Buckley_Leverett import Buckley_Leverett
 from validation_problems import validation_problems
+from mpl_toolkits.axes_grid1.inset_locator import zoomed_inset_axes
+from mpl_toolkits.axes_grid1.inset_locator import mark_inset
+from mpl_toolkits.axes_grid1.inset_locator import inset_axes
 
 torch.set_default_dtype(torch.float64)
 
@@ -19,7 +22,7 @@ problem= Buckley_Leverett
 example = "gravity"
 # example = "degenerate"
 
-valid_problems = validation_problems.validation_problems_BL_4
+valid_problems = validation_problems.validation_problems_BL
 _, rng, folder = valid_problems(0)
 u_exs = validation_problems.exacts_test_BL(folder)
 
@@ -28,7 +31,7 @@ err_nt_mean_vec = np.zeros(rng)
 err_t_max_vec = np.zeros(rng)
 err_t_mean_vec = np.zeros(rng)
 
-for j in range(rng):
+for j in range(1,2):
     params, _, _ = valid_problems(j)
     problem_main = problem(sample_id=None, example = example, space_steps=128, time_steps=None, params=params)
     print(problem_main.params)
@@ -76,3 +79,69 @@ err_mat_ratios[:,1] = err_t_max_vec
 err_mat_ratios[:,4] = err_t_mean_vec
 err_mat_ratios[:,2] = ratio_inf
 err_mat_ratios[:,5] = ratio_l2
+
+import pandas as pd
+# pd.DataFrame(err_mat).to_csv("err_mat.csv")
+pd.DataFrame(err_mat_ratios).to_latex()
+
+# # BL C=1, G=5
+# fig, ax = plt.subplots(figsize=(5.0, 5.0))
+# ax.plot(S, u_nt, color='blue')
+# ax.plot(S, u_t, color='red', marker='x')
+# ax.plot(S, u_ex, color='black')
+# ax.legend(('WENO', 'WENO-DS', 'ref. sol.'), loc=2)
+# ax.set_xlabel('x')
+# ax.set_ylabel('u')
+# axins = inset_axes(ax, width=1, height=2, loc=7)
+# axins.plot(S, u_nt, color='blue')
+# axins.plot(S, u_t, color='red', marker='x')
+# axins.plot(S, u_ex, color='black')
+# axins.set_xlim(0.532, 0.56)  # Limit the region for zoom
+# axins.set_ylim(0.8, 1.01)
+# plt.xticks(visible=False)  # Not present ticks
+# plt.yticks(visible=False)
+# # axins2 = inset_axes(ax, width=2, height=0.5, loc=2)
+# # axins2.plot(x, u_nt_JS, color='blue')
+# # axins2.plot(x, u_nt, color='green')
+# # axins2.plot(x, u_t, color='red')
+# # axins2.plot(x_ex, u_ex, color='black')
+# # axins2.set_xlim(0.5, 0.725)  # Limit the region for zoom
+# # axins2.set_ylim(1.355, 1.37)
+# # plt.xticks(visible=False)  # Not present ticks
+# # plt.yticks(visible=False)
+# mark_inset(ax, axins, loc1=1, loc2=3, fc="none", ec="0.5")
+# # mark_inset(ax, axins2, loc1=1, loc2=4, fc="none", ec="0.5")
+# # plt.draw()
+# # plt.show()
+# plt.savefig("BL_01.pdf", bbox_inches='tight')
+
+# # BL C=1, G=0
+# fig, ax = plt.subplots(figsize=(5.0, 5.0))
+# ax.plot(S, u_nt, color='blue')
+# ax.plot(S, u_t, color='red', marker='x')
+# ax.plot(S, u_ex, color='black')
+# ax.legend(('WENO', 'WENO-DS', 'ref. sol.'), loc=2)
+# ax.set_xlabel('x')
+# ax.set_ylabel('u')
+# axins = inset_axes(ax, width=1, height=2, loc=7)
+# axins.plot(S, u_nt, color='blue')
+# axins.plot(S, u_t, color='red', marker='x')
+# axins.plot(S, u_ex, color='black')
+# axins.set_xlim(0.43, 0.47)  # Limit the region for zoom
+# axins.set_ylim(0.8, 1.01)
+# plt.xticks(visible=False)  # Not present ticks
+# plt.yticks(visible=False)
+# # axins2 = inset_axes(ax, width=2, height=0.5, loc=2)
+# # axins2.plot(x, u_nt_JS, color='blue')
+# # axins2.plot(x, u_nt, color='green')
+# # axins2.plot(x, u_t, color='red')
+# # axins2.plot(x_ex, u_ex, color='black')
+# # axins2.set_xlim(0.5, 0.725)  # Limit the region for zoom
+# # axins2.set_ylim(1.355, 1.37)
+# # plt.xticks(visible=False)  # Not present ticks
+# # plt.yticks(visible=False)
+# mark_inset(ax, axins, loc1=1, loc2=3, fc="none", ec="0.5")
+# # mark_inset(ax, axins2, loc1=1, loc2=4, fc="none", ec="0.5")
+# # plt.draw()
+# # plt.show()
+# plt.savefig("BL_00.pdf", bbox_inches='tight')

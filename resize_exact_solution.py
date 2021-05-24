@@ -31,16 +31,34 @@ train_model = WENONetwork_2()
 #     params_vld.append({'T': 0.1, 'e': 1e-13, 'L': 0, 'R': 1, 'C': 0.25, 'G': 4})
 #     return params_vld[j]
 
+# def validation_problems(j):
+#     params_vld = []
+#     params_vld.append({'T': 0.1, 'e': 1e-13, 'L': 0, 'R': 1, 'C': 1, 'G': 7})
+#     params_vld.append({'T': 0.1, 'e': 1e-13, 'L': 0, 'R': 1, 'C': 1, 'G': 6.5})
+#     params_vld.append({'T': 0.1, 'e': 1e-13, 'L': 0, 'R': 1, 'C': 0.25, 'G': 7})
+#     params_vld.append({'T': 0.1, 'e': 1e-13, 'L': 0, 'R': 1, 'C': 0.1, 'G': 8})
+#     params_vld.append({'T': 0.1, 'e': 1e-13, 'L': 0, 'R': 1, 'C': 0.25, 'G': 9})
+#     return params_vld[j]
+
+# def validation_problems(j):
+#     params_vld = []
+#     params_vld.append({'T': 0.2, 'e': 1e-13, 'L': 0, 'R': 1, 'C': 1, 'G': 5})
+#     params_vld.append({'T': 0.2, 'e': 1e-13, 'L': 0, 'R': 1, 'C': 1, 'G': 0})
+#     params_vld.append({'T': 0.2, 'e': 1e-13, 'L': 0, 'R': 1, 'C': 0.5, 'G': 2})
+#     params_vld.append({'T': 0.2, 'e': 1e-13, 'L': 0, 'R': 1, 'C': 0.5, 'G': 1})
+#     params_vld.append({'T': 0.2, 'e': 1e-13, 'L': 0, 'R': 1, 'C': 0.25, 'G': 4})
+#     return params_vld[j]
+
 def validation_problems(j):
     params_vld = []
-    params_vld.append({'T': 0.1, 'e': 1e-13, 'L': 0, 'R': 1, 'C': 1, 'G': 7})
-    params_vld.append({'T': 0.1, 'e': 1e-13, 'L': 0, 'R': 1, 'C': 1, 'G': 6.5})
-    params_vld.append({'T': 0.1, 'e': 1e-13, 'L': 0, 'R': 1, 'C': 0.25, 'G': 7})
-    params_vld.append({'T': 0.1, 'e': 1e-13, 'L': 0, 'R': 1, 'C': 0.1, 'G': 8})
-    params_vld.append({'T': 0.1, 'e': 1e-13, 'L': 0, 'R': 1, 'C': 0.25, 'G': 9})
+    params_vld.append({'T': 0.05, 'e': 1e-13, 'L': 0, 'R': 1, 'C': 1, 'G': 5})
+    params_vld.append({'T': 0.05, 'e': 1e-13, 'L': 0, 'R': 1, 'C': 1, 'G': 0})
+    params_vld.append({'T': 0.05, 'e': 1e-13, 'L': 0, 'R': 1, 'C': 0.5, 'G': 2})
+    params_vld.append({'T': 0.05, 'e': 1e-13, 'L': 0, 'R': 1, 'C': 0.5, 'G': 1})
+    params_vld.append({'T': 0.05, 'e': 1e-13, 'L': 0, 'R': 1, 'C': 0.25, 'G': 4})
     return params_vld[j]
 
-for j in range(5,6):
+for j in range(5):
 
     # df = pd.read_csv("C:/Users/Tatiana/Desktop/Research/Research_ML_WENO/PME_Test/PME_Data_1024/Basic_test_set/parameters.txt")
     # u_ex = torch.load("C:/Users/Tatiana/Desktop/Research/Research_ML_WENO/PME_Test/PME_Data_1024/Basic_test_set/u_ex_{}".format(j))
@@ -55,11 +73,11 @@ for j in range(5,6):
     # params =  {'T': 0.1, 'e': 1e-13, 'L': 0, 'R': 1, 'C': C, 'G': G}
     # problem_main = problem(sample_id=None, example="gravity", space_steps=128, time_steps=None, params=params)
 
-    u_ex = torch.load("C:/Users/Tatiana/Desktop/Research/Research_ML_WENO/Buckley_Leverett_CD_Test/Buckley_Leverett_CD_Data_1024/Basic_test_set_1/u_ex_{}".format(j))
+    u_ex = torch.load("C:/Users/Tatiana/Desktop/Research/Research_ML_WENO/Buckley_Leverett_CD_Test/Buckley_Leverett_CD_Data_1024/Basic_test_set_4/u_ex_{}".format(j))
     params_test = validation_problems(j)
     C = params_test["C"]
     G = params_test["G"]
-    params =  {'T': 0.1, 'e': 1e-13, 'L': 0, 'R': 1, 'C': C, 'G': G}
+    params =  {'T': 0.05, 'e': 1e-13, 'L': 0, 'R': 1, 'C': C, 'G': G}
     # params = {'T': 0.7, 'L': -2, 'R': 2, 'e': 1e-13}
     problem_main = problem(sample_id=None, example="gravity", space_steps=128, time_steps=None, params=params)
     u_ex = u_ex.detach().numpy()
@@ -80,7 +98,7 @@ for j in range(5,6):
     # np.save(os.path.join(save_path, "u_exact128_{}.npy".format(j)), u_ex)
 
     u_ex = torch.Tensor(u_ex)
-    save_path = "C:/Users/Tatiana/Desktop/Research/Research_ML_WENO/Buckley_Leverett_CD_Test/Buckley_Leverett_CD_Data_1024/Basic_test_set_1"
+    save_path = "C:/Users/Tatiana/Desktop/Research/Research_ML_WENO/Buckley_Leverett_CD_Test/Buckley_Leverett_CD_Data_1024/Basic_test_set_4"
     torch.save(u_ex, os.path.join(save_path, "u_ex128_{}".format(j)))
 
 
