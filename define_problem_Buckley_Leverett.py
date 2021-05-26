@@ -93,7 +93,13 @@ class Buckley_Leverett():
             n = np.ceil(T / CFL)
             # n1 = np.ceil(0.4 * T / (h ** 2))
         if example == "gravity_2d":
-            n = np.ceil(0.5 * T / (h ** 2))
+            conv_der_x = np.max(self.funct_derivative_x(uu))
+            conv_der_y = np.max(self.funct_derivative_y(uu))
+            CFL_conv = conv_der_x / h + conv_der_y / h
+            CFL_diff = 0.01 / h ** 2 + 0.01 / h ** 2
+            CFL = 0.4 / (CFL_conv + CFL_diff)
+            n = np.ceil(T / CFL)
+            #n = np.ceil(0.5 * T / (h ** 2))
         n = int(n)
         t = T / n
         time = np.linspace(0, T, n + 1)
@@ -213,7 +219,7 @@ class Buckley_Leverett():
             u_diff[u < -0.25] = u[u < -0.25] + 0.25
             u_diff[u > 0.25] = u[u > 0.25] - 0.25
         if example == "gravity_2d":
-            u_diff = u
+            u_diff = 0.01*u
         return u_diff
 
     def funct_convection(self, u):
