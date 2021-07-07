@@ -12,6 +12,10 @@ import matplotlib.pyplot as plt
 from scipy.stats import norm
 import random
 
+##########################################################
+# THIS SCRIPT USED FOR TRAINING ON DIGITAL OPTION MAINLY
+##########################################################
+
 torch.set_default_dtype(torch.float64)
 
 # TRAIN NETWORK
@@ -23,13 +27,13 @@ train_model = WENONetwork_2()
 # problem_class = Buckley_Leverett
 # rng = 5
 
-# problem_class = Digital_option
-# rng = 3
+problem_class = Digital_option
+rng = 3
 
-problem_class = PME
+# problem_class = PME
 # example = "boxes"
-example = "Barenblatt"
-rng = 4
+# example = "Barenblatt"
+# rng = 4
 
 def monotonicity_loss(u):
     monotonicity = torch.sum(torch.max(u[:-1]-u[1:], torch.Tensor([0.0])))
@@ -46,8 +50,8 @@ def exact_loss(u, u_ex):
 #optimizer = optim.SGD(train_model.parameters(), lr=0.1)
 # optimizer = optim.Adam(train_model.parameters(), lr=0.0001)   # Buckley-Leverett
 # optimizer = optim.Adam(train_model.parameters(), lr=0.001, weight_decay=0.00001) # PME boxes
-optimizer = optim.Adam(train_model.parameters(), lr=0.1, weight_decay=0.0001) # PME Barenblatt
-# optimizer = optim.Adam(train_model.parameters(), lr=0.001)
+# optimizer = optim.Adam(train_model.parameters(), lr=0.1, weight_decay=0.0001) # PME Barenblatt
+optimizer = optim.Adam(train_model.parameters(), lr=0.001) # Digital option
 
 def validation_problems_barenblatt(j):
     params_vld = []
@@ -130,7 +134,7 @@ if problem_class == PME and example == "boxes":
 all_loss_test = []
 save_id = 0
 
-for j in range(10):
+for j in range(5000):
     loss_test = []
     # Forward path
     if problem_class == Digital_option:
@@ -188,7 +192,7 @@ for j in range(10):
         print(j, k, loss)
         u_train.detach_()
     if problem_class == Digital_option:
-        base_path ="C:/Users/Tatiana/Desktop/Research/Research_ML_WENO/Digital_Option_Test/Models/Model_21/"
+        base_path ="C:/Users/Tatiana/Desktop/Research/Research_ML_WENO/Digital_Option_Test/Models/Model_22/"
     elif problem_class == Buckley_Leverett:
         base_path = "C:/Users/Tatiana/Desktop/Research/Research_ML_WENO/Buckley_Leverett_CD_Test/Models/Model_16/"
     elif problem_class == PME and example == "boxes":
@@ -204,7 +208,7 @@ for j in range(10):
         single_problem_loss_test = []
         if problem_class == Digital_option:
             params_test = validation_problems_digital(kk)
-            problem_test = problem_class(space_steps=64, time_steps=None, params=params_test)
+            problem_test = problem_class(space_steps=100, time_steps=None, params=params_test)
         elif problem_class == Buckley_Leverett:
             params_test = validation_problems_BL(kk)
             problem_test = problem_class(sample_id=None, example="gravity", space_steps=64, time_steps=None, params=params_test)

@@ -27,9 +27,9 @@ def validation_problems(j):
 problem = Digital_option
 all_loss_test = []
 
-for i in range(7000):
+for i in range(4000):
     print(i)
-    train_model = torch.load('C:/Users/Tatiana/Desktop/Research/Research_ML_WENO/Digital_Option_Test/Models/Model_17/{}.pt'.format(i))
+    train_model = torch.load('C:/Users/Tatiana/Desktop/Research/Research_ML_WENO/Digital_Option_Test/Models/Model_21/{}.pt'.format(i))
     loss_test = []
     single_problem_loss_test = []
     for kk in range(3):
