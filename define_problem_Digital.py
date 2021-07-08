@@ -52,7 +52,7 @@ class Digital_option():
         #     n = np.ceil(np.max(theta * sigma ** 2) / (0.8 * (h ** 2)))
         # else:
         #     n = self.time_steps
-        n = np.ceil(np.max(theta * sigma ** 2) / (0.8 * (h ** 2)))
+        n = np.ceil(np.max(theta * sigma ** 2) / (0.80 * (h ** 2)))
         n = int(n)
         t = T / n
         x = np.linspace(G, L, m + 1)

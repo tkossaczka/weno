@@ -14,10 +14,10 @@ with torch.no_grad():
     # train_model = torch.load("C:/Users/Tatiana/Desktop/Research/Research_ML_WENO/PME_Test/Models/Model_58/195.pt")
     #train_model = torch.load('C:/Users/Tatiana/Desktop/Research/Research_ML_WENO/Buckley_Leverett_Test/Models/Model_18/46')
     #train_model = torch.load("C:/Users/Tatiana/Desktop/Research/Research_ML_WENO/Burgers_Equation_Test/Models/Model_16/37")
-    train_model = torch.load("C:/Users/Tatiana/Desktop/Research/Research_ML_WENO/Digital_Option_Test/Models/Model_21/3390.pt")
+    train_model = torch.load("C:/Users/Tatiana/Desktop/Research/Research_ML_WENO/Digital_Option_Test/Models/Model_23/4999.pt")
     #train_model = WENONetwork()
-    problem = heat_equation
-    # problem = transport_equation
+    # problem = heat_equation
+    problem = transport_equation
     #problem = heat_equation
     #problem = Call_option
     #problem = Digital_option
@@ -27,7 +27,7 @@ with torch.no_grad():
     #problem = Buckley_Leverett
     torch.set_default_dtype(torch.float64)
 
-    nb = 5
+    nb = 7
     params = None
     #params = {'T': 0.4, 'e': 1e-13, 'L': 1, 'R': 1, 'C': 0.25}
     #params = {'T': 0.2, 'e': 1e-13, 'L': 1, 'R': 1, 'C': 0.3}

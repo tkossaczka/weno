@@ -19,17 +19,22 @@ def exact_loss(u, u_ex):
 
 def validation_problems(j):
     params_vld = []
+    # params_vld.append({'sigma': 0.3, 'rate': 0.1, 'E': 50, 'T': 1, 'e': 1e-13, 'xl': -6, 'xr': 1.5})
+    # params_vld.append({'sigma': 0.25, 'rate': 0.1, 'E': 50, 'T': 1, 'e': 1e-13, 'xl': -6, 'xr': 1.5})
+    # params_vld.append({'sigma': 0.2, 'rate': 0.08, 'E': 50, 'T': 1, 'e': 1e-13, 'xl': -6, 'xr': 1.5})
+    # params_vld.append({'sigma': 0.4, 'rate': 0.2, 'E': 50, 'T': 1, 'e': 1e-13, 'xl': -6, 'xr': 1.5})
+    # params_vld.append({'sigma': 0.4, 'rate': 0.1, 'E': 50, 'T': 1, 'e': 1e-13, 'xl': -6, 'xr': 1.5})
+    params_vld.append({'sigma': 0.2, 'rate': 0.1, 'E': 50, 'T': 1, 'e': 1e-13, 'xl': -6, 'xr': 1.5})
     params_vld.append({'sigma': 0.3, 'rate': 0.1, 'E': 50, 'T': 1, 'e': 1e-13, 'xl': -6, 'xr': 1.5})
-    params_vld.append({'sigma': 0.25, 'rate': 0.1, 'E': 50, 'T': 1, 'e': 1e-13, 'xl': -6, 'xr': 1.5})
-    params_vld.append({'sigma': 0.2, 'rate': 0.08, 'E': 50, 'T': 1, 'e': 1e-13, 'xl': -6, 'xr': 1.5})
+    params_vld.append({'sigma': 0.3, 'rate': 0.2, 'E': 50, 'T': 1, 'e': 1e-13, 'xl': -6, 'xr': 1.5})
     return params_vld[j]
 
 problem = Digital_option
 all_loss_test = []
 
-for i in range(4000):
+for i in range(5000):
     print(i)
-    train_model = torch.load('C:/Users/Tatiana/Desktop/Research/Research_ML_WENO/Digital_Option_Test/Models/Model_21/{}.pt'.format(i))
+    train_model = torch.load('C:/Users/Tatiana/Desktop/Research/Research_ML_WENO/Digital_Option_Test/Models/Model_23/{}.pt'.format(i))
     loss_test = []
     single_problem_loss_test = []
     for kk in range(3):
@@ -49,6 +54,14 @@ for i in range(4000):
         loss_test.append(single_problem_loss_test)
     all_loss_test.append(loss_test)
 
-all_loss_test = np.array(all_loss_test)
-plt.plot(all_loss_test[:,:,0])
+# all_loss_test = np.array(all_loss_test)
+# plt.plot(all_loss_test[:,:,0])
 
+all_loss_test = np.array(all_loss_test)
+norm_losses=all_loss_test[:,:,0]/all_loss_test[:,:,0].max(axis=0)[None, :]
+print("trained:", all_loss_test[:,:,0].min(axis=0))
+plt.plot(norm_losses)
+plt.show()
+
+plt.figure(2)
+plt.plot(all_loss_test[:,:,0])

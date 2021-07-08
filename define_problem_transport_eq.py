@@ -167,9 +167,18 @@ class transport_equation():
     def err(self, u_last):
         u_ex = self.exact()
         u_last = u_last.detach().numpy()
-        xerr = np.max(np.absolute(u_ex - u_last))
-        #xerr = np.mean((u_ex - u_last)**2)
-        return xerr
+        xerr = np.absolute(u_ex - u_last)
+        xmaxerr = np.max(xerr)
+        return xmaxerr
+
+    def err_l2(self, u_last):
+        u_ex = self.exact()
+        u_last = u_last.detach().numpy()
+        L = self.params['L']
+        R = self.params['R']
+        sp_st = self.space_steps
+        err = np.sqrt((np.abs(L) + np.abs(R)) / sp_st) * (np.sqrt(np.sum((u_last - u_ex) ** 2)))
+        return err
 
     def transformation(self, u):
         u = u

@@ -88,6 +88,10 @@ def validation_problems_digital(j):
     params_vld.append({'sigma': 0.3, 'rate': 0.1, 'E': 50, 'T': 1, 'e': 1e-13, 'xl': -6, 'xr': 1.5})
     params_vld.append({'sigma': 0.25, 'rate': 0.1, 'E': 50, 'T': 1, 'e': 1e-13, 'xl': -6, 'xr': 1.5})
     params_vld.append({'sigma': 0.2, 'rate': 0.08, 'E': 50, 'T': 1, 'e': 1e-13, 'xl': -6, 'xr': 1.5})
+    ### Validation set 2
+    # params_vld.append({'sigma': 0.2, 'rate': 0.1, 'E': 50, 'T': 1, 'e': 1e-13, 'xl': -6, 'xr': 1.5})
+    # params_vld.append({'sigma': 0.3, 'rate': 0.1, 'E': 50, 'T': 1, 'e': 1e-13, 'xl': -6, 'xr': 1.5})
+    # params_vld.append({'sigma': 0.3, 'rate': 0.2, 'E': 50, 'T': 1, 'e': 1e-13, 'xl': -6, 'xr': 1.5})
     return params_vld[j]
 
 def validation_problems_BL(j):
@@ -134,7 +138,7 @@ if problem_class == PME and example == "boxes":
 all_loss_test = []
 save_id = 0
 
-for j in range(5000):
+for j in range(10000):
     loss_test = []
     # Forward path
     if problem_class == Digital_option:
@@ -192,7 +196,7 @@ for j in range(5000):
         print(j, k, loss)
         u_train.detach_()
     if problem_class == Digital_option:
-        base_path ="C:/Users/Tatiana/Desktop/Research/Research_ML_WENO/Digital_Option_Test/Models/Model_22/"
+        base_path ="C:/Users/Tatiana/Desktop/Research/Research_ML_WENO/Digital_Option_Test/Models/Model_24/"
     elif problem_class == Buckley_Leverett:
         base_path = "C:/Users/Tatiana/Desktop/Research/Research_ML_WENO/Buckley_Leverett_CD_Test/Models/Model_16/"
     elif problem_class == PME and example == "boxes":

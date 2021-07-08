@@ -16,7 +16,7 @@ from mpl_toolkits.axes_grid1.inset_locator import inset_axes
 torch.set_default_dtype(torch.float64)
 
 # train_model = WENONetwork_2()
-train_model = torch.load("C:/Users/Tatiana/Desktop/Research/Research_ML_WENO/Digital_Option_Test/Models/Model_21/3390.pt")
+train_model = torch.load("C:/Users/Tatiana/Desktop/Research/Research_ML_WENO/Digital_Option_Test/Models/Model_23/4999.pt")
 
 params=None
 # params = {'sigma': 0.3, 'rate': 0.02, 'E': 50, 'T': 1, 'e': 1e-13, 'xl': -6, 'xr': 1.5, 'psi':20}
@@ -35,6 +35,9 @@ params=None
 # params = {'sigma': 0.4, 'rate': 0.15, 'E': 50, 'T': 1, 'e': 1e-13, 'xl': -6, 'xr': 1.5} # 100 space steps, first time step
 # params = {'sigma': 0.263, 'rate': 0.196, 'E': 50, 'T': 1, 'e': 1e-13, 'xl': -6, 'xr': 1.5} # 100 space steps, last time step
 # params = {'sigma': 0.292, 'rate': 0.181, 'E': 50, 'T': 1, 'e': 1e-13, 'xl': -6, 'xr': 1.5} # 100 space steps, last time step
+
+# params = {'sigma': 0.2, 'rate': 0.1, 'E': 50, 'T': 1, 'e': 1e-13, 'xl': -6, 'xr': 1.5} # oscilacie v poslednom kroku pri klasickom wene
+# params = {'sigma': 0.3, 'rate': 0.2, 'E': 50, 'T': 1, 'e': 1e-13, 'xl': -6, 'xr': 1.5} # oscilacie v poslednom kroku pri klasickom wene
 
 problem= Digital_option
 
