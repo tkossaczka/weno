@@ -19,13 +19,12 @@ def exact_loss(u, u_ex):
 
 def validation_problems(j):
     params_vld = []
-    # params_vld.append({'sigma': 0.3, 'rate': 0.1, 'E': 50, 'T': 1, 'e': 1e-13, 'xl': -6, 'xr': 1.5})
-    # params_vld.append({'sigma': 0.25, 'rate': 0.1, 'E': 50, 'T': 1, 'e': 1e-13, 'xl': -6, 'xr': 1.5})
-    # params_vld.append({'sigma': 0.2, 'rate': 0.08, 'E': 50, 'T': 1, 'e': 1e-13, 'xl': -6, 'xr': 1.5})
-    # params_vld.append({'sigma': 0.4, 'rate': 0.2, 'E': 50, 'T': 1, 'e': 1e-13, 'xl': -6, 'xr': 1.5})
-    # params_vld.append({'sigma': 0.4, 'rate': 0.1, 'E': 50, 'T': 1, 'e': 1e-13, 'xl': -6, 'xr': 1.5})
-    params_vld.append({'sigma': 0.2, 'rate': 0.1, 'E': 50, 'T': 1, 'e': 1e-13, 'xl': -6, 'xr': 1.5})
     params_vld.append({'sigma': 0.3, 'rate': 0.1, 'E': 50, 'T': 1, 'e': 1e-13, 'xl': -6, 'xr': 1.5})
+    params_vld.append({'sigma': 0.25, 'rate': 0.1, 'E': 50, 'T': 1, 'e': 1e-13, 'xl': -6, 'xr': 1.5})
+    params_vld.append({'sigma': 0.2, 'rate': 0.08, 'E': 50, 'T': 1, 'e': 1e-13, 'xl': -6, 'xr': 1.5})
+    params_vld.append({'sigma': 0.4, 'rate': 0.2, 'E': 50, 'T': 1, 'e': 1e-13, 'xl': -6, 'xr': 1.5})
+    params_vld.append({'sigma': 0.4, 'rate': 0.1, 'E': 50, 'T': 1, 'e': 1e-13, 'xl': -6, 'xr': 1.5})
+    params_vld.append({'sigma': 0.2, 'rate': 0.1, 'E': 50, 'T': 1, 'e': 1e-13, 'xl': -6, 'xr': 1.5})
     params_vld.append({'sigma': 0.3, 'rate': 0.2, 'E': 50, 'T': 1, 'e': 1e-13, 'xl': -6, 'xr': 1.5})
     return params_vld[j]
 
@@ -37,7 +36,7 @@ for i in range(5000):
     train_model = torch.load('C:/Users/Tatiana/Desktop/Research/Research_ML_WENO/Digital_Option_Test/Models/Model_23/{}.pt'.format(i))
     loss_test = []
     single_problem_loss_test = []
-    for kk in range(3):
+    for kk in range(7):
         single_problem_loss_test = []
         params_test = validation_problems(kk)
         problem_test = problem(space_steps=100, time_steps=None, params=params_test)
@@ -63,5 +62,11 @@ print("trained:", all_loss_test[:,:,0].min(axis=0))
 plt.plot(norm_losses)
 plt.show()
 
-plt.figure(2)
+plt.figure(figsize=(20.0, 10.0))
+plt.xlabel('number of training steps')
+plt.ylabel('LOSS')
+# aa = np.linspace(0, 5001, 8)
+# my_xticks = aa.tolist()
+plt.xticks(np.arange(0, 5001, 500))
 plt.plot(all_loss_test[:,:,0])
+# plt.savefig("Digital_validation.pdf", bbox_inches='tight')

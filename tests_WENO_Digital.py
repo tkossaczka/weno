@@ -30,10 +30,10 @@ params=None
 # params = {'sigma': 0.28, 'rate': 0.13, 'E': 50, 'T': 1, 'e': 1e-13, 'xl': -6, 'xr': 1.5}
 
 # params to paper
-# train_model = torch.load("C:/Users/Tatiana/Desktop/Research/Research_ML_WENO/Digital_Option_Test/Models/Model_21/3390.pt")
+# train_model = torch.load("C:/Users/Tatiana/Desktop/Research/Research_ML_WENO/Digital_Option_Test/Models/Model_23/4999.pt")
 # params = {'sigma': 0.28, 'rate': 0.13, 'E': 50, 'T': 1, 'e': 1e-13, 'xl': -6, 'xr': 1.5} # 100 space steps, first time step
 # params = {'sigma': 0.4, 'rate': 0.15, 'E': 50, 'T': 1, 'e': 1e-13, 'xl': -6, 'xr': 1.5} # 100 space steps, first time step
-# params = {'sigma': 0.263, 'rate': 0.196, 'E': 50, 'T': 1, 'e': 1e-13, 'xl': -6, 'xr': 1.5} # 100 space steps, last time step
+params = {'sigma': 0.263, 'rate': 0.196, 'E': 50, 'T': 1, 'e': 1e-13, 'xl': -6, 'xr': 1.5} # 100 space steps, last time step
 # params = {'sigma': 0.292, 'rate': 0.181, 'E': 50, 'T': 1, 'e': 1e-13, 'xl': -6, 'xr': 1.5} # 100 space steps, last time step
 
 # params = {'sigma': 0.2, 'rate': 0.1, 'E': 50, 'T': 1, 'e': 1e-13, 'xl': -6, 'xr': 1.5} # oscilacie v poslednom kroku pri klasickom wene
@@ -130,7 +130,7 @@ pd.DataFrame(err_mat).to_latex()
 # fig, ax = plt.subplots()
 # ax.plot(S, V_nt0.detach().numpy()) #, marker='o')
 # ax.plot(S, V_t0.detach().numpy())
-# ax.legend(('WENO-Z', 'WENO-DS'), loc=2)
+# ax.legend(('WENO', 'WENO-DS'), loc=2)
 # ax.set_xlabel('S')
 # ax.set_ylabel('V')
 # #axins = zoomed_inset_axes(ax, 1.5, loc=1)  # zoom = 6
@@ -157,9 +157,9 @@ pd.DataFrame(err_mat).to_latex()
 # #  plotting last time step
 # plt.figure(5)
 # plt.plot(S,V_nt,S,V_t,S, V_ex)
-# plt.legend(('WENO-Z', 'WENO-DS', 'ref. sol.'), loc=2)
+# plt.legend(('WENO', 'WENO-DS', 'ref. sol.'), loc=2)
 # plt.xlabel('S')
 # plt.ylabel('V')
 # plt.show()
-# plt.savefig("Digital_10.pdf", bbox_inches='tight')
+# plt.savefig("Digital_11.pdf", bbox_inches='tight')
 
