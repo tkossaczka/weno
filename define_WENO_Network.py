@@ -14,7 +14,7 @@ class WENONetwork(nn.Module):
         super().__init__()
         self.inner_nn_weno5_plus = self.get_inner_nn_weno5()
         self.inner_nn_weno5_minus = self.get_inner_nn_weno5()
-        self.inner_nn_weno6 = self.get_inner_nn_weno6()
+        # self.inner_nn_weno6 = self.get_inner_nn_weno6()
         self.weno5_mult_bias, self.weno6_mult_bias = self.get_multiplicator_biases()
 
     # def get_inner_nn_weno5(self):

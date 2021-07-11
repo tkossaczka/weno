@@ -78,13 +78,13 @@ all_loss_test = []
 losses = []
 method = "char"
 time_disc = None
-for j in range(300):
+for j in range(50):
     time_numb = 0
     # init_id = 0
     print(j)
     # Forward path
     params = None
-    sp_st = 64
+    sp_st = 100
     init_cond = "Sod"
     problem_main = problem_class(space_steps=sp_st, init_cond=init_cond, time_steps=None, params=params, time_disc=time_disc, init_mid=False, init_general=True)
     gamma = problem_main.params['gamma']
@@ -164,7 +164,7 @@ for j in range(300):
         time_numb = time_numb + 1
         # init_id = init_id + 1
     #lamb = lamb.detach()
-    base_path ="C:/Users/Tatiana/Desktop/Research/Research_ML_WENO/Euler_System_Test/Models/Model_89/"
+    base_path ="C:/Users/Tatiana/Desktop/Research/Research_ML_WENO/Euler_System_Test/Models/Model_92/"
     if not os.path.exists(base_path):
         os.mkdir(base_path)
     path = os.path.join(base_path, "{}.pt".format(j))

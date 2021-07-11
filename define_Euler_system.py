@@ -82,23 +82,23 @@ class Euler_system():
                 # self.u = np.array([0.5529, 0.0])
                 # self.rho = np.array([6.9174, 0.8540])
                 x_mid = 0.5
-                r0[x <= x_mid] = self.rho[0]
-                r0[x > x_mid] = self.rho[1]
-                u0[x <= x_mid] = self.u[0]
-                u0[x > x_mid] = self.u[1]
-                p0[x <= x_mid] = self.p[0]
-                p0[x > x_mid] = self.p[1]
+                r0[x < x_mid] = self.rho[0]
+                r0[x >= x_mid] = self.rho[1]
+                u0[x < x_mid] = self.u[0]
+                u0[x >= x_mid] = self.u[1]
+                p0[x < x_mid] = self.p[0]
+                p0[x >= x_mid] = self.p[1]
         elif init_cond == "Lax":
             self.p = np.array([3.528, 0.571])
             self.u = np.array([0.698, 0.0])
             self.rho = np.array([0.445, 0.5])
             x_mid = 0.5
-            r0[x <= x_mid] = self.rho[0]
-            r0[x > x_mid] = self.rho[1]
-            u0[x <= x_mid] = self.u[0]
-            u0[x > x_mid] = self.u[1]
-            p0[x <= x_mid] = self.p[0]
-            p0[x > x_mid] = self.p[1]
+            r0[x < x_mid] = self.rho[0]
+            r0[x >= x_mid] = self.rho[1]
+            u0[x < x_mid] = self.u[0]
+            u0[x >= x_mid] = self.u[1]
+            p0[x < x_mid] = self.p[0]
+            p0[x >= x_mid] = self.p[1]
         elif init_cond == "shock_entropy":
             self.p = np.array([31/3, 1.0])
             self.u = np.array([(4*np.sqrt(35))/9, 0.0])

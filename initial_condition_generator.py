@@ -32,12 +32,12 @@ def init_Euler(x):
     #     rho[1] = rho[0]*(1/random.uniform(5,10))
     #     p[1] = rho[1]
     x_mid = 0.5
-    r0[x <= x_mid] = rho[0]
-    r0[x > x_mid] = rho[1]
-    u0[x <= x_mid] = u[0]
-    u0[x > x_mid] = u[1]
-    p0[x <= x_mid] = p[0]
-    p0[x > x_mid] = p[1]
+    r0[x < x_mid] = rho[0]
+    r0[x >= x_mid] = rho[1]
+    u0[x < x_mid] = u[0]
+    u0[x >= x_mid] = u[1]
+    p0[x < x_mid] = p[0]
+    p0[x >= x_mid] = p[1]
 
     return r0, u0, p0, rho, u, p
 

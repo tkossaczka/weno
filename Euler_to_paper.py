@@ -22,13 +22,13 @@ def monotonicity_loss_mid(u, x):
     loss = np.sum(monotonicity)
     return loss
 
-train_model = WENONetwork_Euler()
-train_model = torch.load("C:/Users/Tatiana/Desktop/Research/Research_ML_WENO/Euler_System_Test/Models/Model_87/483.pt")  # 72 tento, 142, 168, 179, 101 good?, 483
+# train_model = WENONetwork_Euler()
+train_model = torch.load("C:/Users/Tatiana/Desktop/Research/Research_ML_WENO/Euler_System_Test/Models/Model_92/37.pt")  # 72 tento, 142, 168, 179, 101 good?, 483
 torch.set_default_dtype(torch.float64)
 params=None
 problem = Euler_system
-sp_st = 64 #*2*2*2 #*2*2*2
-init_cond = "Sod"
+sp_st = 100 #*2*2*2 #*2*2*2
+init_cond = "Lax"
 time_disc = None
 problem_main = problem(space_steps=sp_st, init_cond = init_cond, time_steps=None, params = params, time_disc=time_disc, init_mid=False, init_general=False)
 params = problem_main.get_params()
@@ -36,10 +36,35 @@ gamma = params['gamma']
 method = "char"
 T = params['T']
 
+x_ex = np.linspace(0, 1, sp_st+1)
+p_ex, rho_ex, u_ex, _,_ = problem_main.exact(x_ex, T)
+E_ex = p_ex/(gamma-1)+0.5*rho_ex*u_ex**2
+
+# plt.figure(1)
+# plt.plot(x_ex,rho_ex.detach().numpy())
+# plt.figure(2)
+# plt.plot(x_ex,p_ex.detach().numpy())
+# plt.figure(3)
+# plt.plot(x_ex,u_ex.detach().numpy())
+
 q_0, q_1, q_2, lamb, nn, h = train_model.init_Euler(problem_main, vectorized = True, just_one_time_step=False)
 q_0_t_input, q_1_t_input, q_2_t_input, lamb_t = q_0, q_1, q_2, lamb
 q_0_nt, q_1_nt, q_2_nt, lamb_nt = q_0, q_1, q_2, lamb
 q_0_nt_JS, q_1_nt_JS, q_2_nt_JS, lamb_nt_JS = q_0, q_1, q_2, lamb
+
+# with torch.no_grad():
+#     for k in range(nn):
+#         q_0_t, q_1_t, q_2_t, lamb_t = train_model.run_weno(problem_main, mweno = True, mapped = False, method="char", q_0=q_0_t_input, q_1=q_1_t_input, q_2=q_2_t_input, lamb=lamb_t, vectorized=True, trainable=True, k=k, dt=None)
+#         q_0_t_input = q_0_t.detach().numpy()
+#         q_1_t_input = q_1_t.detach().numpy()
+#         q_2_t_input = q_2_t.detach().numpy()
+#         q_0_t_input = torch.Tensor(q_0_t_input)
+#         q_1_t_input = torch.Tensor(q_1_t_input)
+#         q_2_t_input = torch.Tensor(q_2_t_input)
+#
+# for k in range(nn):
+#     q_0_nt, q_1_nt, q_2_nt, lamb_nt = train_model.run_weno(problem_main, mweno = True, mapped = False, method="char", q_0=q_0_nt, q_1=q_1_nt, q_2=q_2_nt, lamb=lamb_nt, vectorized=True, trainable=False, k=k, dt=None)
+# _,x,t = problem_main.transformation(q_0)
 
 time_numb=0
 t_update = 0
@@ -100,8 +125,6 @@ q_2_nt_JS = q_2_nt_JS.detach().numpy()
 # ax = fig.gca(projection='3d')
 # ax.plot_surface(X, Y, q_1_np/q_0_np, cmap=cm.viridis)
 
-x_ex = np.linspace(0, 1, sp_st+1)
-
 # for k in range(0,t.shape[0]):
 #     p_ex[:,k], rho_ex[:,k], u_ex[:,k], c_ex[:,k], mach_ex[:,k] = problem_main.exact(x_ex, t[k])
 
@@ -125,8 +148,9 @@ u_nt_JS = q_1_nt_JS/rho_nt_JS
 E_nt_JS = q_2_nt_JS
 p_nt_JS = (gamma - 1)*(E_nt_JS-0.5*rho_nt_JS*u_nt_JS**2)
 
-p_ex, rho_ex, u_ex, _,_ = problem_main.exact(x_ex, T)
-E_ex = p_ex/(gamma-1)+0.5*rho_ex*u_ex**2
+# x_ex = np.linspace(0, 1, sp_st+1)
+# p_ex, rho_ex, u_ex, _,_ = problem_main.exact(x_ex, T)
+# E_ex = p_ex/(gamma-1)+0.5*rho_ex*u_ex**2
 
 error_rho_nt_max = np.max(np.abs(rho_nt - rho_ex.detach().numpy()))
 error_rho_nt_JS_max = np.max(np.abs(rho_nt_JS - rho_ex.detach().numpy()))
@@ -185,12 +209,19 @@ import pandas as pd
 # pd.DataFrame(err_mat).to_csv("err_mat.csv")
 pd.DataFrame(err_mat_ratios).to_latex()
 
+plt.figure(1)
+plt.plot(x,rho_nt_JS,x,rho_nt,x,rho_t,x,rho_ex.detach().numpy())
+plt.figure(2)
+plt.plot(x,p_nt_JS, x,p_nt, x,p_t,x,p_ex.detach().numpy())
+plt.figure(3)
+plt.plot(x,u_nt_JS, x,u_nt, x,u_t,x,u_ex.detach().numpy())
+
 # plt.figure(1)
-# plt.plot(x,rho_nt_JS,x,rho_nt,x,rho_t,x,rho_ex.detach().numpy())
+# plt.plot(x,rho_nt_JS,x,rho_nt,x,rho_ex.detach().numpy())
 # plt.figure(2)
-# plt.plot(x,p_nt_JS, x,p_nt, x,p_t,x,p_ex.detach().numpy())
+# plt.plot(x,p_nt_JS, x,p_nt,x,p_ex.detach().numpy())
 # plt.figure(3)
-# plt.plot(x,u_nt_JS, x,u_nt, x,u_t,x,u_ex.detach().numpy())
+# plt.plot(x,u_nt_JS, x,u_nt,x,u_ex.detach().numpy())
 
 from mpl_toolkits.axes_grid1.inset_locator import mark_inset
 from mpl_toolkits.axes_grid1.inset_locator import inset_axes
