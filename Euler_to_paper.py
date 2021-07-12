@@ -23,12 +23,12 @@ def monotonicity_loss_mid(u, x):
     return loss
 
 # train_model = WENONetwork_Euler()
-train_model = torch.load("C:/Users/Tatiana/Desktop/Research/Research_ML_WENO/Euler_System_Test/Models/Model_92/37.pt")  # 72 tento, 142, 168, 179, 101 good?, 483
+train_model = torch.load("C:/Users/Tatiana/Desktop/Research/Research_ML_WENO/Euler_System_Test/Models/Model_90/57.pt")  # 72 tento, 142, 168, 179, 101 good?, 483
 torch.set_default_dtype(torch.float64)
 params=None
 problem = Euler_system
-sp_st = 100 #*2*2*2 #*2*2*2
-init_cond = "Lax"
+sp_st = 1024 #1024 #*2*2*2 #*2*2*2
+init_cond = "shock_entropy"
 time_disc = None
 problem_main = problem(space_steps=sp_st, init_cond = init_cond, time_steps=None, params = params, time_disc=time_disc, init_mid=False, init_general=False)
 params = problem_main.get_params()
@@ -36,9 +36,9 @@ gamma = params['gamma']
 method = "char"
 T = params['T']
 
-x_ex = np.linspace(0, 1, sp_st+1)
-p_ex, rho_ex, u_ex, _,_ = problem_main.exact(x_ex, T)
-E_ex = p_ex/(gamma-1)+0.5*rho_ex*u_ex**2
+# x_ex = np.linspace(0, 1, sp_st+1)
+# p_ex, rho_ex, u_ex, _,_ = problem_main.exact(x_ex, T)
+# E_ex = p_ex/(gamma-1)+0.5*rho_ex*u_ex**2
 
 # plt.figure(1)
 # plt.plot(x_ex,rho_ex.detach().numpy())
@@ -52,15 +52,16 @@ q_0_t_input, q_1_t_input, q_2_t_input, lamb_t = q_0, q_1, q_2, lamb
 q_0_nt, q_1_nt, q_2_nt, lamb_nt = q_0, q_1, q_2, lamb
 q_0_nt_JS, q_1_nt_JS, q_2_nt_JS, lamb_nt_JS = q_0, q_1, q_2, lamb
 
-# with torch.no_grad():
-#     for k in range(nn):
-#         q_0_t, q_1_t, q_2_t, lamb_t = train_model.run_weno(problem_main, mweno = True, mapped = False, method="char", q_0=q_0_t_input, q_1=q_1_t_input, q_2=q_2_t_input, lamb=lamb_t, vectorized=True, trainable=True, k=k, dt=None)
-#         q_0_t_input = q_0_t.detach().numpy()
-#         q_1_t_input = q_1_t.detach().numpy()
-#         q_2_t_input = q_2_t.detach().numpy()
-#         q_0_t_input = torch.Tensor(q_0_t_input)
-#         q_1_t_input = torch.Tensor(q_1_t_input)
-#         q_2_t_input = torch.Tensor(q_2_t_input)
+with torch.no_grad():
+    for k in range(nn):
+        print(k)
+        q_0_t, q_1_t, q_2_t, lamb_t = train_model.run_weno(problem_main, mweno = True, mapped = False, method="char", q_0=q_0_t_input, q_1=q_1_t_input, q_2=q_2_t_input, lamb=lamb_t, vectorized=True, trainable=True, k=k, dt=None)
+        q_0_t_input = q_0_t.detach().numpy()
+        q_1_t_input = q_1_t.detach().numpy()
+        q_2_t_input = q_2_t.detach().numpy()
+        q_0_t_input = torch.Tensor(q_0_t_input)
+        q_1_t_input = torch.Tensor(q_1_t_input)
+        q_2_t_input = torch.Tensor(q_2_t_input)
 #
 # for k in range(nn):
 #     q_0_nt, q_1_nt, q_2_nt, lamb_nt = train_model.run_weno(problem_main, mweno = True, mapped = False, method="char", q_0=q_0_nt, q_1=q_1_nt, q_2=q_2_nt, lamb=lamb_nt, vectorized=True, trainable=False, k=k, dt=None)

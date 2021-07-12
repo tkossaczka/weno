@@ -23,10 +23,10 @@ class Euler_system():
 
     def init_params(self):
         params = dict()
-        params["T"] = 0.1 #1.8 #0.1 #0.1 #2 #0.1 #0.1 #5 #1
+        params["T"] = 2 #2 #1.8 #0.1 #0.1 #2 #0.1 #0.1 #5 #1
         params["e"] = 10 ** (-6)
-        params["L"] = 0 #-5 #0 #0 #0 # -1
-        params["R"] = 1 #5 #1 #1 #2 # 1
+        params["L"] = -5 #-5 #0 #0 #0 # -1
+        params["R"] = 5 #5 #1 #1 #2 # 1
         params["gamma"] = 1.4
         self.params = params
 
@@ -47,7 +47,7 @@ class Euler_system():
             n = np.ceil(T / (0.5 * h))  # 10 sod # 1 lax
             #n = 64
             #n = 416 #Sod for 2048 space steps
-            #n = 2048 #shock_entropy for 2048 space steps
+            n = 2048/4 #shock_entropy for 2048 space steps
             n = int(n)
             t = T / n
             time = np.linspace(0, T, n + 1)
@@ -78,7 +78,7 @@ class Euler_system():
                 self.p = np.array([1.0, 0.1])
                 self.u = np.array([0.75, 0.0])
                 self.rho = np.array([1.0, 0.125])
-                # self.p = np.array([6.9174, 0.8071]) setting for compare model 72 and 483
+                # self.p = np.array([6.9174, 0.8071])   # setting for compare model 72 and 483
                 # self.u = np.array([0.5529, 0.0])
                 # self.rho = np.array([6.9174, 0.8540])
                 x_mid = 0.5
@@ -104,12 +104,12 @@ class Euler_system():
             self.u = np.array([(4*np.sqrt(35))/9, 0.0])
             self.rho = 0
             x_mid = -4
-            r0[x <= x_mid] = 27/7
-            r0[x > x_mid] = 1+0.2*torch.sin(5*torch.Tensor(x[x > x_mid]))
-            u0[x <= x_mid] = self.u[0]
-            u0[x > x_mid] = self.u[1]
-            p0[x <= x_mid] = self.p[0]
-            p0[x > x_mid] = self.p[1]
+            r0[x < x_mid] = 27/7
+            r0[x >= x_mid] = 1+0.2*torch.sin(5*torch.Tensor(x[x > x_mid]))
+            u0[x < x_mid] = self.u[0]
+            u0[x >= x_mid] = self.u[1]
+            p0[x < x_mid] = self.p[0]
+            p0[x >= x_mid] = self.p[1]
         elif init_cond == "blast_waves":
             self.p = np.array([1000.0, 0.01, 100.0])
             self.u = np.array([0.0, 0.0, 0.0])
